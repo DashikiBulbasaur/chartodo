@@ -1,0 +1,13 @@
+CHARTODO
+this
+is
+a
+todo
+list
+-----
+DONE
+this
+is
+the
+done
+list

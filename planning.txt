@@ -1,0 +1,106 @@
+~ = name of program
+
+what the TODO and DONE list will look like:
+CHARTODO 
+1. x
+2. y
+3. z
+--
+DONE
+1. a 
+2. b
+3. c 
+
+1. ~ --help 
+  > show all commands
+
+2. ~ list
+  > show the TODO and DONE list
+
+3. ~ add x
+  > adds a new TODO to the bottom of the list
+
+4. ~ edit x abc
+  > edits a current TODO item. x has to be a position number.
+  > abc is what you want the TODO item to be edited to.
+
+5. ~ done x
+  > changes a TODO to DONE
+  > can either be the full item name of the TODO or its number, eg, 1
+  > if neither the item name or the number exist, nothing happens
+
+6. ~ rmtodo x
+  > removes a TODO 
+  > can either be the full name of the TODO or its number, eg, 2
+  > if neither the item name or the number exist, nothing happens
+
+7. ~ switchprio x-y
+  > switch the positions of TODO items
+  > x-y have to be numbers. like x could be 3 and y could 6
+  > if the number doesn't exist, nothing happens
+
+8. ~ changeprio x-y 
+  > change the position of a TODO item from x to y
+  > x-y have to be numbers. like x could be 9 and y could 4
+  > simple deletion from the original position and insertion 
+
+9. ~ cleartodo
+  > empties the TODO list
+
+10. ~ rmdone x 
+  > removes a DONE item 
+  > can either be the full name of the DONE item or its number, eg, 3
+  > if neither the item name or the number exist, nothing happens
+
+11. ~ notdone x 
+  > undoes a DONE item and puts it back to TODO at the bottom of the list
+  > can either be the full name of the DONE item or its number, eg, 4
+  > if neither the item name or the number exist, nothing happens
+
+11a. ~ notdone x -prio y 
+  > this may or may not end up being a thing but i'm putting it here anyway
+  > may be the only instance of a multi-command action
+  > may not be good practice to have only one
+  > like why not do a system where the user can chain together commands and
+  > invalid commands are just ignored?
+  > sounds too annoying tho, might as well keep it simple for now
+  > but this one specifically is a good idea so i'm mentioning it 
+  > undoes a DONE item and puts it back in TODO at a specific position
+  > y is the specific position
+
+12. ~ cleardone
+  > empties the DONE list
+
+13. ~ clearall
+  > empties both TODO and DONE
+  > could just be clear, but added an extra word so that users can't 
+    accidentally clear both lists
+
+
+questions:
+1. should the file containing the lists have `TODO`, `--`, and `DONE` in it too?
+  simpler to just print them anytime, altho it might be less resource intensive
+  to have bufreader read it line by line and print. even if it is, it's not worth it 
+  but it's cool to think about.
+2. i think the TODO and DONE should be separated by -- in the file. Easier to 
+  modify it if I know there's a clear demarcation I can check for. As an added bonus,
+  also easier for humans to read if they check the file
+3. or should TODO and DONE have separate files? I feel like that's easier
+3a. TODO and DONE shouldn't have separate files. In the future, I will add the 
+  ability to have separate TODO+DONE 'categories', like shopping, main/general,
+  work, etc., and having only one file each would make things simpler
+
+answers:
+1. easiest way: create and delete the same file at every functionality
+
+thoughts on the future:
+1. this is very far away, but I'm thinking about having the ability to have separate 
+  TODO + DONE categories and be able to name each category. Like you could have a 
+  main category, and another one for school, and another one for work, or shopping, 
+  etc. This can overcomplicate things though, especially on a CLI interface. 
+  Still a good chance I'm doing this, but only after I'm done and satisfied with 
+  the initial state of the program.
+
+
+  
+
