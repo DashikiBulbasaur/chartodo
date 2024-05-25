@@ -10,12 +10,15 @@ I needed a unique name, and I like Pokemon and I also like Charmander and Chariz
 
 First, make sure you have Rust installed. There are several ways to install:
 
-1. 
+1.  
 ```sh-session
 cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch main
 ```
 2. clone the repo
-3. (upcoming) `cargo install chartodo`
+3. (upcoming)
+```sh-session
+cargo install chartodo
+```
 
 Then, to run, either
 
@@ -26,18 +29,18 @@ Then, to run, either
 
 The following functionalities are done
 - [x] list 
-- [] add 'x'
-- [] done 'x'
-- [] rmtodo 'x'
-- [] cleartodo
-- [] rmdone 'x'
-- [] notdone 'x'
-- [] cleardone
-- [] clearall
-- [] edit 'x' 'abc'
-- [] changeprio 'x-y'
-- [] switchprio 'x-y'
+- [ ] add 'x'
+- [ ] done 'x'
+- [ ] rmtodo 'x'
+- [ ] cleartodo
+- [ ] rmdone 'x'
+- [ ] notdone 'x'
+- [ ] cleardone
+- [ ] clearall
+- [ ] edit 'x' 'abc'
+- [ ] changeprio 'x-y'
+- [ ] switchprio 'x-y'
 
 Some major milestones 
-- [] add integration testing 
-- [] available on crates.io
+- [ ] add integration testing 
+- [ ] available on crates.io
