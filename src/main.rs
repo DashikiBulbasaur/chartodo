@@ -11,10 +11,13 @@
 * status: DONE?
 *
 * 5. add the `add x` functionality
+*
+* 6. add helper.rs for the helper fns
 * */
 
-use chartodo::list;
+use chartodo::{add_todo_item, list};
 use clap::Parser;
+use std::io::Write;
 
 #[derive(Parser)]
 struct Cli {
@@ -31,5 +34,17 @@ fn main() {
 
     if &args.command == "list" {
         list();
+    } else if &args.command == "add" {
+        add_todo_item(
+            args.item_identifier
+                .expect("couldn't unwrap item_identifier"),
+        );
+    } else {
+        command_error();
     }
+}
+
+fn command_error() {
+    let writer = &mut std::io::stdout();
+    writeln!(writer, "invalid command. please try again, or try --help").expect("writeln failed");
 }

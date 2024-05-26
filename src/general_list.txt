@@ -1,9 +1,10 @@
 CHARTODO
 this
 is
-a
+the
 todo
 list
+new_item
 -----
 DONE
 this

@@ -12,12 +12,12 @@ First, make sure you have Rust installed. There are several ways to install:
 
 1.  
 ```sh-session
-cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch main
+$ cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch main
 ```
 2. clone the repo
 3. (upcoming)
 ```sh-session
-cargo install chartodo
+$ cargo install chartodo
 ```
 
 Then, to run, either
@@ -29,7 +29,7 @@ Then, to run, either
 
 The following functionalities are done
 - [x] list 
-- [ ] add 'x'
+- [x] add 'x'
 - [ ] done 'x'
 - [ ] rmtodo 'x'
 - [ ] cleartodo
