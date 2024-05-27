@@ -76,6 +76,11 @@ DONE
   > could just be clear, but added an extra word so that users can't 
     accidentally clear both lists
 
+notes:
+1. after doing ~ list and ~ add x, it seems clear that the general flow of the functionalities are
+  1. read file
+  2. if needed, do actions on file, e.g., edit 
+  3. print
 
 questions:
 1. should the file containing the lists have `TODO`, `--`, and `DONE` in it too?

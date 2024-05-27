@@ -11,12 +11,18 @@
 * status: DONE?
 *
 * 5. add the `add x` functionality
+* status: DONE
 *
 * 6. add helper.rs for the helper fns
+* status: DONE
+*
+* 7. check what's up with add x and todo_buf.len of 10
 * */
 
-use chartodo::{add_todo_item, list};
+mod functions;
+
 use clap::Parser;
+use functions::functionalities::{add_todo_item, list};
 use std::io::Write;
 
 #[derive(Parser)]

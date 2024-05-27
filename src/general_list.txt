@@ -5,6 +5,10 @@ the
 todo
 list
 new_item
+newer_item
+new
+woohoo
+winnie
 -----
 DONE
 this
