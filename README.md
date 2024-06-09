@@ -17,13 +17,79 @@ cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch ma
 2. clone the repo
 3. (upcoming)
 ```sh-session
-$ cargo install chartodo
+cargo install chartodo
 ```
 
 Then, to run, either
 
 1. if you cloned the repo, go to it using your terminal, and type cargo run [ACTION], e.g., `cargo run list`
 2. (upcoming) on your terminal, type chartodo [ACTION], e.g., `chartodo list`
+
+# Usage
+
+Show the TODO and DONE list 
+
+```sh-session
+$ chartodo list
+CHARTODO
+1: this
+2: is
+3: the
+4: todo
+5: list
+-----
+DONE
+1: this
+2: is
+3: the
+4: done
+5: list
+```
+
+Add a TODO item 
+
+```sh-session
+$ chartodo add item
+'item' has been added to todo
+
+CHARTODO
+1: this
+2: is
+3: the
+4: todo
+5: list
+6: item
+-----
+DONE
+1: this
+2: is
+3: the
+4: done
+5: list
+```
+
+To add a multi-word item, replace the space character with a character such as _
+
+```sh-session
+$ chartodo add multi_word_item
+'multi_word_item' has been added to todo
+
+CHARTODO
+1: this
+2: is
+3: the
+4: todo
+5: list
+6: item
+7: multi_word_item
+-----
+DONE
+1: this
+2: is
+3: the
+4: done
+5: list
+```
 
 # Milestones
 
@@ -37,6 +103,7 @@ The following functionalities are done
 - [ ] notdone 'x'
 - [ ] cleardone
 - [ ] clearall
+- [ ] help
 - [ ] edit 'x' 'abc'
 - [ ] changeprio 'x-y'
 - [ ] switchprio 'x-y'
