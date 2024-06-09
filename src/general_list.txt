@@ -4,8 +4,6 @@ is
 the
 todo
 list
-item
-multi_word_item
 -----
 DONE
 this

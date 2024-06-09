@@ -98,6 +98,7 @@ pub fn print_the_lists(todo_buf: Vec<String>, done_buf: Vec<String>) {
 
 #[cfg(test)]
 mod helpers_unit_tests {
+    // note: to run this specifically, do cargo test helpers_unit_tests, or just helpers
 
     use super::*;
     // note: I'd like to use assert_fs to create temp files, but I can't make NamedTempFile work
@@ -132,7 +133,8 @@ mod helpers_unit_tests {
 
         let (test_todo, test_done) = read_file_and_create_vecs("test1.txt");
         // note: different file cuz I think there's a concurrency issue when I try to delete the
-        // same file from different test fns
+        // same file from different test fns. I could just run these one by one with the same file,
+        // with test-threads=1, but that takes 2 long and is a last resort
         std::fs::remove_file("test1.txt")?;
         let (test_todo, test_done) = add_positions_to_todo_and_done(test_todo, test_done);
 
