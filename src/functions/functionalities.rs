@@ -3,7 +3,7 @@ use std::{fs::File, io::Write};
 
 pub fn list() {
     // NB: read from file and separate it into vecs
-    let (todo_buf, done_buf) = read_file_and_create_vecs();
+    let (todo_buf, done_buf) = read_file_and_create_vecs("src/general_list.txt");
     // NB: add positions to todo_buf and done_buf before printing
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
     // NB: print the lists
@@ -12,7 +12,7 @@ pub fn list() {
 
 pub fn add_todo_item(add_item: String) {
     // NB: read from file and separate into vecs
-    let (mut todo_buf, done_buf) = read_file_and_create_vecs();
+    let (mut todo_buf, done_buf) = read_file_and_create_vecs("src/general_list.txt");
 
     let writer = &mut std::io::stdout();
 
@@ -73,6 +73,10 @@ pub fn add_todo_item(add_item: String) {
     });
 
     // ----
+
+    // NB: todo_buf has a max len of 15
+    // NB: adding items that would exceed the max len just erases the last item and replaces it
+    // with the new one. idk how it does this, but i'm fine with it
 
     // NB: add positions to todo_buf and done_buf before printing
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);

@@ -76,6 +76,9 @@ DONE
   > could just be clear, but added an extra word so that users can't 
     accidentally clear both lists
 
+14. ~ addtoplace 'item' 'position'
+  > add an item to a specific position 
+
 notes:
 1. after doing ~ list and ~ add x, it seems clear that the general flow of the functionalities are
   1. read file

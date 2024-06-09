@@ -3,9 +3,9 @@ use std::{
     io::{BufRead, BufReader, Write},
 };
 
-pub fn read_file_and_create_vecs() -> (Vec<String>, Vec<String>) {
-    let file = File::open("src/general_list.txt")
-        .expect("general_list.txt doesn't exist even though it should. Please create a general_list.txt file in src");
+pub fn read_file_and_create_vecs(path: &str) -> (Vec<String>, Vec<String>) {
+    let file = File::open(path)
+        .expect("file doesn't exist even though it should. If this happens outside of a test, i.e., during use, please create a general_list.txt file in src");
     // TODO: if this fails, perhaps create a file and open it one more time
     let reader = BufReader::new(file);
 
@@ -22,7 +22,7 @@ pub fn read_file_and_create_vecs() -> (Vec<String>, Vec<String>) {
 
     // if this is 1, that means the todo list is done and the loop can push to done_buf
     let mut todo_done_demarcation = 0;
-    // NB: max len for todo_buf and done_buf is 10
+    // NB: max len for todo_buf and done_buf is 15
     for line in file_buf {
         if line == "-----" {
             todo_done_demarcation = 1;
@@ -31,14 +31,14 @@ pub fn read_file_and_create_vecs() -> (Vec<String>, Vec<String>) {
                 0 => {
                     // only applies if the user manually modifies general_list.txt
                     // lines with more than 150 chars are ommitted
-                    if todo_buf.len() < 10 && line.len() < 150 {
+                    if todo_buf.len() < 15 && line.len() < 150 {
                         todo_buf.push(line.to_string());
                     }
                 }
                 _ => {
                     // only applies if the user manually modifies general_list.txt
                     // lines with more than 150 chars are ommitted
-                    if done_buf.len() < 10 && line.len() < 150 {
+                    if done_buf.len() < 15 && line.len() < 150 {
                         done_buf.push(line.to_string());
                     }
                 }
@@ -94,4 +94,63 @@ pub fn print_the_lists(todo_buf: Vec<String>, done_buf: Vec<String>) {
     done_buf
         .iter()
         .for_each(|item| writeln!(writer, "{}", item).expect("writeln failed"));
+}
+
+#[cfg(test)]
+mod helpers_unit_tests {
+
+    use super::*;
+    // note: I'd like to use assert_fs to create temp files, but I can't make NamedTempFile work
+    // like in rust grrs cli tutorial
+
+    #[test]
+    fn reading_and_creating_vecs_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        let mut test_file = File::create("test.txt")?;
+        test_file.write(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
+
+        let (test_todo, test_done) = read_file_and_create_vecs("test.txt");
+        std::fs::remove_file("test.txt")?;
+
+        let correct_test = vec![
+            "CHARTODO".to_string(),
+            "this".to_string(),
+            "is".to_string(),
+            "a".to_string(),
+            "test".to_string(),
+            "---".to_string(),
+        ];
+        let correct_done = vec!["DONE".to_string(), "please".to_string(), "pass".to_string()];
+        assert_eq!((test_todo, test_done), (correct_test, correct_done));
+
+        Ok(())
+    }
+
+    #[test]
+    fn positions_in_lists_are_correct() -> Result<(), Box<dyn std::error::Error>> {
+        let mut test_file = File::create("test1.txt")?;
+        test_file.write(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
+
+        let (test_todo, test_done) = read_file_and_create_vecs("test1.txt");
+        // note: different file cuz I think there's a concurrency issue when I try to delete the
+        // same file from different test fns
+        std::fs::remove_file("test1.txt")?;
+        let (test_todo, test_done) = add_positions_to_todo_and_done(test_todo, test_done);
+
+        let correct_test = vec![
+            "CHARTODO".to_string(),
+            "1: this".to_string(),
+            "2: is".to_string(),
+            "3: a".to_string(),
+            "4: test".to_string(),
+            "5: ---".to_string(),
+        ];
+        let correct_done = vec![
+            "DONE".to_string(),
+            "1: please".to_string(),
+            "2: pass".to_string(),
+        ];
+        assert_eq!((test_todo, test_done), (correct_test, correct_done));
+
+        Ok(())
+    }
 }

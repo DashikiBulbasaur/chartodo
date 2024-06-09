@@ -31,8 +31,9 @@ struct Cli {
     command: String,
     /// If applicable, the name/position of the TODO/DONE item
     item_identifier: Option<String>,
-    /// If changing a TODO item, this is where you specify what to change it to
-    edit_todo: Option<String>,
+    /// If changing a TODO item, this is where you specify what to change it to. If adding a todo
+    /// item to a specific position, this is where you specify the position.
+    edit_or_position: Option<String>,
 }
 
 fn main() {

@@ -10,9 +10,9 @@ I needed a unique name, and I like Pokemon and I also like Charmander and Chariz
 
 First, make sure you have Rust installed. There are several ways to install:
 
-1.  
+1.
 ```sh-session
-$ cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch main
+cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch main
 ```
 2. clone the repo
 3. (upcoming)
@@ -40,7 +40,11 @@ The following functionalities are done
 - [ ] edit 'x' 'abc'
 - [ ] changeprio 'x-y'
 - [ ] switchprio 'x-y'
+- [ ] addtoplace 'item' 'position'
 
 Some major milestones 
-- [ ] add integration testing 
+- [ ] finish unit tests
+- [ ] finish integration tests
 - [ ] available on crates.io
+- [ ] finish the basic functionalities
+- [ ] finish the advanced functionalities
