@@ -6,7 +6,7 @@ This is a simple TODO cli application that's of my own design. It's currently a 
 
 I needed a unique name, and I like Pokemon and I also like Charmander and Charizard, and there's a joke about Rust being 'blazingly fast', so it seemed perfect to combine CHAR and TODO.
 
-# How to install and run
+## How to install and run
 
 First, make sure you have Rust installed. There are several ways to install:
 
@@ -25,7 +25,7 @@ Then, to run, either
 1. if you cloned the repo, go to it using your terminal, and type cargo run [ACTION], e.g., `cargo run list`
 2. (upcoming) on your terminal, type chartodo [ACTION], e.g., `chartodo list`
 
-# Usage
+## Usage
 
 Show the TODO and DONE list 
 
@@ -91,7 +91,7 @@ DONE
 5: list
 ```
 
-# Milestones
+## Milestones
 
 The following functionalities are done
 - [x] list 

@@ -44,7 +44,7 @@ fn main() {
     } else if &args.command == "add" {
         add_todo_item(
             args.item_identifier
-                .expect("couldn't unwrap item_identifier"),
+                .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo add item'. For more information, try --help***"),
         );
     } else {
         command_error();

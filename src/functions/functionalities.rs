@@ -16,15 +16,17 @@ pub fn add_todo_item(add_item: String) {
 
     let writer = &mut std::io::stdout();
 
-    // the following conditionals check for invalid inputs
+    // the following conditionals check for invalid inputs.
     if add_item.is_empty() {
         return writeln!(
             writer,
-            "Item cannot be empty. Please try again, or try --help"
+            "Items to be added to the todo list cannot be empty. Please try again, or try --help"
         )
         .expect("writeln failed");
     }
 
+    // note: this will never activate i think. either clap or cargo/rust panics when something like
+    // -- is added.
     if add_item.trim() == "-----" {
         return writeln!(
             writer,
