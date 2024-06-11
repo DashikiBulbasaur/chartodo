@@ -27,7 +27,7 @@ Then, to run, either
 
 ## Usage
 
-Show the TODO and DONE list 
+Show the TODO and DONE list. The 'list' argument can be shortened to 'l'. 
 
 ```sh-session
 $ chartodo list
@@ -46,7 +46,7 @@ DONE
 5: list
 ```
 
-Add a TODO item. Both the todo and done lists currently have a max length of 15.
+Add a TODO item. The 'add' argument can be shortened to 'a'. Both the todo and done lists currently have a max length of 15.
 
 ```sh-session
 $ chartodo add item
@@ -91,7 +91,7 @@ DONE
 5: list
 ```
 
-Marking a todo item as done. You have to use the item's position number to mark it as done, as typing the item itself may get tedious for todo items with many characters.
+Marking a todo item as done. The 'done' argument can be shortened to 'd'. You have to use the item's position number to mark it as done, as typing the item itself may get tedious for todo items with many characters.
 
 ```sh-session
 $ chartodo done 7
