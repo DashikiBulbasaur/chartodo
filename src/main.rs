@@ -1,24 +1,3 @@
-/* TODO items
-* 1. add cli parsing arguments
-* status: DONE
-*
-* 2. add the commands in lib
-*
-* 3. add --help (how u do that?)
-* status: still need to add help sections for the various commands
-*
-* 4. check the subcommands/optional commands in clap
-* status: DONE?
-*
-* 5. add the `add x` functionality
-* status: DONE
-*
-* 6. add helper.rs for the helper fns
-* status: DONE
-*
-* 7. check what's up with add x and todo_buf.len of 10
-* */
-
 mod functions;
 
 use clap::Parser;
@@ -39,15 +18,17 @@ struct Cli {
 fn main() {
     let args = Cli::parse();
 
-    if &args.command == "list" {
+    if &args.command == "list" || &args.command == "l" {
         list();
-    } else if &args.command == "add" {
+    } else if &args.command == "add" || &args.command == "a" {
         add_todo_item(
             args.item_identifier
                 .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo add item'. For more information, try --help***"),
         );
-    } else if &args.command == "done" {
-        change_todo_item_to_done(args.item_identifier.expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***"));
+    } else if &args.command == "done" || &args.command == "d" {
+        change_todo_item_to_done(
+            args.item_identifier
+                .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***"));
     } else {
         command_error();
     }

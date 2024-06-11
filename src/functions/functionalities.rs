@@ -1,5 +1,14 @@
-use super::helpers::{add_positions_to_todo_and_done, print_the_lists, read_file_and_create_vecs};
-use std::{fs::File, io::Write, sync::PoisonError};
+use super::helpers::{
+    add_positions_to_todo_and_done, create_new_file_and_write, print_the_lists,
+    read_file_and_create_vecs,
+};
+use std::io::Write;
+
+// NB: the general flow for each functionality are
+// 1. read the file and create vecs for the two lists
+// 2. if needed, modify a list/both lists, then write to the same file
+// 3. add positions to the vec lists
+// 4. print the lists
 
 pub fn list() {
     // NB: read from file and separate it into vecs
@@ -50,29 +59,8 @@ pub fn add_todo_item(add_item: String) {
     // 2. create a new file
     // 3. push todo_buf and done_buf to file
     todo_buf.push(add_item.clone());
-    let mut new_file = File::create("src/general_list.txt");
-
-    todo_buf.iter().for_each(|item| {
-        writeln!(
-            new_file.as_mut().expect("new_file couldn't be accessed"),
-            "{}",
-            item
-        )
-        .expect("writeln failed")
-    });
-    writeln!(
-        new_file.as_mut().expect("new_file couldn't be accessed"),
-        "-----"
-    )
-    .expect("writeln failed");
-    done_buf.iter().for_each(|item| {
-        writeln!(
-            new_file.as_mut().expect("new_file couldn't be accessed"),
-            "{}",
-            item
-        )
-        .expect("writeln failed")
-    });
+    let (todo_buf, done_buf) =
+        create_new_file_and_write("src/general_list.txt", todo_buf, done_buf);
 
     // ----
 
@@ -109,8 +97,8 @@ pub fn change_todo_item_to_done(position: String) {
         )
         .expect("writeln failed");
 
-        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo panics 
-        // and complains. I also can't seem to test for it
+        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo
+        // panics and complains. I also can't seem to test for it.
     }
 
     if todo_buf.is_empty() {
@@ -145,29 +133,9 @@ pub fn change_todo_item_to_done(position: String) {
     todo_buf.remove(position);
     done_buf.push(todo_to_done.clone());
 
-    let mut new_file = File::create("src/general_list.txt");
-
-    todo_buf.iter().for_each(|item| {
-        writeln!(
-            new_file.as_mut().expect("new_file couldn't be accessed"),
-            "{}",
-            item
-        )
-        .expect("writeln failed")
-    });
-    writeln!(
-        new_file.as_mut().expect("new_file couldn't be accessed"),
-        "-----"
-    )
-    .expect("writeln failed");
-    done_buf.iter().for_each(|item| {
-        writeln!(
-            new_file.as_mut().expect("new_file couldn't be accessed"),
-            "{}",
-            item
-        )
-        .expect("writeln failed")
-    });
+    // NB: after changes, write to file
+    let (todo_buf, done_buf) =
+        create_new_file_and_write("src/general_list.txt", todo_buf, done_buf);
 
     // NB: add positions to todo and done b4 printing
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);

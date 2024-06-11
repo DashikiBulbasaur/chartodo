@@ -96,6 +96,38 @@ pub fn print_the_lists(todo_buf: Vec<String>, done_buf: Vec<String>) {
         .for_each(|item| writeln!(writer, "{}", item).expect("writeln failed"));
 }
 
+pub fn create_new_file_and_write(
+    path: &str,
+    todo_buf: Vec<String>,
+    done_buf: Vec<String>,
+) -> (Vec<String>, Vec<String>) {
+    let mut new_file = File::create(path);
+
+    todo_buf.iter().for_each(|item| {
+        writeln!(
+            new_file.as_mut().expect("new_file couldn't be accessed"),
+            "{}",
+            item
+        )
+        .expect("writeln failed")
+    });
+    writeln!(
+        new_file.as_mut().expect("new_file couldn't be accessed"),
+        "-----"
+    )
+    .expect("writeln failed");
+    done_buf.iter().for_each(|item| {
+        writeln!(
+            new_file.as_mut().expect("new_file couldn't be accessed"),
+            "{}",
+            item
+        )
+        .expect("writeln failed")
+    });
+
+    (todo_buf, done_buf)
+}
+
 #[cfg(test)]
 mod helpers_unit_tests {
     // note: to run this specifically, do cargo test helpers_unit_tests, or just helpers
@@ -112,7 +144,7 @@ mod helpers_unit_tests {
         let (test_todo, test_done) = read_file_and_create_vecs("test.txt");
         std::fs::remove_file("test.txt")?;
 
-        let correct_test = vec![
+        let correct_todo = vec![
             "CHARTODO".to_string(),
             "this".to_string(),
             "is".to_string(),
@@ -121,7 +153,7 @@ mod helpers_unit_tests {
             "---".to_string(),
         ];
         let correct_done = vec!["DONE".to_string(), "please".to_string(), "pass".to_string()];
-        assert_eq!((test_todo, test_done), (correct_test, correct_done));
+        assert_eq!((test_todo, test_done), (correct_todo, correct_done));
 
         Ok(())
     }
@@ -138,7 +170,7 @@ mod helpers_unit_tests {
         std::fs::remove_file("test1.txt")?;
         let (test_todo, test_done) = add_positions_to_todo_and_done(test_todo, test_done);
 
-        let correct_test = vec![
+        let correct_todo = vec![
             "CHARTODO".to_string(),
             "1: this".to_string(),
             "2: is".to_string(),
@@ -151,7 +183,46 @@ mod helpers_unit_tests {
             "1: please".to_string(),
             "2: pass".to_string(),
         ];
-        assert_eq!((test_todo, test_done), (correct_test, correct_done));
+        assert_eq!((test_todo, test_done), (correct_todo, correct_done));
+
+        Ok(())
+    }
+
+    #[test]
+    fn writing_changes_to_file_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // note: this might be a convoluted piece of mess, but i wrote this for my own peace of
+        // mind so i know that what's written on the file is correct
+
+        let correct_todo = vec![
+            "CHARTODO".to_string(),
+            "this".to_string(),
+            "is".to_string(),
+            "a".to_string(),
+            "test".to_string(),
+        ];
+        let correct_done = vec!["DONE".to_string(), "please".to_string(), "pass".to_string()];
+        let mut correct_full_list = vec![];
+        correct_todo
+            .iter()
+            .for_each(|item| correct_full_list.push(item));
+        let binding = "-----".to_string();
+        correct_full_list.push(&binding);
+        correct_done
+            .iter()
+            .for_each(|item| correct_full_list.push(item));
+
+        let (_, _) =
+            create_new_file_and_write("test2.txt", correct_todo.clone(), correct_done.clone());
+        let (test_todo, test_done) = read_file_and_create_vecs("test2.txt");
+        std::fs::remove_file("test2.txt")?;
+
+        let mut test_full_list = vec![];
+        test_todo.iter().for_each(|item| test_full_list.push(item));
+        let binding = "-----".to_string();
+        test_full_list.push(&binding);
+        test_done.iter().for_each(|item| test_full_list.push(item));
+
+        assert_eq!(correct_full_list, test_full_list);
 
         Ok(())
     }
