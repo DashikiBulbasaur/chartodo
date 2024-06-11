@@ -12,7 +12,7 @@ use std::{fs::File, io::Write, process::Command};
 fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
     let mut test_file = File::create("src/general_list.txt")?;
     test_file
-        .write(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
+        .write_all(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
 
     Ok(())
 }
@@ -40,8 +40,12 @@ fn adds_item_correctly() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("add").arg("item");
     cmd.assert().success().stdout(predicate::str::contains(
-        "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        "'item' was added to todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
     ));
+
+    // NB: in functionalities.rs, there is only one \n after the notification. so there should be
+    // no space between the noti and the list proper, yet there is one. i've yet to find out why
+    // this is
 
     Ok(())
 }
@@ -62,6 +66,75 @@ fn empty_add_item() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
+fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
+    // note: the character limit for the list is 150
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("add").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    cmd.assert().try_success()?.stdout(predicate::str::contains(
+        "The maximum length of an item is 150 characters. Please try again, or try --help",
+    ));
+
+    Ok(())
+}
+
+#[test]
+fn todo_item_to_be_marked_as_done_is_not_specified() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("done").arg("");
+    cmd.assert().try_success()?.stdout(predicate::str::contains(
+        "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+    ));
+
+    Ok(())
+}
+
+#[test]
+fn position_is_not_a_number_for_the_todo_item_to_be_marked_as_done() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("done").arg("a");
+    cmd.assert().try_success()?.stdout(predicate::str::contains(
+        "You must specify the todo item's position, and it has to be a number that is not zero or negative. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+    ));
+
+    Ok(())
+}
+
+#[test]
+fn position_for_the_todo_item_to_be_marked_as_done_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("done").arg("0");
+    cmd.assert().try_success()?.stdout(predicate::str::contains(
+        "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+    ));
+
+    Ok(())
+}
+
+#[test]
+fn position_for_todo_item_to_be_marked_as_done_is_too_big() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("done").arg("10");
+    cmd.assert().try_success()?.stdout(predicate::str::contains(
+        "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+    ));
+
+    Ok(())
+}
+
+#[test]
+fn todo_item_moved_to_done_correctly() -> Result<(), Box<dyn std::error::Error>> {
+    let _ = create_test_file();
+
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("done").arg("5");
+    cmd.assert().try_success()?.stdout(predicate::str::contains(
+        "'list' was marked as done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: list",
+    ));
+
+    Ok(())
+}
+
+#[test]
 fn invalid_input() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("blahblah");
@@ -73,7 +146,9 @@ fn invalid_input() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn resets_the_file() {
-    // note: this is just to reset the file after all the changes for my own convenience
+fn zzz_resets_the_file() {
+    // note: this is just to reset the file after all the changes for my own convenience.
+    // the fn also starts with zzz cuz rust runs the tests in alphabetical order, and I 
+    // want this to be the last one everytime
     let _ = create_test_file();
 }

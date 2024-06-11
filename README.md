@@ -8,7 +8,7 @@ I needed a unique name, and I like Pokemon and I also like Charmander and Chariz
 
 ## How to install and run
 
-First, make sure you have Rust installed. There are several ways to install:
+First, make sure you have Rust installed. After that, there are several ways to install the program:
 
 1.
 ```sh-session
@@ -46,11 +46,11 @@ DONE
 5: list
 ```
 
-Add a TODO item 
+Add a TODO item. Both the todo and done lists currently have a max length of 15.
 
 ```sh-session
 $ chartodo add item
-'item' has been added to todo
+'item' was added to todo
 
 CHARTODO
 1: this
@@ -68,11 +68,11 @@ DONE
 5: list
 ```
 
-To add a multi-word item, replace the space character with a character such as _
+To add a multi-word item, replace the space character with a character such as _. Note that there is a 150 character limit to the todo items.
 
 ```sh-session
 $ chartodo add multi_word_item
-'multi_word_item' has been added to todo
+'multi_word_item' was added to todo
 
 CHARTODO
 1: this
@@ -91,12 +91,35 @@ DONE
 5: list
 ```
 
+Marking a todo item as done. You have to use the item's position number to mark it as done, as typing the item itself may get tedious for todo items with many characters.
+
+```sh-session
+$ chartodo done 7
+'multi_word_item' was marked as done
+
+CHARTODO
+1: this
+2: is
+3: the
+4: todo
+5: list
+6: item
+-----
+DONE
+1: this
+2: is
+3: the
+4: done
+5: list
+6: multi_word_item
+```
+
 ## Milestones
 
 The following functionalities are done
 - [x] list 
 - [x] add 'x'
-- [ ] done 'x'
+- [x] done 'x'
 - [ ] rmtodo 'x'
 - [ ] cleartodo
 - [ ] rmdone 'x'

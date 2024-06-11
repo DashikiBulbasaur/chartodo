@@ -107,7 +107,7 @@ mod helpers_unit_tests {
     #[test]
     fn reading_and_creating_vecs_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         let mut test_file = File::create("test.txt")?;
-        test_file.write(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
+        test_file.write_all(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
 
         let (test_todo, test_done) = read_file_and_create_vecs("test.txt");
         std::fs::remove_file("test.txt")?;
@@ -129,7 +129,7 @@ mod helpers_unit_tests {
     #[test]
     fn positions_in_lists_are_correct() -> Result<(), Box<dyn std::error::Error>> {
         let mut test_file = File::create("test1.txt")?;
-        test_file.write(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
+        test_file.write_all(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
 
         let (test_todo, test_done) = read_file_and_create_vecs("test1.txt");
         // note: different file cuz I think there's a concurrency issue when I try to delete the
