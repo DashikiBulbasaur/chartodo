@@ -114,13 +114,35 @@ DONE
 6: multi_word_item
 ```
 
+Removing a todo item. The 'rmtodo' argument can be shortened to 'rmt'. You have to use the item's position number to mark it as done, as typing the item itself may get tedious for todo items with many characters.
+
+```sh-session
+$ chartodo rmtodo 3
+'the' was removed from todo
+
+CHARTODO
+1: this
+2: is
+3: todo
+4: list
+5: item
+-----
+DONE
+1: this
+2: is
+3: the
+4: done
+5: list
+6: multi_word_item
+```
+
 ## Milestones
 
 The following functionalities are done
 - [x] list 
 - [x] add 'x'
 - [x] done 'x'
-- [ ] rmtodo 'x'
+- [x] rmtodo 'x'
 - [ ] cleartodo
 - [ ] rmdone 'x'
 - [ ] notdone 'x'
@@ -133,8 +155,7 @@ The following functionalities are done
 - [ ] addtoplace 'item' 'position'
 
 Some major milestones 
-- [ ] finish unit tests
-- [ ] finish integration tests
 - [ ] available on crates.io
 - [ ] finish the basic functionalities
 - [ ] finish the advanced functionalities
+- [ ] finish argument chaining

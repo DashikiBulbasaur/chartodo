@@ -11,8 +11,9 @@ use std::{fs::File, io::Write, process::Command};
 
 fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
     let mut test_file = File::create("src/general_list.txt")?;
-    test_file
-        .write_all(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
+    test_file.write_all(
+        b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist",
+    )?;
 
     Ok(())
 }
@@ -77,61 +78,214 @@ fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[test]
-fn todo_item_to_be_marked_as_done_is_not_specified() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("done").arg("");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
-    ));
+mod todo_item_is_done_tests {
+    use super::*;
 
-    Ok(())
+    #[test]
+    fn todo_item_to_be_marked_as_done_is_not_specified() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_is_not_a_number_or_not_u8_for_the_todo_item_to_be_marked_as_done(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("a");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("a");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_the_todo_item_to_be_marked_as_done_is_zero(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("0");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("0");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_todo_item_to_be_marked_as_done_is_too_big(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("10");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("10");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_moved_to_done_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "'list' was marked as done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: list",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_moved_to_done_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "'list' was marked as done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: list",
+        ));
+
+        Ok(())
+    }
 }
 
-#[test]
-fn position_is_not_a_number_for_the_todo_item_to_be_marked_as_done() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("done").arg("a");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "You must specify the todo item's position, and it has to be a number that is not zero or negative. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
-    ));
+mod remove_todo_item_tests {
+    use super::*;
 
-    Ok(())
-}
+    #[test]
+    fn position_for_todo_item_to_be_removed_is_not_specified(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+        ));
 
-#[test]
-fn position_for_the_todo_item_to_be_marked_as_done_is_zero() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("done").arg("0");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
-    ));
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+        ));
 
-    Ok(())
-}
+        Ok(())
+    }
 
-#[test]
-fn position_for_todo_item_to_be_marked_as_done_is_too_big() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("done").arg("10");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
-    ));
+    #[test]
+    fn position_is_not_a_number_or_not_u8_for_todo_item_to_be_removed(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("a");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+        ));
 
-    Ok(())
-}
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("a");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+        ));
 
-#[test]
-fn todo_item_moved_to_done_correctly() -> Result<(), Box<dyn std::error::Error>> {
-    let _ = create_test_file();
+        Ok(())
+    }
 
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("done").arg("5");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "'list' was marked as done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: list",
-    ));
+    #[test]
+    fn position_for_the_todo_item_to_be_removed_is_zero() -> Result<(), Box<dyn std::error::Error>>
+    {
+        let _ = create_test_file();
 
-    Ok(())
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("0");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("0");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_todo_item_to_be_removed_is_too_big() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("10");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("10");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_removed_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "'list' was removed from todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_removed_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "'list' was removed from todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        Ok(())
+    }
 }
 
 #[test]
@@ -148,7 +302,7 @@ fn invalid_input() -> Result<(), Box<dyn std::error::Error>> {
 #[test]
 fn zzz_resets_the_file() {
     // note: this is just to reset the file after all the changes for my own convenience.
-    // the fn also starts with zzz cuz rust runs the tests in alphabetical order, and I 
+    // the fn also starts with zzz cuz rust runs the tests in alphabetical order, and I
     // want this to be the last one everytime
     let _ = create_test_file();
 }

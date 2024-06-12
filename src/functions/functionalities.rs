@@ -1,7 +1,4 @@
-use super::helpers::{
-    add_positions_to_todo_and_done, create_new_file_and_write, print_the_lists,
-    read_file_and_create_vecs,
-};
+use super::helpers::*;
 use std::io::Write;
 
 // NB: the general flow for each functionality are
@@ -78,6 +75,7 @@ pub fn add_todo_item(add_item: String) {
 }
 
 pub fn change_todo_item_to_done(position: String) {
+    // NB: read file and create vecs
     let (mut todo_buf, mut done_buf) = read_file_and_create_vecs("src/general_list.txt");
 
     let writer = &mut std::io::stdout();
@@ -90,10 +88,11 @@ pub fn change_todo_item_to_done(position: String) {
         .expect("writeln failed");
     }
 
-    if position.parse::<u32>().is_err() {
+    // note: I'm keeping this as u8 just so it's slightly faster
+    if position.parse::<u8>().is_err() {
         return writeln!(
             writer,
-            "You must specify the todo item's position, and it has to be a number that is not zero or negative. A good example would be: 'chartodo done 3'. Please try again, or try --help."
+            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help."
         )
         .expect("writeln failed");
 
@@ -111,7 +110,7 @@ pub fn change_todo_item_to_done(position: String) {
         return print_the_lists(todo_buf, done_buf);
     }
 
-    if position.parse::<u32>().unwrap() == 0 {
+    if position.parse::<u8>().unwrap() == 0 {
         return writeln!(
             writer,
             "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try --help.", todo_buf.len() - 1
@@ -119,7 +118,7 @@ pub fn change_todo_item_to_done(position: String) {
         .expect("writeln failed");
     }
 
-    if position.parse::<u32>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
+    if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
         return writeln!(
             writer,
             "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be {} or lower. Please try again, or try --help.", todo_buf.len() - 1
@@ -141,6 +140,77 @@ pub fn change_todo_item_to_done(position: String) {
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
 
     writeln!(writer, "'{}' was marked as done\n", todo_to_done).expect("writeln failed");
+
+    // NB: print the lists
+    print_the_lists(todo_buf, done_buf);
+}
+
+pub fn remove_todo_item(position: String) {
+    // NB: read file and create vecs
+    let (mut todo_buf, done_buf) = read_file_and_create_vecs("src/general_list.txt");
+
+    let writer = &mut std::io::stdout();
+
+    if position.is_empty() {
+        return writeln!(
+            writer,
+            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help."
+        )
+        .expect("writeln failed");
+    }
+
+    if position.parse::<u8>().is_err() {
+        return writeln!(
+            writer,
+            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help."
+        )
+        .expect("writeln failed");
+
+        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo
+        // panics and complains. I also can't seem to test for it.
+    }
+
+    // note: i'm not integration testing this for now cuz it requires importing a helper fn into
+    // outputs, which i don't wanna do rn
+    if todo_buf.is_empty() {
+        writeln!(
+            writer,
+            "The todo list is currently empty, so there are no todo items that can be removed."
+        )
+        .expect("writeln failed");
+
+        return print_the_lists(todo_buf, done_buf);
+    }
+
+    if position.parse::<u8>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try --help.", todo_buf.len() - 1
+        )
+        .expect("writeln failed");
+    }
+
+    if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
+        return writeln!(
+            writer,
+            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be {} or lower. Please try again, or try --help.", todo_buf.len() - 1
+        )
+        .expect("writeln failed");
+    }
+
+    // get the todo item, remove it from todo, and push it to done
+    let position = position.parse::<usize>().unwrap();
+    let remove_todo = todo_buf.get(position).unwrap().to_string();
+    todo_buf.remove(position);
+
+    // NB: after changes, write to file
+    let (todo_buf, done_buf) =
+        create_new_file_and_write("src/general_list.txt", todo_buf, done_buf);
+
+    // NB: add positions to the lists
+    let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
+
+    writeln!(writer, "'{}' was removed from todo\n", remove_todo).expect("writeln failed");
 
     // NB: print the lists
     print_the_lists(todo_buf, done_buf);

@@ -1,7 +1,7 @@
 mod functions;
 
 use clap::Parser;
-use functions::functionalities::{add_todo_item, change_todo_item_to_done, list};
+use functions::functionalities::*;
 use std::io::Write;
 
 #[derive(Parser)]
@@ -18,19 +18,16 @@ struct Cli {
 fn main() {
     let args = Cli::parse();
 
-    if &args.command == "list" || &args.command == "l" {
-        list();
-    } else if &args.command == "add" || &args.command == "a" {
-        add_todo_item(
+    match args.command.as_str() {
+        "list" | "l" => list(),
+        "add" | "a" => add_todo_item(
             args.item_identifier
-                .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo add item'. For more information, try --help***"),
-        );
-    } else if &args.command == "done" || &args.command == "d" {
-        change_todo_item_to_done(
+                .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo add item'. For more information, try --help***")),
+        "done" | "d" => change_todo_item_to_done(
             args.item_identifier
-                .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***"));
-    } else {
-        command_error();
+                .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***")),
+        "rmtodo" | "rmt" => remove_todo_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both of which are not allowed. A correct example would be: 'chartodo rmtodo 3', and if a todo item existed at the third position, it would be removed. For more information, try --help***")),
+        _ => command_error(),
     }
 }
 

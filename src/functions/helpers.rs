@@ -218,7 +218,6 @@ mod helpers_unit_tests {
 
         let mut test_full_list = vec![];
         test_todo.iter().for_each(|item| test_full_list.push(item));
-        let binding = "-----".to_string();
         test_full_list.push(&binding);
         test_done.iter().for_each(|item| test_full_list.push(item));
 
