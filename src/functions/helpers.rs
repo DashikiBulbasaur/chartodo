@@ -9,6 +9,8 @@ fn create_dir_and_file_if_needed() -> Result<(), Box<dyn std::error::Error>> {
     something.push("chartodo");
 
     if !something.exists() {
+        // note: this isn't create_dir_all cuz if god forbid the file paths leading up to it
+        // somehow don't exist, i'd rather it just fail than to force create them
         let _ = std::fs::create_dir(something.clone());
     }
     something.push("general_list.txt");
