@@ -1,5 +1,5 @@
 use super::helpers::*;
-use std::io::Write;
+use std::{io::Write, path::PathBuf};
 
 // NB: the general flow for each functionality are
 // 1. read the file and create vecs for the two lists
@@ -7,9 +7,21 @@ use std::io::Write;
 // 3. add positions to the vec lists
 // 4. print the lists
 
+// linux: $HOME/.local/share/chartodo/general_list.txt
+// windows: C:\Users\some_user\AppData\Local\chartodo\general_list.txt
+// mac: /Users/some_user/Library/Application Support/chartodo/general_list.txt
+fn path_to_chartodo_file() -> PathBuf {
+    let mut path = dirs::data_dir().unwrap();
+    path.push("chartodo/general_list.txt");
+
+    path
+}
+
 pub fn list() {
+    let path = path_to_chartodo_file();
+
     // NB: read from file and separate it into vecs
-    let (todo_buf, done_buf) = read_file_and_create_vecs("src/general_list.txt");
+    let (todo_buf, done_buf) = read_file_and_create_vecs(path);
     // NB: add positions to todo_buf and done_buf before printing
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
     // NB: print the lists
@@ -17,8 +29,10 @@ pub fn list() {
 }
 
 pub fn add_todo_item(add_item: String) {
+    let path = path_to_chartodo_file();
+
     // NB: read from file and separate into vecs
-    let (mut todo_buf, done_buf) = read_file_and_create_vecs("src/general_list.txt");
+    let (mut todo_buf, done_buf) = read_file_and_create_vecs(path.clone());
 
     let writer = &mut std::io::stdout();
 
@@ -56,8 +70,7 @@ pub fn add_todo_item(add_item: String) {
     // 2. create a new file
     // 3. push todo_buf and done_buf to file
     todo_buf.push(add_item.clone());
-    let (todo_buf, done_buf) =
-        create_new_file_and_write("src/general_list.txt", todo_buf, done_buf);
+    let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
 
     // ----
 
@@ -75,8 +88,10 @@ pub fn add_todo_item(add_item: String) {
 }
 
 pub fn change_todo_item_to_done(position: String) {
+    let path = path_to_chartodo_file();
+
     // NB: read file and create vecs
-    let (mut todo_buf, mut done_buf) = read_file_and_create_vecs("src/general_list.txt");
+    let (mut todo_buf, mut done_buf) = read_file_and_create_vecs(path.clone());
 
     let writer = &mut std::io::stdout();
 
@@ -133,8 +148,7 @@ pub fn change_todo_item_to_done(position: String) {
     done_buf.push(todo_to_done.clone());
 
     // NB: after changes, write to file
-    let (todo_buf, done_buf) =
-        create_new_file_and_write("src/general_list.txt", todo_buf, done_buf);
+    let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
 
     // NB: add positions to todo and done b4 printing
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
@@ -146,8 +160,10 @@ pub fn change_todo_item_to_done(position: String) {
 }
 
 pub fn remove_todo_item(position: String) {
+    let path = path_to_chartodo_file();
+
     // NB: read file and create vecs
-    let (mut todo_buf, done_buf) = read_file_and_create_vecs("src/general_list.txt");
+    let (mut todo_buf, done_buf) = read_file_and_create_vecs(path.clone());
 
     let writer = &mut std::io::stdout();
 
@@ -204,8 +220,7 @@ pub fn remove_todo_item(position: String) {
     todo_buf.remove(position);
 
     // NB: after changes, write to file
-    let (todo_buf, done_buf) =
-        create_new_file_and_write("src/general_list.txt", todo_buf, done_buf);
+    let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
 
     // NB: add positions to the lists
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);

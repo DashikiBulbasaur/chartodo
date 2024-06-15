@@ -1,12 +1,32 @@
 use std::{
     fs::File,
     io::{BufRead, BufReader, Write},
+    path::{Path, PathBuf},
 };
 
-pub fn read_file_and_create_vecs(path: &str) -> (Vec<String>, Vec<String>) {
-    let file = File::open(path)
-        .expect("file doesn't exist even though it should. If this happens outside of a test, i.e., during use, please create a general_list.txt file in src");
-    // TODO: if this fails, perhaps create a file and open it one more time
+fn create_dir_and_file_if_needed() -> Result<(), Box<dyn std::error::Error>> {
+    let mut something = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    something.push("chartodo");
+
+    if !something.exists() {
+        let _ = std::fs::create_dir(something.clone());
+    }
+    something.push("general_list.txt");
+
+    if !Path::new(&something).exists() {
+        let mut general_list = File::create(something)?;
+        general_list.write_all(
+            b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist",
+        )?;
+    }
+
+    Ok(())
+}
+
+pub fn read_file_and_create_vecs(path: PathBuf) -> (Vec<String>, Vec<String>) {
+    let _ = create_dir_and_file_if_needed();
+
+    let file = File::open(path).expect("could not open file in path");
     let reader = BufReader::new(file);
 
     // separate the lists into vecs so i can do operations on them
@@ -97,7 +117,7 @@ pub fn print_the_lists(todo_buf: Vec<String>, done_buf: Vec<String>) {
 }
 
 pub fn create_new_file_and_write(
-    path: &str,
+    path: PathBuf,
     todo_buf: Vec<String>,
     done_buf: Vec<String>,
 ) -> (Vec<String>, Vec<String>) {
@@ -141,7 +161,7 @@ mod helpers_unit_tests {
         let mut test_file = File::create("test.txt")?;
         test_file.write_all(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
 
-        let (test_todo, test_done) = read_file_and_create_vecs("test.txt");
+        let (test_todo, test_done) = read_file_and_create_vecs("test.txt".into());
         std::fs::remove_file("test.txt")?;
 
         let correct_todo = vec![
@@ -163,7 +183,7 @@ mod helpers_unit_tests {
         let mut test_file = File::create("test1.txt")?;
         test_file.write_all(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
 
-        let (test_todo, test_done) = read_file_and_create_vecs("test1.txt");
+        let (test_todo, test_done) = read_file_and_create_vecs("test1.txt".into());
         // note: different file cuz I think there's a concurrency issue when I try to delete the
         // same file from different test fns. I could just run these one by one with the same file,
         // with test-threads=1, but that takes 2 long and is a last resort
@@ -211,9 +231,12 @@ mod helpers_unit_tests {
             .iter()
             .for_each(|item| correct_full_list.push(item));
 
-        let (_, _) =
-            create_new_file_and_write("test2.txt", correct_todo.clone(), correct_done.clone());
-        let (test_todo, test_done) = read_file_and_create_vecs("test2.txt");
+        let (_, _) = create_new_file_and_write(
+            "test2.txt".into(),
+            correct_todo.clone(),
+            correct_done.clone(),
+        );
+        let (test_todo, test_done) = read_file_and_create_vecs("test2.txt".into());
         std::fs::remove_file("test2.txt")?;
 
         let mut test_full_list = vec![];

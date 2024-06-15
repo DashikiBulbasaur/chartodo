@@ -10,7 +10,16 @@ use std::{fs::File, io::Write, process::Command};
 // good to also add test-threads=1
 
 fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut test_file = File::create("src/general_list.txt")?;
+    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    path.push("chartodo");
+
+    // note: this is just me being careful
+    if !path.exists() {
+        let _ = std::fs::create_dir(path.clone());
+    }
+    path.push("general_list.txt");
+
+    let mut test_file = File::create(path)?;
     test_file.write_all(
         b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist",
     )?;

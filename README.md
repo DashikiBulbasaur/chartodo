@@ -12,7 +12,7 @@ First, make sure you have Rust installed. After that, there are several ways to 
 
 1.
 ```sh-session
-cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch main
+cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch master
 ```
 2. clone the repo
 3. (upcoming)
