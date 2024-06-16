@@ -27,6 +27,22 @@ fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn create_empty_todo_test_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    path.push("chartodo");
+
+    // note: this is just me being careful
+    if !path.exists() {
+        let _ = std::fs::create_dir(path.clone());
+    }
+    path.push("general_list.txt");
+
+    let mut test_file = File::create(path)?;
+    test_file.write_all(b"CHARTODO\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
+
+    Ok(())
+}
+
 #[test]
 fn list_prints_correctly() -> Result<(), Box<dyn std::error::Error>> {
     // note: I really don't like doing it this way, but the program only ever accesses one file
@@ -120,6 +136,20 @@ mod todo_item_is_done_tests {
         cmd.arg("d").arg("a");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn correctly_check_todo_list_is_empty_when_marking_todo_item_as_done(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_todo_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is currently empty, so there are no todo items that can be marked as done.",
         ));
 
         Ok(())
@@ -226,6 +256,20 @@ mod remove_todo_item_tests {
         cmd.arg("rmt").arg("a");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn correctly_check_todo_list_is_empty_when_marking_todo_item_as_done(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_todo_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is currently empty, so there are no todo items that can be removed.",
         ));
 
         Ok(())

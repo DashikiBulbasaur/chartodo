@@ -115,7 +115,7 @@ pub fn change_todo_item_to_done(position: String) {
         // panics and complains. I also can't seem to test for it.
     }
 
-    if todo_buf.is_empty() {
+    if todo_buf.len() == 1 {
         writeln!(
             writer,
             "The todo list is currently empty, so there are no todo items that can be marked as done."
@@ -188,7 +188,7 @@ pub fn remove_todo_item(position: String) {
 
     // note: i'm not integration testing this for now cuz it requires importing a helper fn into
     // outputs, which i don't wanna do rn
-    if todo_buf.is_empty() {
+    if todo_buf.len() == 1 {
         writeln!(
             writer,
             "The todo list is currently empty, so there are no todo items that can be removed."
