@@ -28,6 +28,7 @@ fn main() {
             args.item_identifier
                 .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***")),
         "rmtodo" | "rmt" => remove_todo_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmtodo 3', and if a todo item existed at the third position, it would be removed. For more information, try --help***")),
+        "cleartodo" | "clt" => clear_todo_list(),
         _ => command_error(),
     }
 }
@@ -64,6 +65,9 @@ fn help() {
     rmtodo, rmt     
         remove a todo item from the list, using a numbered position to specify which one 
         example: 'chartodo rmt 4' would remove the fourth todo item
+    cleartodo, clt
+        clear the todo list 
+        example: chartodo cleartodo
     "
     )
     .expect("writeln failed");

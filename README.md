@@ -31,6 +31,7 @@ Then, to run, either
 Commands:
     help, h         
         show help
+        example: chartodo help
     list, l         
         show the todo list
         example: chartodo list
@@ -44,6 +45,9 @@ Commands:
     rmtodo, rmt     
         remove a todo item from the list, using a numbered position to specify which one
         example: 'chartodo rmt 4' would remove the fourth todo item
+    cleartodo, clt
+        clear the todo list 
+        example: chartodo cleartodo
 ```
 
 ## Milestones
@@ -54,7 +58,7 @@ The following functionalities are done
 - [x] done 'x'
 - [x] rmtodo 'x'
 - [x] help
-- [ ] cleartodo
+- [x] cleartodo
 - [ ] doneall
 - [ ] rmdone 'x'
 - [ ] notdone 'x'

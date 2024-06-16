@@ -59,48 +59,68 @@ fn list_prints_correctly() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[test]
-fn adds_item_correctly() -> Result<(), Box<dyn std::error::Error>> {
-    let _ = create_test_file();
+mod add_todo_item_tests {
+    use super::*;
 
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("add").arg("item");
-    cmd.assert().success().stdout(predicate::str::contains(
-        "'item' was added to todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
-    ));
+    #[test]
+    fn adds_item_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
 
-    // NB: in functionalities.rs, there is only one \n after the notification. so there should be
-    // no space between the noti and the list proper, yet there is one. i've yet to find out why
-    // this is
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add").arg("item");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "'item' was added to todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
 
-    Ok(())
-}
+        let _ = create_test_file();
 
-#[test]
-fn empty_add_item() -> Result<(), Box<dyn std::error::Error>> {
-    // note: I don't know how this would ever activate. On main, it panics if there's no item to be
-    // added. I guess this would activate if a person pasted a no-character/empty string to the
-    // console?
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a").arg("item");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "'item' was added to todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
 
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("add").arg("");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "Items to be added to the todo list cannot be empty. Please try again, or try 'chartodo help'.",
-    ));
+        Ok(())
+    }
 
-    Ok(())
-}
+    #[test]
+    fn empty_add_item() -> Result<(), Box<dyn std::error::Error>> {
+        // note: I don't know how this would ever activate. On main, it panics if there's no item to be
+        // added. I guess this would activate if a person pasted a no-character/empty string to the
+        // console?
 
-#[test]
-fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
-    // note: the character limit for the list is 150
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("add").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "The maximum length of an item is 150 characters. Please try again, or try 'chartodo help'.",
-    ));
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "Items to be added to the todo list cannot be empty. Please try again, or try 'chartodo help'.",
+        ));
 
-    Ok(())
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "Items to be added to the todo list cannot be empty. Please try again, or try 'chartodo help'.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
+        // note: the character limit for the list is 150
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The maximum length of an item is 150 characters. Please try again, or try 'chartodo help'.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The maximum length of an item is 150 characters. Please try again, or try 'chartodo help'.",
+        ));
+
+        Ok(())
+    }
 }
 
 mod todo_item_is_done_tests {
@@ -148,6 +168,12 @@ mod todo_item_is_done_tests {
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is currently empty, so there are no todo items that can be marked as done. Try adding items to the todo list. To see how, type 'chartodo help'.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("5");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "The todo list is currently empty, so there are no todo items that can be marked as done. Try adding items to the todo list. To see how, type 'chartodo help'.",
         ));
@@ -205,11 +231,6 @@ mod todo_item_is_done_tests {
             "'list' was marked as done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: list",
         ));
 
-        Ok(())
-    }
-
-    #[test]
-    fn todo_item_moved_to_done_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
@@ -272,6 +293,12 @@ mod remove_todo_item_tests {
             "The todo list is currently empty, so there are no todo items that can be removed. Try adding items to the todo list. To see how, type 'chartodo help'.",
         ));
 
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is currently empty, so there are no todo items that can be removed. Try adding items to the todo list. To see how, type 'chartodo help'.",
+        ));
+
         Ok(())
     }
 
@@ -324,17 +351,56 @@ mod remove_todo_item_tests {
             "'list' was removed from todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
-        Ok(())
-    }
-
-    #[test]
-    fn todo_item_removed_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("5");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "'list' was removed from todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        Ok(())
+    }
+}
+
+mod clear_todo_list_tests {
+    use super::*;
+
+    #[test]
+    fn todo_list_is_already_empty() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_todo_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cleartodo");
+        cmd.assert()
+            .try_success()?
+            .stdout(predicate::str::contains("The todo list is already empty."));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("clt");
+        cmd.assert()
+            .try_success()?
+            .stdout(predicate::str::contains("The todo list is already empty."));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_list_was_cleared_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cleartodo");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list was cleared.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("clt");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list was cleared.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
         Ok(())
@@ -365,14 +431,12 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     rmtodo, rmt     
         remove a todo item from the list, using a numbered position to specify which one 
         example: 'chartodo rmt 4' would remove the fourth todo item
+    cleartodo, clt
+        clear the todo list 
+        example: chartodo cleartodo
     ",
     ));
 
-    Ok(())
-}
-
-#[test]
-fn help_is_shown_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("h");
     cmd.assert().success().stdout(predicate::str::contains(
@@ -395,6 +459,9 @@ fn help_is_shown_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> 
     rmtodo, rmt     
         remove a todo item from the list, using a numbered position to specify which one 
         example: 'chartodo rmt 4' would remove the fourth todo item
+    cleartodo, clt
+        clear the todo list 
+        example: chartodo cleartodo
     ",
     ));
 
