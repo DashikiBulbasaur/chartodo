@@ -40,7 +40,7 @@ pub fn add_todo_item(add_item: String) {
     if add_item.is_empty() {
         return writeln!(
             writer,
-            "Items to be added to the todo list cannot be empty. Please try again, or try --help"
+            "Items to be added to the todo list cannot be empty. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
     }
@@ -50,7 +50,7 @@ pub fn add_todo_item(add_item: String) {
     if add_item.trim() == "-----" {
         return writeln!(
             writer,
-            "----- is an invalid item. It is the only invalid item. Please try again, or try --help"
+            "----- is an invalid item. It is the only invalid item. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
     }
@@ -58,7 +58,7 @@ pub fn add_todo_item(add_item: String) {
     if add_item.trim().len() > 150 {
         return writeln!(
             writer,
-            "The maximum length of an item is 150 characters. Please try again, or try --help"
+            "The maximum length of an item is 150 characters. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
     }
@@ -98,7 +98,7 @@ pub fn change_todo_item_to_done(position: String) {
     if position.is_empty() {
         return writeln!(
             writer,
-            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help."
+            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
     }
@@ -107,7 +107,7 @@ pub fn change_todo_item_to_done(position: String) {
     if position.parse::<u8>().is_err() {
         return writeln!(
             writer,
-            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help."
+            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
 
@@ -118,7 +118,7 @@ pub fn change_todo_item_to_done(position: String) {
     if todo_buf.len() == 1 {
         writeln!(
             writer,
-            "The todo list is currently empty, so there are no todo items that can be marked as done."
+            "The todo list is currently empty, so there are no todo items that can be marked as done. Try adding items to the todo list. To see how, type 'chartodo help'."
         )
         .expect("writeln failed");
 
@@ -128,7 +128,7 @@ pub fn change_todo_item_to_done(position: String) {
     if position.parse::<u8>().unwrap() == 0 {
         return writeln!(
             writer,
-            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try --help.", todo_buf.len() - 1
+            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
         )
         .expect("writeln failed");
     }
@@ -136,7 +136,7 @@ pub fn change_todo_item_to_done(position: String) {
     if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
         return writeln!(
             writer,
-            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be {} or lower. Please try again, or try --help.", todo_buf.len() - 1
+            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be {} or lower. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
         )
         .expect("writeln failed");
     }
@@ -170,7 +170,7 @@ pub fn remove_todo_item(position: String) {
     if position.is_empty() {
         return writeln!(
             writer,
-            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help."
+            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
     }
@@ -178,7 +178,7 @@ pub fn remove_todo_item(position: String) {
     if position.parse::<u8>().is_err() {
         return writeln!(
             writer,
-            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help."
+            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
 
@@ -191,7 +191,7 @@ pub fn remove_todo_item(position: String) {
     if todo_buf.len() == 1 {
         writeln!(
             writer,
-            "The todo list is currently empty, so there are no todo items that can be removed."
+            "The todo list is currently empty, so there are no todo items that can be removed. Try adding items to the todo list. To see how, type 'chartodo help'."
         )
         .expect("writeln failed");
 
@@ -201,7 +201,7 @@ pub fn remove_todo_item(position: String) {
     if position.parse::<u8>().unwrap() == 0 {
         return writeln!(
             writer,
-            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try --help.", todo_buf.len() - 1
+            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
         )
         .expect("writeln failed");
     }
@@ -209,7 +209,7 @@ pub fn remove_todo_item(position: String) {
     if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
         return writeln!(
             writer,
-            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be {} or lower. Please try again, or try --help.", todo_buf.len() - 1
+            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be {} or lower. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
         )
         .expect("writeln failed");
     }

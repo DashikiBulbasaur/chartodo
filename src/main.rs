@@ -19,6 +19,7 @@ fn main() {
     let args = Cli::parse();
 
     match args.command.as_str() {
+        "help" | "h" => help(),
         "list" | "l" => list(),
         "add" | "a" => add_todo_item(
             args.item_identifier
@@ -33,5 +34,28 @@ fn main() {
 
 fn command_error() {
     let writer = &mut std::io::stdout();
-    writeln!(writer, "invalid command. please try again, or try --help").expect("writeln failed");
+    writeln!(
+        writer,
+        "invalid command. please try again, or try 'chartodo help'."
+    )
+    .expect("writeln failed");
+}
+
+fn help() {
+    let writer = &mut std::io::stdout();
+    writeln!(writer, "
+    CHARTODO is a simple command-line-interface (CLI) todo list application
+
+    Commands:
+    help, h         show help 
+    list, l         show the todo list
+                        example: chartodo list 
+    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
+                        example: chartodo add item
+                        example: chartodo add new_item
+    done, d         change a todo item to done, using a numbered position to specify which one
+                        example: 'chartodo done 3' would change the third todo item to done 
+    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one 
+                        example: 'chartodo rmt 4' would remove the fourth todo item
+    ").expect("writeln failed");
 }

@@ -85,7 +85,7 @@ fn empty_add_item() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("add").arg("");
     cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "Items to be added to the todo list cannot be empty. Please try again, or try --help",
+        "Items to be added to the todo list cannot be empty. Please try again, or try 'chartodo help'.",
     ));
 
     Ok(())
@@ -97,7 +97,7 @@ fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("add").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     cmd.assert().try_success()?.stdout(predicate::str::contains(
-        "The maximum length of an item is 150 characters. Please try again, or try --help",
+        "The maximum length of an item is 150 characters. Please try again, or try 'chartodo help'.",
     ));
 
     Ok(())
@@ -111,13 +111,13 @@ mod todo_item_is_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+            "You must specify the todo item's position. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -129,13 +129,13 @@ mod todo_item_is_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("a");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("a");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try --help.",
+            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -149,7 +149,7 @@ mod todo_item_is_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("5");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is currently empty, so there are no todo items that can be marked as done.",
+            "The todo list is currently empty, so there are no todo items that can be marked as done. Try adding items to the todo list. To see how, type 'chartodo help'.",
         ));
 
         Ok(())
@@ -163,13 +163,13 @@ mod todo_item_is_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("0");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("0");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -183,13 +183,13 @@ mod todo_item_is_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("10");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("10");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -231,13 +231,13 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -249,13 +249,13 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("a");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("a");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try --help.",
+            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -269,7 +269,7 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("5");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is currently empty, so there are no todo items that can be removed.",
+            "The todo list is currently empty, so there are no todo items that can be removed. Try adding items to the todo list. To see how, type 'chartodo help'.",
         ));
 
         Ok(())
@@ -283,13 +283,13 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("0");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("0");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try --help.",
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -302,13 +302,13 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("10");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("10");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try --help.",
+            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
         ));
 
         Ok(())
@@ -342,11 +342,59 @@ mod remove_todo_item_tests {
 }
 
 #[test]
+fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("help");
+    cmd.assert().success().stdout(predicate::str::contains("
+    CHARTODO is a simple command-line-interface (CLI) todo list application
+
+    Commands:
+    help, h         show help 
+    list, l         show the todo list
+                        example: chartodo list 
+    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
+                        example: chartodo add item
+                        example: chartodo add new_item
+    done, d         change a todo item to done, using a numbered position to specify which one
+                        example: 'chartodo done 3' would change the third todo item to done 
+    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one 
+                        example: 'chartodo rmt 4' would remove the fourth todo item
+    ",
+    ));
+
+    Ok(())
+}
+
+#[test]
+fn help_is_shown_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
+    let mut cmd = Command::cargo_bin("chartodo")?;
+    cmd.arg("h");
+    cmd.assert().success().stdout(predicate::str::contains("
+    CHARTODO is a simple command-line-interface (CLI) todo list application
+
+    Commands:
+    help, h         show help 
+    list, l         show the todo list
+                        example: chartodo list 
+    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
+                        example: chartodo add item
+                        example: chartodo add new_item
+    done, d         change a todo item to done, using a numbered position to specify which one
+                        example: 'chartodo done 3' would change the third todo item to done 
+    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one 
+                        example: 'chartodo rmt 4' would remove the fourth todo item
+    ",
+    ));
+
+    Ok(())
+}
+
+#[test]
 fn invalid_input() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("blahblah");
     cmd.assert().success().stdout(predicate::str::contains(
-        "invalid command. please try again, or try --help",
+        "invalid command. please try again, or try 'chartodo help'.",
     ));
 
     Ok(())
