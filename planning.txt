@@ -85,6 +85,8 @@ notes:
   2. if needed, do actions on file, e.g., edit 
   3. print
 
+after adding time-based/deadline-based todo items, comfy-table crate might be a good option to show separation of the lists
+
 questions:
 1. should the file containing the lists have `TODO`, `--`, and `DONE` in it too?
   simpler to just print them anytime, altho it might be less resource intensive
