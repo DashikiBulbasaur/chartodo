@@ -43,19 +43,28 @@ fn command_error() {
 
 fn help() {
     let writer = &mut std::io::stdout();
-    writeln!(writer, "
+    writeln!(
+        writer,
+        "
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
     Commands:
-    help, h         show help 
-    list, l         show the todo list
-                        example: chartodo list 
-    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
-                        example: chartodo add item
-                        example: chartodo add new_item
-    done, d         change a todo item to done, using a numbered position to specify which one
-                        example: 'chartodo done 3' would change the third todo item to done 
-    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one 
-                        example: 'chartodo rmt 4' would remove the fourth todo item
-    ").expect("writeln failed");
+    help, h         
+        show help 
+    list, l         
+        show the todo list
+        example: chartodo list 
+    add, a          
+        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo add item
+        example: chartodo add new_item
+    done, d         
+        change a todo item to done, using a numbered position to specify which one
+        example: 'chartodo done 3' would change the third todo item to done 
+    rmtodo, rmt     
+        remove a todo item from the list, using a numbered position to specify which one 
+        example: 'chartodo rmt 4' would remove the fourth todo item
+    "
+    )
+    .expect("writeln failed");
 }

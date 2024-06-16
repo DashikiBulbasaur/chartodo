@@ -345,20 +345,26 @@ mod remove_todo_item_tests {
 fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("help");
-    cmd.assert().success().stdout(predicate::str::contains("
+    cmd.assert().success().stdout(predicate::str::contains(
+        "
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
     Commands:
-    help, h         show help 
-    list, l         show the todo list
-                        example: chartodo list 
-    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
-                        example: chartodo add item
-                        example: chartodo add new_item
-    done, d         change a todo item to done, using a numbered position to specify which one
-                        example: 'chartodo done 3' would change the third todo item to done 
-    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one 
-                        example: 'chartodo rmt 4' would remove the fourth todo item
+    help, h         
+        show help 
+    list, l         
+        show the todo list
+        example: chartodo list 
+    add, a          
+        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo add item
+        example: chartodo add new_item
+    done, d         
+        change a todo item to done, using a numbered position to specify which one
+        example: 'chartodo done 3' would change the third todo item to done 
+    rmtodo, rmt     
+        remove a todo item from the list, using a numbered position to specify which one 
+        example: 'chartodo rmt 4' would remove the fourth todo item
     ",
     ));
 
@@ -369,20 +375,26 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
 fn help_is_shown_correctly_shortcut() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
     cmd.arg("h");
-    cmd.assert().success().stdout(predicate::str::contains("
+    cmd.assert().success().stdout(predicate::str::contains(
+        "
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
     Commands:
-    help, h         show help 
-    list, l         show the todo list
-                        example: chartodo list 
-    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
-                        example: chartodo add item
-                        example: chartodo add new_item
-    done, d         change a todo item to done, using a numbered position to specify which one
-                        example: 'chartodo done 3' would change the third todo item to done 
-    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one 
-                        example: 'chartodo rmt 4' would remove the fourth todo item
+    help, h         
+        show help 
+    list, l         
+        show the todo list
+        example: chartodo list 
+    add, a          
+        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo add item
+        example: chartodo add new_item
+    done, d         
+        change a todo item to done, using a numbered position to specify which one
+        example: 'chartodo done 3' would change the third todo item to done 
+    rmtodo, rmt     
+        remove a todo item from the list, using a numbered position to specify which one 
+        example: 'chartodo rmt 4' would remove the fourth todo item
     ",
     ));
 

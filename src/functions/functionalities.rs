@@ -186,8 +186,6 @@ pub fn remove_todo_item(position: String) {
         // panics and complains. I also can't seem to test for it.
     }
 
-    // note: i'm not integration testing this for now cuz it requires importing a helper fn into
-    // outputs, which i don't wanna do rn
     if todo_buf.len() == 1 {
         writeln!(
             writer,

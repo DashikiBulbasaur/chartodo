@@ -28,18 +28,22 @@ Then, to run, either
 
 ## Usage
 ```sh-session
-Commands:  
-
-    help, h         show help
-    list, l         show the todo list
-                        example: chartodo list
-    add, a          add an item to the todo list. To add a multi-word item, replace the space character with something like _
-                        example: chartodo add item
-                        example: chartodo add new_item
-    done, d         change a todo item to done, using a numbered position to specify which one
-                        example: 'chartodo done 3' would change the third todo item to done
-    rmtodo, rmt     remove a todo item from the list, using a numbered position to specify which one
-                        example: 'chartodo rmt 4' would remove the fourth todo item
+Commands:
+    help, h         
+        show help
+    list, l         
+        show the todo list
+        example: chartodo list
+    add, a          
+        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo add item
+        example: chartodo add new_item
+    done, d         
+        change a todo item to done, using a numbered position to specify which one
+        example: 'chartodo done 3' would change the third todo item to done
+    rmtodo, rmt     
+        remove a todo item from the list, using a numbered position to specify which one
+        example: 'chartodo rmt 4' would remove the fourth todo item
 ```
 
 ## Milestones
@@ -51,6 +55,7 @@ The following functionalities are done
 - [x] rmtodo 'x'
 - [x] help
 - [ ] cleartodo
+- [ ] doneall
 - [ ] rmdone 'x'
 - [ ] notdone 'x'
 - [ ] cleardone
@@ -60,9 +65,9 @@ The following functionalities are done
 - [ ] switchprio 'x-y'
 - [ ] addtoplace 'item' 'position'
 
-Some major milestones 
-- [ ] available on crates.io
+Some major milestones
 - [ ] finish the basic functionalities
-- [ ] added deadline-based todo items
-- [ ] finish the advanced functionalities
+- [ ] add deadline-based todo items
+- [ ] available on crates.io
 - [ ] finish argument chaining
+- [ ] finish the advanced functionalities
