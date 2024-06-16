@@ -1,2 +1,2 @@
-pub mod functionalities;
+pub mod commands;
 mod helpers;

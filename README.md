@@ -48,6 +48,9 @@ Commands:
     cleartodo, clt
         clear the todo list 
         example: chartodo cleartodo
+    doneall, da
+        change all todo items to done
+        example: chartodo da
 ```
 
 ## Milestones
@@ -59,7 +62,7 @@ The following functionalities are done
 - [x] rmtodo 'x'
 - [x] help
 - [x] cleartodo
-- [ ] doneall
+- [x] doneall
 - [ ] rmdone 'x'
 - [ ] notdone 'x'
 - [ ] cleardone

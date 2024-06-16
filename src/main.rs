@@ -1,7 +1,7 @@
 mod functions;
 
 use clap::Parser;
-use functions::functionalities::*;
+use functions::commands::*;
 use std::io::Write;
 
 #[derive(Parser)]
@@ -29,6 +29,7 @@ fn main() {
                 .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***")),
         "rmtodo" | "rmt" => remove_todo_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmtodo 3', and if a todo item existed at the third position, it would be removed. For more information, try --help***")),
         "cleartodo" | "clt" => clear_todo_list(),
+        "doneall" | "da" => change_all_todos_to_done(),
         _ => command_error(),
     }
 }
@@ -68,6 +69,9 @@ fn help() {
     cleartodo, clt
         clear the todo list 
         example: chartodo cleartodo
+    doneall, da
+        change all todo items to done
+        example: chartodo da
     "
     )
     .expect("writeln failed");

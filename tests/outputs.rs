@@ -367,7 +367,7 @@ mod clear_todo_list_tests {
     use super::*;
 
     #[test]
-    fn todo_list_is_already_empty() -> Result<(), Box<dyn std::error::Error>> {
+    fn todo_list_is_already_empty_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
         let _ = create_empty_todo_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
@@ -407,6 +407,50 @@ mod clear_todo_list_tests {
     }
 }
 
+mod change_all_todos_to_done_tests {
+    use super::*;
+
+    #[test]
+    fn todo_list_is_already_empty_doneall() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_todo_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("doneall");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is empty, and so has no items that can be changed to done.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("da");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is empty, and so has no items that can be changed to done.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn all_todos_were_changed_to_done() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("doneall");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "All todos were changed to done.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: this\n7: is\n8: the\n9: todo\n10: list",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("da");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "All todos were changed to done.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list\n6: this\n7: is\n8: the\n9: todo\n10: list",
+        ));
+
+        Ok(())
+    }
+}
+
 #[test]
 fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
@@ -434,6 +478,9 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     cleartodo, clt
         clear the todo list 
         example: chartodo cleartodo
+    doneall, da
+        change all todo items to done
+        example: chartodo da
     ",
     ));
 
@@ -462,6 +509,9 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     cleartodo, clt
         clear the todo list 
         example: chartodo cleartodo
+    doneall, da
+        change all todo items to done
+        example: chartodo da
     ",
     ));
 
