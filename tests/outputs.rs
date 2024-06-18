@@ -43,6 +43,22 @@ fn create_empty_todo_test_file() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn create_empty_done_test_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    path.push("chartodo");
+
+    // note: this is just me being careful
+    if !path.exists() {
+        let _ = std::fs::create_dir(path.clone());
+    }
+    path.push("general_list.txt");
+
+    let mut test_file = File::create(path)?;
+    test_file.write_all(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE")?;
+
+    Ok(())
+}
+
 fn create_both_lists_empty_test_file() -> Result<(), Box<dyn std::error::Error>> {
     let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
     path.push("chartodo");
@@ -472,7 +488,7 @@ mod clear_done_list_tests {
 
     #[test]
     fn done_list_is_already_empty_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_empty_todo_test_file();
+        let _ = create_empty_done_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("cleardone");

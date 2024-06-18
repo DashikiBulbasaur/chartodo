@@ -299,7 +299,7 @@ pub fn clear_done_list() {
 
     let writer = &mut std::io::stdout();
 
-    if todo_buf.len() == 1 {
+    if done_buf.len() == 1 {
         return writeln!(writer, "The done list is already empty.").expect("writeln failed");
     }
 
