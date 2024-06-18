@@ -63,10 +63,10 @@ The following functionalities are done
 - [x] help
 - [x] cleartodo
 - [x] doneall
+- [x] cleardone
+- [ ] clearall
 - [ ] rmdone 'x'
 - [ ] notdone 'x'
-- [ ] cleardone
-- [ ] clearall
 - [ ] edit 'x' 'abc'
 - [ ] changeprio 'x-y'
 - [ ] switchprio 'x-y'

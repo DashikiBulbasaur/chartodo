@@ -377,7 +377,7 @@ mod clear_todo_list_tests {
             .stdout(predicate::str::contains("The todo list is already empty."));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("clt");
+        cmd.arg("ct");
         cmd.assert()
             .try_success()?
             .stdout(predicate::str::contains("The todo list is already empty."));
@@ -398,7 +398,7 @@ mod clear_todo_list_tests {
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("clt");
+        cmd.arg("ct");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "The todo list was cleared.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
@@ -451,6 +451,50 @@ mod change_all_todos_to_done_tests {
     }
 }
 
+mod clear_done_list_tests {
+    use super::*;
+
+    #[test]
+    fn done_list_is_already_empty_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_todo_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cleardone");
+        cmd.assert()
+            .try_success()?
+            .stdout(predicate::str::contains("The done list is already empty."));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cd");
+        cmd.assert()
+            .try_success()?
+            .stdout(predicate::str::contains("The done list is already empty."));
+
+        Ok(())
+    }
+
+    #[test]
+    fn done_list_was_cleared_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cleardone");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The done list was cleared.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cd");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The done list was cleared.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE",
+        ));
+
+        Ok(())
+    }
+}
+
 #[test]
 fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
@@ -481,6 +525,9 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     doneall, da
         change all todo items to done
         example: chartodo da
+    cleardone, cd
+        clear the done list
+        example: chartodo cd
     ",
     ));
 
