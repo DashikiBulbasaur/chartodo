@@ -10,7 +10,7 @@ I needed a unique name, and I like Pokemon and I also like Charmander and Chariz
 
 First, make sure you have [Rust installed](https://doc.rust-lang.org/book/ch01-01-installation.html). After that, there are several ways to install the program (ordered by recommendation):
 
-1. (upcoming)
+1. (upcoming, not yet available on crates.io)
 ```sh-session
 cargo install chartodo
 ```
@@ -36,21 +36,27 @@ Commands:
         show the todo list
         example: chartodo list
     add, a          
-        add an item to the todo list. To add a multi-word item, replace space with something like _
+        add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
-        example: chartodo add new_item
+        example: chartodo add new-item
     done, d         
         change a todo item to done, using a numbered position to specify which one
         example: 'chartodo done 3' would change the third todo item to done
     rmtodo, rmt     
         remove a todo item from the list, using a numbered position to specify which one
         example: 'chartodo rmt 4' would remove the fourth todo item
-    cleartodo, clt
+    cleartodo, ct
         clear the todo list 
         example: chartodo cleartodo
     doneall, da
         change all todo items to done
         example: chartodo da
+    cleardone, cd
+        clear the done list
+        example: chartodo cd
+    clearall, ca
+        clear both todo and done lists
+        example: chartodo clearall
 ```
 
 ## Milestones
@@ -64,7 +70,7 @@ The following functionalities are done
 - [x] cleartodo
 - [x] doneall
 - [x] cleardone
-- [ ] clearall
+- [x] clearall
 - [ ] rmdone 'x'
 - [ ] notdone 'x'
 - [ ] edit 'x' 'abc'

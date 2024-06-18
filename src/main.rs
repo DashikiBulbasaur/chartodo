@@ -18,6 +18,7 @@ struct Cli {
 fn main() {
     let args = Cli::parse();
 
+    // TODO: better error handling (anyhow crate) for commands that expect some extra arg
     match args.command.as_str() {
         "help" | "h" => help(),
         "list" | "l" => list(),
@@ -31,6 +32,7 @@ fn main() {
         "cleartodo" | "ct" => clear_todo_list(),
         "doneall" | "da" => change_all_todos_to_done(),
         "cleardone" | "cd" => clear_done_list(),
+        "clearall" | "ca" => clear_both_lists(),
         _ => command_error(),
     }
 }
@@ -52,23 +54,23 @@ fn help() {
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
     Commands:
-    help, h         
-        show help 
-    list, l         
+    help, h
+        show help
+    list, l
         show the todo list
-        example: chartodo list 
-    add, a          
-        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo list
+    add, a
+        add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
-        example: chartodo add new_item
-    done, d         
+        example: chartodo add new-item
+    done, d
         change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done 
-    rmtodo, rmt     
-        remove a todo item from the list, using a numbered position to specify which one 
+        example: 'chartodo done 3' would change the third todo item to done
+    rmtodo, rmt
+        remove a todo item from the list, using a numbered position to specify which one
         example: 'chartodo rmt 4' would remove the fourth todo item
-    cleartodo, clt
-        clear the todo list 
+    cleartodo, ct
+        clear the todo list
         example: chartodo cleartodo
     doneall, da
         change all todo items to done
@@ -76,6 +78,9 @@ fn help() {
     cleardone, cd
         clear the done list
         example: chartodo cd
+    clearall, ca
+        clear both todo and done lists
+        example: chartodo clearall
     "
     )
     .expect("writeln failed");

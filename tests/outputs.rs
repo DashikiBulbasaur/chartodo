@@ -43,6 +43,22 @@ fn create_empty_todo_test_file() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn create_both_lists_empty_test_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    path.push("chartodo");
+
+    // note: this is just me being careful
+    if !path.exists() {
+        let _ = std::fs::create_dir(path.clone());
+    }
+    path.push("general_list.txt");
+
+    let mut test_file = File::create(path)?;
+    test_file.write_all(b"CHARTODO\n-----\nDONE")?;
+
+    Ok(())
+}
+
 #[test]
 fn list_prints_correctly() -> Result<(), Box<dyn std::error::Error>> {
     // note: I really don't like doing it this way, but the program only ever accesses one file
@@ -495,6 +511,50 @@ mod clear_done_list_tests {
     }
 }
 
+mod clear_both_list_tests {
+    use super::*;
+
+    #[test]
+    fn both_list_are_already_empty_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_both_lists_empty_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("clearall");
+        cmd.assert()
+            .try_success()?
+            .stdout(predicate::str::contains("The todo and done lists are already empty."));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("ca");
+        cmd.assert()
+            .try_success()?
+            .stdout(predicate::str::contains("The todo and done lists are already empty."));
+
+        Ok(())
+    }
+
+    #[test]
+    fn both_lists_were_cleared_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("clearall");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo and done lists were cleared.\n\nCHARTODO\n-----\nDONE",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("ca");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo and done lists were cleared.\n\nCHARTODO\n-----\nDONE",
+        ));
+
+        Ok(())
+    }
+}
+
 #[test]
 fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
@@ -504,23 +564,23 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
     Commands:
-    help, h         
-        show help 
-    list, l         
+    help, h
+        show help
+    list, l
         show the todo list
-        example: chartodo list 
-    add, a          
-        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo list
+    add, a
+        add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
-        example: chartodo add new_item
-    done, d         
+        example: chartodo add new-item
+    done, d
         change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done 
-    rmtodo, rmt     
-        remove a todo item from the list, using a numbered position to specify which one 
+        example: 'chartodo done 3' would change the third todo item to done
+    rmtodo, rmt
+        remove a todo item from the list, using a numbered position to specify which one
         example: 'chartodo rmt 4' would remove the fourth todo item
-    cleartodo, clt
-        clear the todo list 
+    cleartodo, ct
+        clear the todo list
         example: chartodo cleartodo
     doneall, da
         change all todo items to done
@@ -528,6 +588,9 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     cleardone, cd
         clear the done list
         example: chartodo cd
+    clearall, ca
+        clear both todo and done lists
+        example: chartodo clearall
     ",
     ));
 
@@ -538,27 +601,33 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
     Commands:
-    help, h         
-        show help 
-    list, l         
+    help, h
+        show help
+    list, l
         show the todo list
-        example: chartodo list 
-    add, a          
-        add an item to the todo list. To add a multi-word item, replace space with something like _
+        example: chartodo list
+    add, a
+        add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
-        example: chartodo add new_item
-    done, d         
+        example: chartodo add new-item
+    done, d
         change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done 
-    rmtodo, rmt     
-        remove a todo item from the list, using a numbered position to specify which one 
+        example: 'chartodo done 3' would change the third todo item to done
+    rmtodo, rmt
+        remove a todo item from the list, using a numbered position to specify which one
         example: 'chartodo rmt 4' would remove the fourth todo item
-    cleartodo, clt
-        clear the todo list 
+    cleartodo, ct
+        clear the todo list
         example: chartodo cleartodo
     doneall, da
         change all todo items to done
         example: chartodo da
+    cleardone, cd
+        clear the done list
+        example: chartodo cd
+    clearall, ca
+        clear both todo and done lists
+        example: chartodo clearall
     ",
     ));
 
