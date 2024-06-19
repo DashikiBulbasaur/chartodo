@@ -60,6 +60,9 @@ Commands:
     rmdone, rmd
         removes a done item at the specified position
         example: chartodo rmd 4
+    notdone, nd
+        reverses a done item back to a todo item
+        example: chartodo nd 3
 ```
 
 ## Milestones
@@ -75,7 +78,7 @@ The following functionalities are done
 - [x] cleardone
 - [x] clearall
 - [x] rmdone 'x'
-- [ ] notdone 'x'
+- [x] notdone 'x'
 - [ ] edit 'x' 'abc'
 - [ ] changeprio 'x-y'
 - [ ] switchprio 'x-y'
