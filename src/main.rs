@@ -24,17 +24,18 @@ fn main() {
         "list" | "l" => list(),
         "add" | "a" => add_todo_item(
             args.item_identifier
-                .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo add item'. For more information, try --help***")),
+                .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo add item'. For more information, try 'chartodo help' or --help.***")),
         "done" | "d" => change_todo_item_to_done(
             args.item_identifier
-                .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try --help***")),
-        "rmtodo" | "rmt" => remove_todo_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmtodo 3', and if a todo item existed at the third position, it would be removed. For more information, try --help***")),
+                .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try 'chartodo help' or --help.***")),
+        "rmtodo" | "rmt" => remove_todo_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmtodo 3', and if a todo item existed at the third position, it would be removed. For more information, try 'chartodo help' or --help.***")),
         "cleartodo" | "ct" => clear_todo_list(),
         "doneall" | "da" => change_all_todos_to_done(),
         "cleardone" | "cd" => clear_done_list(),
         "clearall" | "ca" => clear_both_lists(),
-        "rmdone" | "rmd" => remove_done_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmdone 3', and if a done item existed at the third position, it would be removed. For more information, try --help***")),
-        "notdone" | "nd" => item_not_done(args.item_identifier.expect("***Please specify the position for the done item that you want to reverse. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo notdone 3', and if a done item existed at the third position, it would be reversed. For more information, try --help***")),
+        "rmdone" | "rmd" => remove_done_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmdone 3', and if a done item existed at the third position, it would be removed. For more information, try 'chartodo help' or --help.***")),
+        "notdone" | "nd" => item_not_done(args.item_identifier.expect("***Please specify the position for the done item that you want to reverse. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo notdone 3', and if a done item existed at the third position, it would be reversed. For more information, try 'chartodo help' or --help.***")),
+        "edit" | "e" => edit_todo_item(args.item_identifier.expect("***Please specify the position for the todo item that you want to edit. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo edit 3 abc', and if a todo item existed at the third position, it would be changed to 'abc'. For more information, try 'chartodo help' or --help.***"), args.edit_or_position.expect("Please specify what you want your specified todo item to be changed to. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo edit 3 abc', and if a todo item existed at the third position, it would be changed to 'abc'. For more information, try 'chartodo help' or --help.***")),
         _ => command_error(),
     }
 }
@@ -89,6 +90,9 @@ fn help() {
     notdone, nd
         reverses a done item back to a todo item
         example: chartodo nd 3
+    edit, e
+        changes a todo item, with its position specified, to what you want
+        example: chartodo edit 3 change-item-to-this
     "
     )
     .expect("writeln failed");

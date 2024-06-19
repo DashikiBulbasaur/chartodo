@@ -63,6 +63,9 @@ Commands:
     notdone, nd
         reverses a done item back to a todo item
         example: chartodo nd 3
+    edit, e
+        changes a todo item, with its position specified, to what you want
+        example: chartodo edit 3 change-item-to-this
 ```
 
 ## Milestones
@@ -79,14 +82,14 @@ The following functionalities are done
 - [x] clearall
 - [x] rmdone 'x'
 - [x] notdone 'x'
-- [ ] edit 'x' 'abc'
+- [x] edit 'x' 'abc'
+- [ ] addtoplace 'item' 'position'
 - [ ] changeprio 'x-y'
 - [ ] switchprio 'x-y'
-- [ ] addtoplace 'item' 'position'
 
 Some major milestones
-- [ ] finish the basic functionalities
+- [x] finish the basic functionalities
+- [ ] finish argument chaining
 - [ ] add deadline-based todo items
 - [ ] available on crates.io
-- [ ] finish argument chaining
 - [ ] finish the advanced functionalities
