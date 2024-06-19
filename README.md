@@ -57,6 +57,9 @@ Commands:
     clearall, ca
         clear both todo and done lists
         example: chartodo clearall
+    rmdone, rmd
+        removes a done item at the specified position
+        example: chartodo rmd 4
 ```
 
 ## Milestones
@@ -71,7 +74,7 @@ The following functionalities are done
 - [x] doneall
 - [x] cleardone
 - [x] clearall
-- [ ] rmdone 'x'
+- [x] rmdone 'x'
 - [ ] notdone 'x'
 - [ ] edit 'x' 'abc'
 - [ ] changeprio 'x-y'

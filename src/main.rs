@@ -33,6 +33,7 @@ fn main() {
         "doneall" | "da" => change_all_todos_to_done(),
         "cleardone" | "cd" => clear_done_list(),
         "clearall" | "ca" => clear_both_lists(),
+        "rmdone" | "rmd" => remove_done_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmdone 3', and if a done item existed at the third position, it would be removed. For more information, try --help***")),
         _ => command_error(),
     }
 }
@@ -81,6 +82,9 @@ fn help() {
     clearall, ca
         clear both todo and done lists
         example: chartodo clearall
+    rmdone, rmd
+        removes a done item at the specified position
+        example: chartodo rmd 4
     "
     )
     .expect("writeln failed");

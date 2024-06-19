@@ -571,6 +571,125 @@ mod clear_both_list_tests {
     }
 }
 
+mod remove_done_item_tests {
+    use super::*;
+
+    #[test]
+    fn position_for_done_item_to_be_removed_is_not_specified(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the done item's position that will be removed. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the done item's position that will be removed. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_is_not_a_number_or_not_u8_for_done_item_to_be_removed(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone").arg("a");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the done item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd").arg("a");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify the done item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn correctly_check_done_list_is_empty_when_removing_done_item(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_done_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The done list is already empty, so there are no done items that can be removed."));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The done list is already empty, so there are no done items that can be removed.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_the_done_item_to_be_removed_is_zero() -> Result<(), Box<dyn std::error::Error>>
+    {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone").arg("0");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd").arg("0");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_done_item_to_be_removed_is_too_big() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone").arg("10");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The done list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd").arg("10");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The done list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn done_item_removed_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "'list' was removed from done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd").arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "'list' was removed from done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done",
+        ));
+
+        Ok(())
+    }
+}
+
 #[test]
 fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     let mut cmd = Command::cargo_bin("chartodo")?;
@@ -607,6 +726,9 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     clearall, ca
         clear both todo and done lists
         example: chartodo clearall
+    rmdone, rmd
+        removes a done item at the specified position
+        example: chartodo rmd 4
     ",
     ));
 
@@ -644,6 +766,9 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     clearall, ca
         clear both todo and done lists
         example: chartodo clearall
+    rmdone, rmd
+        removes a done item at the specified position
+        example: chartodo rmd 4
     ",
     ));
 

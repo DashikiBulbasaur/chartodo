@@ -346,3 +346,74 @@ pub fn clear_both_lists() {
     // NB: print the lists
     print_the_lists(todo_buf, done_buf);
 }
+
+pub fn remove_done_item(position: String) {
+    let path = path_to_chartodo_file();
+
+    // NB: read file and create vecs
+    let (todo_buf, mut done_buf) = read_file_and_create_vecs(path.clone());
+
+    let writer = &mut std::io::stdout();
+
+    if position.is_empty() {
+        return writeln!(
+            writer,
+            "You must specify the done item's position that will be removed. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'."
+        )
+        .expect("writeln failed");
+    }
+
+    if position.parse::<u8>().is_err() {
+        return writeln!(
+            writer,
+            "You must specify the done item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'."
+        )
+        .expect("writeln failed");
+
+        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo
+        // panics and complains. I also can't seem to test for it.
+    }
+
+    if done_buf.len() == 1 {
+        writeln!(
+            writer,
+            "The done list is already empty, so there are no done items that can be removed."
+        )
+        .expect("writeln failed");
+
+        return print_the_lists(todo_buf, done_buf);
+    }
+
+    if position.parse::<u8>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try 'chartodo help'.", done_buf.len() - 1
+        )
+        .expect("writeln failed");
+    }
+
+    if position.parse::<u8>().unwrap() > (done_buf.len() - 1).try_into().unwrap() {
+        return writeln!(
+            writer,
+            "The done list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be {} or lower. Please try again, or try 'chartodo help'.", done_buf.len() - 1
+        )
+        .expect("writeln failed");
+    }
+
+    // get the todo item, remove it from todo, and push it to done
+    let position = position.parse::<usize>().unwrap();
+    let remove_done = done_buf.get(position).unwrap().to_string();
+    done_buf.remove(position);
+
+    // NB: after changes, write to file
+    let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
+
+    // NB: add positions to the lists
+    let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
+
+    writeln!(writer, "'{}' was removed from done\n", remove_done).expect("writeln failed");
+
+    // NB: print the lists
+    print_the_lists(todo_buf, done_buf);
+
+}
