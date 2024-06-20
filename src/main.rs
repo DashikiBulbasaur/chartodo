@@ -1,5 +1,6 @@
 mod functions;
 
+use anyhow::{Context, Ok, Result};
 use clap::Parser;
 use functions::commands::*;
 use std::io::Write;
@@ -15,36 +16,109 @@ struct Cli {
     edit_or_position: Option<String>,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args = Cli::parse();
 
     // TODO: better error handling (anyhow crate) for commands that expect some extra arg
     match args.command.as_str() {
-        "help" | "h" => help(),
-        "list" | "l" => list(),
-        "add" | "a" => add_todo_item(
-            args.item_identifier
-                .expect("***Please specify the item you want to add to the todo list. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo add item'. For more information, try 'chartodo help' or --help.***")),
-        "done" | "d" => change_todo_item_to_done(
-            args.item_identifier
-                .expect("***Please specify the item's position that you want to change as 'done'. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo done 3', and if a todo item existed at the third position, it would be changed to done. For more information, try 'chartodo help' or --help.***")),
-        "rmtodo" | "rmt" => remove_todo_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmtodo 3', and if a todo item existed at the third position, it would be removed. For more information, try 'chartodo help' or --help.***")),
-        "cleartodo" | "ct" => clear_todo_list(),
-        "doneall" | "da" => change_all_todos_to_done(),
-        "cleardone" | "cd" => clear_done_list(),
-        "clearall" | "ca" => clear_both_lists(),
-        "rmdone" | "rmd" => remove_done_item(args.item_identifier.expect("***Please specify the position for the item that you want to remove. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo rmdone 3', and if a done item existed at the third position, it would be removed. For more information, try 'chartodo help' or --help.***")),
-        "notdone" | "nd" => item_not_done(args.item_identifier.expect("***Please specify the position for the done item that you want to reverse. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo notdone 3', and if a done item existed at the third position, it would be reversed. For more information, try 'chartodo help' or --help.***")),
-        "edit" | "e" => edit_todo_item(args.item_identifier.expect("***Please specify the position for the todo item that you want to edit. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo edit 3 abc', and if a todo item existed at the third position, it would be changed to 'abc'. For more information, try 'chartodo help' or --help.***"), args.edit_or_position.expect("Please specify what you want your specified todo item to be changed to. Either you specified an empty string item, or you typed --. Both are not allowed. A correct example would be: 'chartodo edit 3 abc', and if a todo item existed at the third position, it would be changed to 'abc'. For more information, try 'chartodo help' or --help.***")),
-        _ => command_error(),
+        "help" | "h" => {
+            help();
+            Ok(())
+        }
+        "list" | "l" => {
+            list();
+            Ok(())
+        }
+        "add" | "a" => {
+            add_todo_item(
+                args
+                    .item_identifier
+                    .with_context(|| format!("Did not provide the todo item to be added. Good example: chartodo {} new-item. If you have more questions, try chartodo help or chartodo --help", args.command))?
+            );
+            Ok(())
+        }
+        "done" | "d" => {
+            change_todo_item_to_done(
+                args
+                    .item_identifier
+                    .with_context(|| format!("Did not provide the todo item to be changed to done. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+            );
+            Ok(())
+        }
+        "rmtodo" | "rmt" => {
+            remove_todo_item(
+                args
+                    .item_identifier
+                    .with_context(|| format!("Did not provide the todo item to be removed. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+            );
+            Ok(())
+        }
+        "cleartodo" | "ct" => {
+            clear_todo_list();
+            Ok(())
+        }
+        "doneall" | "da" => {
+            change_all_todos_to_done();
+            Ok(())
+        }
+        "cleardone" | "cd" => {
+            clear_done_list();
+            Ok(())
+        }
+        "clearall" | "ca" => {
+            clear_both_lists();
+            Ok(())
+        }
+        "rmdone" | "rmd" => {
+            remove_done_item(
+                args
+                    .item_identifier
+                    .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+            );
+            Ok(())
+        }
+        "notdone" | "nd" => {
+            item_not_done(
+                args
+                    .item_identifier
+                    .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+            );
+            Ok(())
+        }
+        "edit" | "e" => {
+            edit_todo_item(
+                args
+                    .item_identifier
+                    .clone()
+                    .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?, 
+                args
+                    .edit_or_position
+                    .with_context(|| format!("Did not specify what you want the todo item to be edited to. Good example: chartodo {} {} abc. If you have more questions, try chartodo help or chartodo --help", args.command, args.item_identifier.unwrap()))?
+            );
+            Ok(())
+        }
+        "" => {
+            // note: seems like it's hard for the user to reach this
+            no_arg_command();
+            Ok(())
+        }
+        _ => {
+            command_error();
+            Ok(())
+        }
     }
+}
+
+fn no_arg_command() {
+    let writer = &mut std::io::stdout();
+    writeln!(writer, "You must provide a command. Try chartodo help.").expect("writeln failed");
 }
 
 fn command_error() {
     let writer = &mut std::io::stdout();
     writeln!(
         writer,
-        "invalid command. please try again, or try 'chartodo help'."
+        "Invalid command. please try again, or try chartodo help"
     )
     .expect("writeln failed");
 }

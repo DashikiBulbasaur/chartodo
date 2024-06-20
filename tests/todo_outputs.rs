@@ -1,95 +1,9 @@
+mod helpers;
+
 use assert_cmd::prelude::*;
+use helpers::*;
 use predicates::prelude::*;
-use std::{fs::File, io::Write, process::Command};
-
-// note: to run these tests, do cargo test --test outputs -- --test-threads=1
-// note that it seems to be 90% working with cargo test --test outputs, though it may just be a
-// coincidence. not running it on one thread prevents the file reset at the end
-
-// note: to run only integration tests, do cargo test --test '*'. For this program's case, probably
-// good to also add test-threads=1
-
-fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
-    path.push("chartodo");
-
-    // note: this is just me being careful
-    if !path.exists() {
-        let _ = std::fs::create_dir(path.clone());
-    }
-    path.push("general_list.txt");
-
-    let mut test_file = File::create(path)?;
-    test_file.write_all(
-        b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\nthis\nis\nthe\ndone\nlist",
-    )?;
-
-    Ok(())
-}
-
-fn create_empty_todo_test_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
-    path.push("chartodo");
-
-    // note: this is just me being careful
-    if !path.exists() {
-        let _ = std::fs::create_dir(path.clone());
-    }
-    path.push("general_list.txt");
-
-    let mut test_file = File::create(path)?;
-    test_file.write_all(b"CHARTODO\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
-
-    Ok(())
-}
-
-fn create_empty_done_test_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
-    path.push("chartodo");
-
-    // note: this is just me being careful
-    if !path.exists() {
-        let _ = std::fs::create_dir(path.clone());
-    }
-    path.push("general_list.txt");
-
-    let mut test_file = File::create(path)?;
-    test_file.write_all(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE")?;
-
-    Ok(())
-}
-
-fn create_both_lists_empty_test_file() -> Result<(), Box<dyn std::error::Error>> {
-    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
-    path.push("chartodo");
-
-    // note: this is just me being careful
-    if !path.exists() {
-        let _ = std::fs::create_dir(path.clone());
-    }
-    path.push("general_list.txt");
-
-    let mut test_file = File::create(path)?;
-    test_file.write_all(b"CHARTODO\n-----\nDONE")?;
-
-    Ok(())
-}
-
-#[test]
-fn list_prints_correctly() -> Result<(), Box<dyn std::error::Error>> {
-    // note: I really don't like doing it this way, but the program only ever accesses one file
-    // (unless I decide to expand), and so the only way to do integration testing is to access that
-    // one file again and again
-    let _ = create_test_file();
-
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("list");
-    cmd.assert().success().stdout(predicate::str::contains(
-        "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
-    ));
-
-    Ok(())
-}
+use std::process::Command;
 
 mod add_todo_item_tests {
     use super::*;
@@ -116,11 +30,10 @@ mod add_todo_item_tests {
     }
 
     #[test]
-    fn empty_add_item() -> Result<(), Box<dyn std::error::Error>> {
+    fn todo_item_to_add_is_empty() -> Result<(), Box<dyn std::error::Error>> {
         // note: I don't know how this would ever activate. On main, it panics if there's no item to be
         // added. I guess this would activate if a person pasted a no-character/empty string to the
         // console?
-
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("add").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -139,6 +52,8 @@ mod add_todo_item_tests {
     #[test]
     fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
         // note: the character limit for the list is 150
+        // note: gonna decrease this to 30 eventually
+        // TODO: decrease this to 30
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("add").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -153,13 +68,44 @@ mod add_todo_item_tests {
 
         Ok(())
     }
+
+    #[test]
+    fn todo_item_to_add_isnt_specified() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains("Error: Did not provide the todo item to be added. Good example: chartodo add new-item. If you have more questions, try chartodo help or chartodo --help"));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a");
+        // note: lowkey starting to realize i don't need predicate for a lot of these
+        cmd.assert().try_failure()?.stderr(predicate::str::contains("Error: Did not provide the todo item to be added. Good example: chartodo a new-item. If you have more questions, try chartodo help or chartodo --help"));
+
+        Ok(())
+    }
 }
 
-mod todo_item_is_done_tests {
+mod todo_item_to_done_tests {
     use super::*;
 
     #[test]
-    fn todo_item_to_be_marked_as_done_is_not_specified() -> Result<(), Box<dyn std::error::Error>> {
+    fn todo_item_to_done_position_isnt_specified() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not provide the todo item to be changed to done. Good example: chartodo done 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not provide the todo item to be changed to done. Good example: chartodo d 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_to_done_position_is_empty() -> Result<(), Box<dyn std::error::Error>> {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -185,7 +131,7 @@ mod todo_item_is_done_tests {
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("d").arg("a");
+        cmd.arg("d").arg("256");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo done 3'. Please try again, or try 'chartodo help'.",
         ));
@@ -279,8 +225,24 @@ mod remove_todo_item_tests {
     use super::*;
 
     #[test]
-    fn position_for_todo_item_to_be_removed_is_not_specified(
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    fn position_for_todo_item_to_be_removed_is_missing() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not provide the todo item to be removed. Good example: chartodo rmtodo 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not provide the todo item to be removed. Good example: chartodo rmt 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_todo_item_to_be_removed_is_empty() -> Result<(), Box<dyn std::error::Error>> {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -306,7 +268,7 @@ mod remove_todo_item_tests {
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmt").arg("a");
+        cmd.arg("rmt").arg("256");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'.",
         ));
@@ -483,338 +445,46 @@ mod change_all_todos_to_done_tests {
     }
 }
 
-mod clear_done_list_tests {
-    use super::*;
-
-    #[test]
-    fn done_list_is_already_empty_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_empty_done_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("cleardone");
-        cmd.assert()
-            .try_success()?
-            .stdout(predicate::str::contains("The done list is already empty."));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("cd");
-        cmd.assert()
-            .try_success()?
-            .stdout(predicate::str::contains("The done list is already empty."));
-
-        Ok(())
-    }
-
-    #[test]
-    fn done_list_was_cleared_correctly() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("cleardone");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list was cleared.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE",
-        ));
-
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("cd");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list was cleared.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE",
-        ));
-
-        Ok(())
-    }
-}
-
-mod clear_both_list_tests {
-    use super::*;
-
-    #[test]
-    fn both_list_are_already_empty_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_both_lists_empty_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("clearall");
-        cmd.assert()
-            .try_success()?
-            .stdout(predicate::str::contains("The todo and done lists are already empty."));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("ca");
-        cmd.assert()
-            .try_success()?
-            .stdout(predicate::str::contains("The todo and done lists are already empty."));
-
-        Ok(())
-    }
-
-    #[test]
-    fn both_lists_were_cleared_correctly() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("clearall");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo and done lists were cleared.\n\nCHARTODO\n-----\nDONE",
-        ));
-
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("ca");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo and done lists were cleared.\n\nCHARTODO\n-----\nDONE",
-        ));
-
-        Ok(())
-    }
-}
-
-mod remove_done_item_tests {
-    use super::*;
-
-    #[test]
-    fn position_for_done_item_to_be_removed_is_not_specified(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmdone").arg("");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be removed. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be removed. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn position_is_not_a_number_or_not_u8_for_done_item_to_be_removed(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmdone").arg("a");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("a");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn correctly_check_done_list_is_empty_when_removing_done_item(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_empty_done_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmdone").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is already empty, so there are no done items that can be removed."));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is already empty, so there are no done items that can be removed.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn position_for_the_done_item_to_be_removed_is_zero() -> Result<(), Box<dyn std::error::Error>>
-    {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmdone").arg("0");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("0");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn position_for_done_item_to_be_removed_is_too_big() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmdone").arg("10");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("10");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn done_item_removed_correctly() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmdone").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "'list' was removed from done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done",
-        ));
-
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "'list' was removed from done\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done",
-        ));
-
-        Ok(())
-    }
-}
-
-mod reverse_done_item_back_to_todo_tests {
-    use super::*;
-
-    #[test]
-    fn position_for_done_item_to_be_reversed_is_not_specified(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("notdone").arg("");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be reversed. A good example would be: 'chartodo notdone 3', and if there was a done item at position 3, it would be reversed back to a todo item. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("nd").arg("");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be reversed. A good example would be: 'chartodo notdone 3', and if there was a done item at position 3, it would be reversed back to a todo item. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn position_is_not_a_number_or_not_u8_for_done_item_to_be_reversed(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("notdone").arg("a");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be reversed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo notdone 3', and if there was a done item at position 3, it would be reversed back to a todo item. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("nd").arg("a");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the done item's position that will be reversed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo notdone 3', and if there was a done item at position 3, it would be reversed back to a todo item. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn correctly_check_done_list_is_empty_when_reversing_done_item(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_empty_done_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("notdone").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is already empty, so there are no done items that can be reversed."));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("nd").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is already empty, so there are no done items that can be reversed.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn position_for_the_done_item_to_be_reversed_is_zero() -> Result<(), Box<dyn std::error::Error>>
-    {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("notdone").arg("0");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("nd").arg("0");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn position_for_done_item_to_be_reversed_is_too_big() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("notdone").arg("10");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is smaller than your specified position; therefore, the item you want to reverse doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("nd").arg("10");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The done list is smaller than your specified position; therefore, the item you want to reverse doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn done_item_reversed_correctly() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("notdone").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "'list' was reversed from done back to todo.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done",
-        ));
-
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("nd").arg("5");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "'list' was reversed from done back to todo.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: list\n-----\nDONE\n1: this\n2: is\n3: the\n4: done",
-        ));
-
-        Ok(())
-    }
-}
-
 mod edit_todo_item_tests {
     use super::*;
 
     #[test]
-    fn position_for_todo_item_to_be_edited_is_not_specified(
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    fn position_for_the_todo_item_to_be_edited_is_missing() -> Result<(), Box<dyn std::error::Error>>
+    {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("edit");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not provide the todo item to be edited. Good example: chartodo edit 3 abc. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("e");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not provide the todo item to be edited. Good example: chartodo e 3 abc. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_to_be_edited_to_is_missing() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("edit").arg("3");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not specify what you want the todo item to be edited to. Good example: chartodo edit 3 abc. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("e").arg("4");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Error: Did not specify what you want the todo item to be edited to. Good example: chartodo e 4 abc. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_todo_item_to_be_edited_is_empty() -> Result<(), Box<dyn std::error::Error>> {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -869,8 +539,7 @@ mod edit_todo_item_tests {
     }
 
     #[test]
-    fn position_for_the_todo_item_to_be_edited_is_zero() -> Result<(), Box<dyn std::error::Error>>
-    {
+    fn position_for_the_todo_item_to_be_edited_is_zero() -> Result<(), Box<dyn std::error::Error>> {
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
@@ -928,6 +597,7 @@ mod edit_todo_item_tests {
 
     #[test]
     fn todo_item_to_be_edited_to_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
+        // TODO: decreae this to 30
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
@@ -965,114 +635,6 @@ mod edit_todo_item_tests {
 
         Ok(())
     }
-}
-
-#[test]
-fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("help");
-    cmd.assert().success().stdout(predicate::str::contains(
-        "
-    CHARTODO is a simple command-line-interface (CLI) todo list application
-
-    Commands:
-    help, h
-        show help
-    list, l
-        show the todo list
-        example: chartodo list
-    add, a
-        add an item to the todo list. To add a multi-word item, replace space with something like -
-        example: chartodo add item
-        example: chartodo add new-item
-    done, d
-        change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done
-    rmtodo, rmt
-        remove a todo item from the list, using a numbered position to specify which one
-        example: 'chartodo rmt 4' would remove the fourth todo item
-    cleartodo, ct
-        clear the todo list
-        example: chartodo cleartodo
-    doneall, da
-        change all todo items to done
-        example: chartodo da
-    cleardone, cd
-        clear the done list
-        example: chartodo cd
-    clearall, ca
-        clear both todo and done lists
-        example: chartodo clearall
-    rmdone, rmd
-        removes a done item at the specified position
-        example: chartodo rmd 4
-    notdone, nd
-        reverses a done item back to a todo item
-        example: chartodo nd 3
-    edit, e
-        changes a todo item, with its position specified, to what you want
-        example: chartodo edit 3 change-item-to-this
-    ",
-    ));
-
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("h");
-    cmd.assert().success().stdout(predicate::str::contains(
-        "
-    CHARTODO is a simple command-line-interface (CLI) todo list application
-
-    Commands:
-    help, h
-        show help
-    list, l
-        show the todo list
-        example: chartodo list
-    add, a
-        add an item to the todo list. To add a multi-word item, replace space with something like -
-        example: chartodo add item
-        example: chartodo add new-item
-    done, d
-        change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done
-    rmtodo, rmt
-        remove a todo item from the list, using a numbered position to specify which one
-        example: 'chartodo rmt 4' would remove the fourth todo item
-    cleartodo, ct
-        clear the todo list
-        example: chartodo cleartodo
-    doneall, da
-        change all todo items to done
-        example: chartodo da
-    cleardone, cd
-        clear the done list
-        example: chartodo cd
-    clearall, ca
-        clear both todo and done lists
-        example: chartodo clearall
-    rmdone, rmd
-        removes a done item at the specified position
-        example: chartodo rmd 4
-    notdone, nd
-        reverses a done item back to a todo item
-        example: chartodo nd 3
-    edit, e
-        changes a todo item, with its position specified, to what you want
-        example: chartodo edit 3 change-item-to-this
-    ",
-    ));
-
-    Ok(())
-}
-
-#[test]
-fn invalid_input() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = Command::cargo_bin("chartodo")?;
-    cmd.arg("blahblah");
-    cmd.assert().success().stdout(predicate::str::contains(
-        "invalid command. please try again, or try 'chartodo help'.",
-    ));
-
-    Ok(())
 }
 
 #[test]

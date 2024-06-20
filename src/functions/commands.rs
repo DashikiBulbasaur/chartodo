@@ -7,6 +7,8 @@ use std::{io::Write, path::PathBuf};
 // 3. add positions to the vec lists
 // 4. print the lists
 
+// TODO: reduce the length of some of the errors
+
 // linux: $HOME/.local/share/chartodo/general_list.txt
 // windows: C:\Users\some_user\AppData\Local\chartodo\general_list.txt
 // mac: /Users/some_user/Library/Application Support/chartodo/general_list.txt
@@ -558,7 +560,7 @@ pub fn edit_todo_item(position: String, new_todo_item: String) {
     // get the todo item, remove it from todo, and push it to done
     let position = position.parse::<usize>().unwrap();
     let edit_todo = todo_buf.get(position).unwrap().to_string();
-    todo_buf[position] = new_todo_item.clone();
+    todo_buf[position].clone_from(&new_todo_item);
 
     // NB: after changes, write to file
     let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
