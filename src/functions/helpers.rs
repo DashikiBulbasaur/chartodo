@@ -4,6 +4,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+// TODO: all these let _ = .. that I keep doing where I just ignore the errors probably shouldn't
+// be there. Error handling for those later
+
 fn create_dir_and_file_if_needed() -> Result<(), Box<dyn std::error::Error>> {
     let mut something = dirs::data_dir().expect("could not get path $HOME/.local/share/");
     something.push("chartodo");
@@ -44,7 +47,7 @@ pub fn read_file_and_create_vecs(path: PathBuf) -> (Vec<String>, Vec<String>) {
 
     // if this is 1, that means the todo list is done and the loop can push to done_buf
     let mut todo_done_demarcation = 0;
-    // NB: max len for todo_buf and done_buf is 15
+    // NB: max len for todo_buf is 15 and 30 for done_buf
     for line in file_buf {
         if line == "-----" {
             todo_done_demarcation = 1;
@@ -52,15 +55,15 @@ pub fn read_file_and_create_vecs(path: PathBuf) -> (Vec<String>, Vec<String>) {
             match todo_done_demarcation {
                 0 => {
                     // only applies if the user manually modifies general_list.txt
-                    // lines with more than 150 chars are ommitted
-                    if todo_buf.len() < 15 && line.len() < 150 {
+                    // lines with more than 50 chars are ommitted
+                    if todo_buf.len() < 15 && line.len() < 50 {
                         todo_buf.push(line.to_string());
                     }
                 }
                 _ => {
                     // only applies if the user manually modifies general_list.txt
-                    // lines with more than 150 chars are ommitted
-                    if done_buf.len() < 15 && line.len() < 150 {
+                    // lines with more than 50 chars are ommitted
+                    if done_buf.len() < 30 && line.len() < 50 {
                         done_buf.push(line.to_string());
                     }
                 }

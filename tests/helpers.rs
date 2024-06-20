@@ -2,10 +2,7 @@ use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use std::{fs::File, io::Write, process::Command};
 
-// note: for all of the tests, do cargo test -- --test-threads=1
-
-// note: to run only integration tests, do cargo test --test '*'. For this program's case, probably
-// good to also add test-threads=1
+// cargo test --test helpers -- --test-threads=1
 
 pub fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
     let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");

@@ -5,6 +5,8 @@ use helpers::*;
 use predicates::prelude::*;
 use std::process::Command;
 
+// cargo test --test done_outputs -- --test-threads=1
+
 mod clear_done_list_tests {
     use super::*;
 
@@ -53,8 +55,24 @@ mod remove_done_item_tests {
     use super::*;
 
     #[test]
-    fn position_for_done_item_to_be_removed_is_not_specified(
-    ) -> Result<(), Box<dyn std::error::Error>> {
+    fn position_for_done_item_to_be_removed_is_missing() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmdone");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Did not provide the done item to be removed. Good example: chartodo rmdone 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmd");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Did not provide the done item to be removed. Good example: chartodo rmd 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_done_item_to_be_removed_is_empty() -> Result<(), Box<dyn std::error::Error>> {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmdone").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -80,7 +98,7 @@ mod remove_done_item_tests {
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("rmd").arg("a");
+        cmd.arg("rmd").arg("256");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "You must specify the done item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmdone 3'. Please try again, or try 'chartodo help'.",
         ));
@@ -173,8 +191,25 @@ mod reverse_done_item_back_to_todo_tests {
     use super::*;
 
     #[test]
-    fn position_for_done_item_to_be_reversed_is_not_specified(
+    fn position_for_the_done_item_to_be_reversed_is_missing(
     ) -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("notdone");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Did not provide the done item to be reversed back to todo. Good example: chartodo notdone 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("nd");
+        cmd.assert().try_failure()?.stderr(predicate::str::contains(
+            "Did not provide the done item to be reversed back to todo. Good example: chartodo nd 3. If you have more questions, try chartodo help or chartodo --help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn position_for_done_item_to_be_reversed_is_empty() -> Result<(), Box<dyn std::error::Error>> {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("notdone").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
