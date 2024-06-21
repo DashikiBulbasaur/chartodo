@@ -2,7 +2,7 @@ mod functions;
 
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
-use functions::commands::*;
+use functions::{done_commands::*, general_commands::*, todo_commands::*};
 use std::io::Write;
 
 #[derive(Parser)]
@@ -10,10 +10,10 @@ struct Cli {
     /// The action taken
     command: String,
     /// If applicable, the name/position of the TODO/DONE item
-    item_identifier: Option<String>,
+    item_identifier: Option<Vec<String>>,
     /// If changing a TODO item, this is where you specify what to change it to. If adding a todo
     /// item to a specific position, this is where you specify the position.
-    edit_or_position: Option<String>,
+    edit_or_position: Option<Vec<String>>,
 }
 
 fn main() -> Result<()> {
@@ -33,7 +33,7 @@ fn main() -> Result<()> {
             add_todo_item(
                 args
                     .item_identifier
-                    .with_context(|| format!("Did not provide the todo item to be added. Good example: chartodo {} new-item. If you have more questions, try chartodo help or chartodo --help", args.command))?
+                    .with_context(|| format!("Did not provide the todo item to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             Ok(())
         }

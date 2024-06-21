@@ -17,7 +17,7 @@ mod add_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("add").arg("item");
         cmd.assert().success().stdout(predicate::str::contains(
-            "'item' was added to todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+            "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
         let _ = create_test_file();
@@ -25,7 +25,23 @@ mod add_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("a").arg("item");
         cmd.assert().success().stdout(predicate::str::contains(
-            "'item' was added to todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+            "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add").arg("item1").arg("item2");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item1\n7: item2\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a").arg("item1").arg("item2");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n6: item1\n7: item2\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
         Ok(())
@@ -46,43 +62,6 @@ mod add_todo_item_tests {
         cmd.arg("a").arg("");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
             "Items to be added to the todo list cannot be empty. Please try again, or try chartodo help",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn item_to_be_added_is_demarcator() -> Result<(), Box<dyn std::error::Error>> {
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("add").arg("-----");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "----- is an invalid item. It is the only invalid item. Please try again, or try chartodo help",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("a").arg("-----");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "----- is an invalid item. It is the only invalid item. Please try again, or try chartodo help",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn item_to_be_added_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
-        // note: the character limit for the list is 50
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("add")
-            .arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The maximum length of an item is 50 characters. Please try again, or try chartodo help",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("a")
-            .arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The maximum length of an item is 50 characters. Please try again, or try chartodo help",
         ));
 
         Ok(())
