@@ -11,9 +11,6 @@ struct Cli {
     command: String,
     /// If applicable, the name/position of the TODO/DONE item
     item_identifier: Option<Vec<String>>,
-    /// If changing a TODO item, this is where you specify what to change it to. If adding a todo
-    /// item to a specific position, this is where you specify the position.
-    edit_or_position: Option<Vec<String>>,
 }
 
 fn main() -> Result<()> {
@@ -85,18 +82,18 @@ fn main() -> Result<()> {
             );
             Ok(())
         }
-        "edit" | "e" => {
+        /* "edit" | "e" => {
             edit_todo_item(
                 args
                     .item_identifier
                     .clone()
-                    .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?, 
+                    .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
                 args
                     .edit_or_position
-                    .with_context(|| format!("Did not specify what you want the todo item to be edited to. Good example: chartodo {} {} abc. If you have more questions, try chartodo help or chartodo --help", args.command, args.item_identifier.unwrap()))?
+                    .with_context(|| format!("Did not specify what you want the todo item to be edited to. Good example: chartodo {} 1 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?
             );
             Ok(())
-        }
+        } */
         "" => {
             // note: seems like it's hard for the user to reach this
             no_arg_command();

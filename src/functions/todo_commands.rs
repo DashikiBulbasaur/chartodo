@@ -1,5 +1,5 @@
 use super::helpers::*;
-use std::{io::Write, path::PathBuf, usize};
+use std::{io::Write, path::PathBuf};
 
 // NB: the general flow for each functionality are
 // 1. read the file and create vecs for the two lists
@@ -19,7 +19,7 @@ fn path_to_chartodo_file() -> PathBuf {
     path
 }
 
-pub fn add_todo_item(add_items: Vec<String>) {
+pub fn add_todo_item(add_todos: Vec<String>) {
     let path = path_to_chartodo_file();
 
     // NB: read from file and separate into vecs
@@ -28,12 +28,16 @@ pub fn add_todo_item(add_items: Vec<String>) {
     let writer = &mut std::io::stdout();
 
     // the following conditionals check for invalid inputs.
-    if add_items.is_empty() {
+    if add_todos.is_empty() {
         return writeln!(
             writer,
             "You must add one or more items to the todo list. Good examples: chartodo add item, or chartodo add item one-more-item. Please try again, or try chartodo help"
         )
         .expect("writeln failed");
+    }
+
+    if (add_todos.len() + (todo_buf.len() - 1)) > 14 {
+        return writeln!(writer, "The todo list is too full. Please try removing items or clearing it altogether. For more information, try chartodo help").expect("writeln failed");
     }
 
     // -----
@@ -42,8 +46,8 @@ pub fn add_todo_item(add_items: Vec<String>) {
     // 1. push new item(s) to todo
     // 2. create a new file
     // 3. push todo_buf and done_buf to file
-    add_items.iter().for_each(|item| {
-        if *item != "-----".to_string() && item.len() < 31 {
+    add_todos.iter().for_each(|item| {
+        if item != "-----" && item.len() < 31 {
             todo_buf.push(item.to_string());
         }
     });
@@ -62,7 +66,7 @@ pub fn add_todo_item(add_items: Vec<String>) {
     print_the_lists(todo_buf, done_buf);
 }
 
-pub fn change_todo_item_to_done(items_to_done: Vec<String>) {
+pub fn change_todo_item_to_done(todos_to_done: Vec<String>) {
     let path = path_to_chartodo_file();
 
     // NB: read file and create vecs
@@ -70,7 +74,7 @@ pub fn change_todo_item_to_done(items_to_done: Vec<String>) {
 
     let writer = &mut std::io::stdout();
 
-    if items_to_done.is_empty() {
+    if todos_to_done.is_empty() {
         return writeln!(
             writer,
             "You must specify the todo item's position(s). Good example: chartodo done 3, or chartodo done 3 4 5. Please try again, or try chartodo help"
@@ -79,17 +83,15 @@ pub fn change_todo_item_to_done(items_to_done: Vec<String>) {
     }
 
     if todo_buf.len() == 1 {
-        writeln!(
+        return writeln!(
             writer,
             "The todo list is currently empty, so there are no todo items that can be marked as done. Try adding items to the todo list. To see how, type chartodo help"
         )
         .expect("writeln failed");
-
-        return print_the_lists(todo_buf, done_buf);
     }
 
-    if items_to_done.len() > 14 {
-        return writeln!(writer, "The todo list's maximum length is 15. At this point, you might as well just do chartodo cleartodo. For more information, try chartodo help").expect("writeln failed");
+    if todos_to_done.len() > 14 {
+        return writeln!(writer, "The todo list's maximum length is 15. You provided 15 or more todo items. At this point, you might as well just do chartodo doneall. For more information, try chartodo help").expect("writeln failed");
     }
 
     // in a better world, I'd love for this to be u8 so I can guarantee the small allocation in
@@ -97,15 +99,18 @@ pub fn change_todo_item_to_done(items_to_done: Vec<String>) {
     let mut positions_sorted: Vec<usize> = vec![];
     // filter each argument for correctness, push it to a list. reverse sort and filter that list
     // for duplicates
-    items_to_done.iter().for_each(|item| {
+    todos_to_done.iter().for_each(|item| {
         if item.parse::<usize>().is_ok()
             && !item.is_empty()
             && item.parse::<u8>().unwrap() != 0
-            && item.parse::<usize>().unwrap() <= todo_buf.len() - 1
+            && item.parse::<usize>().unwrap() < todo_buf.len()
         {
             positions_sorted.push(item.parse().unwrap());
         }
     });
+
+    // lowkey don't like how i make another vec. would like for it to just be 1 vec, but right now
+    // this works. TODO: fix later
     positions_sorted.reverse();
     positions_sorted.dedup();
 
@@ -125,7 +130,7 @@ pub fn change_todo_item_to_done(items_to_done: Vec<String>) {
     print_the_lists(todo_buf, done_buf);
 }
 
-pub fn remove_todo_item(position: String) {
+pub fn remove_todo_item(todos_to_remove: Vec<String>) {
     let path = path_to_chartodo_file();
 
     // NB: read file and create vecs
@@ -133,23 +138,12 @@ pub fn remove_todo_item(position: String) {
 
     let writer = &mut std::io::stdout();
 
-    if position.is_empty() {
+    if todos_to_remove.is_empty() {
         return writeln!(
             writer,
-            "You must specify the todo item's position that will be removed. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'."
+            "You must specify the todo item's position(s) that will be removed. A good example would be: chartodo rmtodo 3, or chartodo rmt 3 4 5. Please try again, or try 'chartodo help'."
         )
         .expect("writeln failed");
-    }
-
-    if position.parse::<u8>().is_err() {
-        return writeln!(
-            writer,
-            "You must specify the todo item's position that will be removed, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo rmtodo 3'. Please try again, or try 'chartodo help'."
-        )
-        .expect("writeln failed");
-
-        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo
-        // panics and complains. I also can't seem to test for it.
     }
 
     if todo_buf.len() == 1 {
@@ -162,34 +156,28 @@ pub fn remove_todo_item(position: String) {
         return print_the_lists(todo_buf, done_buf);
     }
 
-    if position.parse::<u8>().unwrap() == 0 {
-        return writeln!(
-            writer,
-            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
-        )
-        .expect("writeln failed");
-    }
+    let mut positions_sorted: Vec<usize> = vec![];
+    todos_to_remove.iter().for_each(|item| {
+        if item.parse::<usize>().is_ok()
+            && !item.is_empty()
+            && item.parse::<u8>().unwrap() != 0
+            && item.parse::<usize>().unwrap() < todo_buf.len()
+        {
+            positions_sorted.push(item.parse().unwrap());
+        }
+    });
+    positions_sorted.reverse();
+    positions_sorted.dedup();
 
-    if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
-        return writeln!(
-            writer,
-            "The todo list is smaller than your specified position; therefore, the item you want to remove doesn't exist. The position has to be {} or lower. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
-        )
-        .expect("writeln failed");
-    }
-
-    // get the todo item, remove it from todo, and push it to done
-    let position = position.parse::<usize>().unwrap();
-    let remove_todo = todo_buf.get(position).unwrap().to_string();
-    todo_buf.remove(position);
+    positions_sorted.iter().for_each(|position| {
+        todo_buf.remove(*position);
+    });
 
     // NB: after changes, write to file
     let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
 
     // NB: add positions to the lists
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
-
-    writeln!(writer, "'{}' was removed from todo\n", remove_todo).expect("writeln failed");
 
     // NB: print the lists
     print_the_lists(todo_buf, done_buf);
@@ -238,6 +226,10 @@ pub fn change_all_todos_to_done() {
         .expect("writeln failed");
     }
 
+    if (todo_buf.len() - 1) + (done_buf.len() - 1) > 31 {
+        done_buf.clear();
+    }
+
     todo_buf
         .iter()
         .skip(1)
@@ -257,7 +249,7 @@ pub fn change_all_todos_to_done() {
     print_the_lists(todo_buf, done_buf);
 }
 
-pub fn edit_todo_item(position: String, new_todo_item: String) {
+pub fn edit_todo_item(position: Vec<String>, new_todo_item: String) {
     let path = path_to_chartodo_file();
 
     // NB: read file and create vecs
@@ -273,53 +265,32 @@ pub fn edit_todo_item(position: String, new_todo_item: String) {
         .expect("writeln failed");
     }
 
-    if position.parse::<u8>().is_err() {
+    if position.len() > 1 {
         return writeln!(
             writer,
-            "You must specify the todo item's position that will be edited, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo edit 3 abc', and if a todo item existed at position 3, it would be changed to 'abc'. Please try again, or try 'chartodo help'."
+            "You can only specify one todo item to edit. Please try again, or try chartodo help"
         )
         .expect("writeln failed");
-
-        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo
-        // panics and complains. I also can't seem to test for it.
     }
 
     if todo_buf.len() == 1 {
-        writeln!(
+        return writeln!(
             writer,
             "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type 'chartodo help'."
-        )
-        .expect("writeln failed");
-
-        return print_the_lists(todo_buf, done_buf);
-    }
-
-    if position.parse::<u8>().unwrap() == 0 {
-        return writeln!(
-            writer,
-            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
-        )
-        .expect("writeln failed");
-    }
-
-    if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
-        return writeln!(
-            writer,
-            "The todo list is smaller than your specified position; therefore, the item you want to edit doesn't exist. The position has to be {} or lower. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
         )
         .expect("writeln failed");
     }
 
     if new_todo_item.is_empty() {
-        return writeln!(writer, "You must specify what you want todo item #{position} to be changed to. A good example would be 'chartodo edit {position} new_todo'. Please try again, or try 'chartodo help'.").expect("writeln failed");
+        return writeln!(writer, "You must specify what you want todo item to be changed to. A good example would be: chartodo edit 1 new_todo. Please try again, or try chartodo help.").expect("writeln failed");
     }
 
-    if new_todo_item.len() > 50 {
-        return writeln!(writer, "Editing a todo item to be longer than 50 characters is not allowed. Please try again, or try 'chartodo help'.").expect("writeln failed");
+    if new_todo_item.len() > 30 {
+        return writeln!(writer, "Editing a todo item to be longer than 30 characters is not allowed. Please try again, or try chartodo help").expect("writeln failed");
     }
 
     // get the todo item, remove it from todo, and push it to done
-    let position = position.parse::<usize>().unwrap();
+    let position: usize = position.first().unwrap().parse().unwrap();
     let edit_todo = todo_buf.get(position).unwrap().to_string();
     todo_buf[position].clone_from(&new_todo_item);
 
