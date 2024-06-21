@@ -1,5 +1,5 @@
 use super::helpers::*;
-use std::{io::Write, path::PathBuf};
+use std::{io::Write, path::PathBuf, usize};
 
 // NB: the general flow for each functionality are
 // 1. read the file and create vecs for the two lists
@@ -62,7 +62,7 @@ pub fn add_todo_item(add_items: Vec<String>) {
     print_the_lists(todo_buf, done_buf);
 }
 
-pub fn change_todo_item_to_done(position: String) {
+pub fn change_todo_item_to_done(items_to_done: Vec<String>) {
     let path = path_to_chartodo_file();
 
     // NB: read file and create vecs
@@ -70,24 +70,12 @@ pub fn change_todo_item_to_done(position: String) {
 
     let writer = &mut std::io::stdout();
 
-    if position.is_empty() {
+    if items_to_done.is_empty() {
         return writeln!(
             writer,
-            "You must specify the todo item's position. Good example: chartodo done 3. Please try again, or try chartodo help"
+            "You must specify the todo item's position(s). Good example: chartodo done 3, or chartodo done 3 4 5. Please try again, or try chartodo help"
         )
         .expect("writeln failed");
-    }
-
-    // note: I'm keeping this as u8 just so it's slightly faster
-    if position.parse::<u8>().is_err() {
-        return writeln!(
-            writer,
-            "You must specify the todo item's position, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. Good example: chartodo done 3. Please try again, or try chartodo help"
-        )
-        .expect("writeln failed");
-
-        // NB: the user can't seem to do a negative number arg like -1, or else clap/cargo
-        // panics and complains. I also can't seem to test for it.
     }
 
     if todo_buf.len() == 1 {
@@ -100,35 +88,38 @@ pub fn change_todo_item_to_done(position: String) {
         return print_the_lists(todo_buf, done_buf);
     }
 
-    if position.parse::<u8>().unwrap() == 0 {
-        return writeln!(
-            writer,
-            "The position specified cannot be 0. Try a position that is between 1 and {}. Please try again, or try chartodo help", todo_buf.len() - 1
-        )
-        .expect("writeln failed");
+    if items_to_done.len() > 14 {
+        return writeln!(writer, "The todo list's maximum length is 15. At this point, you might as well just do chartodo cleartodo. For more information, try chartodo help").expect("writeln failed");
     }
 
-    if position.parse::<u8>().unwrap() > (todo_buf.len() - 1).try_into().unwrap() {
-        return writeln!(
-            writer,
-            "The todo list is smaller than your specified position; therefore, the item you want to mark as done doesn't exist. The position has to be {} or lower. Please try again, or try 'chartodo help'.", todo_buf.len() - 1
-        )
-        .expect("writeln failed");
-    }
+    // in a better world, I'd love for this to be u8 so I can guarantee the small allocation in
+    // memory
+    let mut positions_sorted: Vec<usize> = vec![];
+    // filter each argument for correctness, push it to a list. reverse sort and filter that list
+    // for duplicates
+    items_to_done.iter().for_each(|item| {
+        if item.parse::<usize>().is_ok()
+            && !item.is_empty()
+            && item.parse::<u8>().unwrap() != 0
+            && item.parse::<usize>().unwrap() <= todo_buf.len() - 1
+        {
+            positions_sorted.push(item.parse().unwrap());
+        }
+    });
+    positions_sorted.reverse();
+    positions_sorted.dedup();
 
-    // get the todo item, remove it from todo, and push it to done
-    let position = position.parse::<usize>().unwrap();
-    let todo_to_done = todo_buf.get(position).unwrap().to_string();
-    todo_buf.remove(position);
-    done_buf.push(todo_to_done.clone());
+    // for each position in the list, remove from todo and push to done
+    positions_sorted.iter().for_each(|position| {
+        done_buf.push(todo_buf.get(*position).unwrap().to_string());
+        todo_buf.remove(*position);
+    });
 
     // NB: after changes, write to file
     let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
 
     // NB: add positions to todo and done b4 printing
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
-
-    writeln!(writer, "'{}' was marked as done\n", todo_to_done).expect("writeln failed");
 
     // NB: print the lists
     print_the_lists(todo_buf, done_buf);
