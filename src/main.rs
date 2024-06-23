@@ -9,7 +9,9 @@ use std::io::Write;
 struct Cli {
     /// The action taken
     command: String,
-    /// If applicable, the name/position of the TODO/DONE item
+    /// This has several functions:
+    /// 1. for commands that take positions, they would go here
+    /// 2. for a command like edit, both position and edit-item would be here
     item_identifier: Option<Vec<String>>,
 }
 
@@ -30,7 +32,7 @@ fn main() -> Result<()> {
             add_todo_item(
                 args
                     .item_identifier
-                    .with_context(|| format!("Did not provide the todo item to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
+                    .with_context(|| format!("Did not provide the todo item(s) to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             Ok(())
         }
@@ -38,7 +40,7 @@ fn main() -> Result<()> {
             change_todo_item_to_done(
                 args
                     .item_identifier
-                    .with_context(|| format!("Did not provide the todo item to be changed to done. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+                    .with_context(|| format!("Did not provide the todo item(s) to be changed to done. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             Ok(())
         }
@@ -46,7 +48,7 @@ fn main() -> Result<()> {
             remove_todo_item(
                 args
                     .item_identifier
-                    .with_context(|| format!("Did not provide the todo item to be removed. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+                    .with_context(|| format!("Did not provide the todo item(s) to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             Ok(())
         }
@@ -82,18 +84,14 @@ fn main() -> Result<()> {
             );
             Ok(())
         }
-        /* "edit" | "e" => {
+        "edit" | "e" => {
             edit_todo_item(
                 args
                     .item_identifier
-                    .clone()
                     .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
-                args
-                    .edit_or_position
-                    .with_context(|| format!("Did not specify what you want the todo item to be edited to. Good example: chartodo {} 1 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?
             );
             Ok(())
-        } */
+        }
         "" => {
             // note: seems like it's hard for the user to reach this
             no_arg_command();

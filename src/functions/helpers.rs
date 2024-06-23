@@ -56,14 +56,14 @@ pub fn read_file_and_create_vecs(path: PathBuf) -> (Vec<String>, Vec<String>) {
                 0 => {
                     // only applies if the user manually modifies general_list.txt
                     // lines with more than 50 chars are ommitted
-                    if todo_buf.len() < 15 && line.len() < 50 {
+                    if todo_buf.len() < 15 && line.len() < 30 {
                         todo_buf.push(line.to_string());
                     }
                 }
                 _ => {
                     // only applies if the user manually modifies general_list.txt
                     // lines with more than 50 chars are ommitted
-                    if done_buf.len() < 30 && line.len() < 50 {
+                    if done_buf.len() < 15 && line.len() < 30 {
                         done_buf.push(line.to_string());
                     }
                 }

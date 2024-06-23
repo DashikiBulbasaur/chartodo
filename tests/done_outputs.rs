@@ -1,7 +1,7 @@
-mod helpers;
+mod outputs_helpers;
 
 use assert_cmd::prelude::*;
-use helpers::*;
+use outputs_helpers::*;
 use predicates::prelude::*;
 use std::process::Command;
 
