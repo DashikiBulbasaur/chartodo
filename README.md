@@ -28,25 +28,29 @@ Then, to run, either
 
 ## Usage
 ```sh-session
-Commands:
-    help, h         
+Commands (argument chaining is available where it makes sense):
+
+    help, h
         show help
         example: chartodo help
-    list, l         
+    list, l
         show the todo list
         example: chartodo list
-    add, a          
+    add, a
         add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
         example: chartodo add new-item
-    done, d         
+        example: chartodo add 1st-item 2nd-item 3rd-item
+    done, d
         change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done
-    rmtodo, rmt     
+        example: chartodo done 3
+        example: chartodo d 5 1 3 2
+    rmtodo, rmt
         remove a todo item from the list, using a numbered position to specify which one
-        example: 'chartodo rmt 4' would remove the fourth todo item
+        example: chartodo rmt 4
+        example: chartodo rmt 4 3 2
     cleartodo, ct
-        clear the todo list 
+        clear the todo list
         example: chartodo cleartodo
     doneall, da
         change all todo items to done
@@ -60,13 +64,22 @@ Commands:
     rmdone, rmd
         removes a done item at the specified position
         example: chartodo rmd 4
+        exmaple: chartodo rmdone 1 2 3
     notdone, nd
         reverses a done item back to a todo item
         example: chartodo nd 3
+        example: chartodo notdone 3 2 1 5
     edit, e
         changes a todo item, with its position specified, to what you want
         example: chartodo edit 3 change-item-to-this
+    notdoneall, nda
+        reverses all done items back to todo
+        example: chartodo nda
 ```
+
+### Tips on usage
+
+1. Commands that take positions as arguments will ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
 
 ## Milestones
 
@@ -89,7 +102,7 @@ The following functionalities are done
 
 Some major milestones
 - [x] finish the basic functionalities
-- [ ] finish argument chaining
+- [x] finish argument chaining
 - [ ] add deadline-based todo items
 - [ ] available on crates.io
 - [ ] finish the advanced functionalities
