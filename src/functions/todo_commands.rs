@@ -91,6 +91,7 @@ pub fn change_todo_item_to_done(todos_to_done: Vec<String>) {
             positions_sorted.push(item.parse().unwrap());
         }
     });
+    drop(todos_to_done);
 
     // lowkey don't like how i make another vec. would like for it to just be 1 vec, but right now
     // this works. TODO: maybe fix later
@@ -102,7 +103,7 @@ pub fn change_todo_item_to_done(todos_to_done: Vec<String>) {
         return writeln!(writer, "The number of your arguments meet or exceed the todo list's current filled length. At this point, you might as well just do chartodo doneall. For more information, try chartodo help").expect("writeln failed");
     }
 
-    if todos_to_done.len() + (done_buf.len() - 1) > 15 {
+    if positions_sorted.len() + (done_buf.len() - 1) > 15 {
         return writeln!(writer, "You're trying to change too many todos to done, as doing so would exceed the done list's max length. Try marking fewer todos as done, or remove some done items/clear the done list. For more information, try chartodo help").expect("writeln failed");
     }
 
@@ -136,8 +137,6 @@ pub fn remove_todo_item(todos_to_remove: Vec<String>) {
             "The todo list is currently empty, so there are no todo items that can be removed. Try adding items to the todo list. To see how, type chartodo help"
         )
         .expect("writeln failed");
-
-        return print_the_lists(todo_buf, done_buf);
     }
 
     let mut positions_sorted: Vec<usize> = vec![];
@@ -150,10 +149,15 @@ pub fn remove_todo_item(todos_to_remove: Vec<String>) {
             positions_sorted.push(item.parse().unwrap());
         }
     });
+    drop(todos_to_remove);
 
     positions_sorted.sort();
     positions_sorted.reverse();
     positions_sorted.dedup();
+
+    if positions_sorted.len() >= todo_buf.len() - 1 {
+        return writeln!(writer, "The number of your arguments meet or exceed the todo list's current filled length. At this point, you might as well just do chartodo cleartodo. For more information, try chartodo help").expect("writeln failed");
+    }
 
     positions_sorted.iter().for_each(|position| {
         todo_buf.remove(*position);
@@ -212,8 +216,9 @@ pub fn change_all_todos_to_done() {
         .expect("writeln failed");
     }
 
-    if (todo_buf.len() - 1) + (done_buf.len() - 1) > 30 {
+    if (todo_buf.len() - 1) + (done_buf.len() - 1) > 15 {
         done_buf.clear();
+        done_buf.push("DONE".to_string());
     }
 
     todo_buf
@@ -243,14 +248,6 @@ pub fn edit_todo_item(position_and_item: Vec<String>) {
 
     let writer = &mut std::io::stdout();
 
-    if position_and_item.is_empty() {
-        return writeln!(
-            writer,
-            "You must specify the todo item's position that will be edited. A good example would be: 'chartodo edit 3 abc', and if a todo item existed at position 3, it would be changed to 'abc'. Please try again, or try 'chartodo help'."
-        )
-        .expect("writeln failed");
-    }
-
     if position_and_item.len() != 2 {
         return writeln!(
             writer,
@@ -262,13 +259,27 @@ pub fn edit_todo_item(position_and_item: Vec<String>) {
     if todo_buf.len() == 1 {
         return writeln!(
             writer,
-            "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type 'chartodo help'."
+            "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type chartodo help"
         )
         .expect("writeln failed");
     }
 
+    if position_and_item.first().unwrap().is_empty() {
+        // again, idk how this would ever activate
+        return writeln!(writer, "You must provide the todo item's position that will be edited. Please try again, or try chartodo help").expect("writeln failed");
+    }
+
+    if position_and_item.get(1).unwrap().is_empty() {
+        // again, idk how this would ever activate
+        return writeln!(writer, "You must specify what the todo item will be edited to. Please try again, or try chartodo help").expect("writeln failed");
+    }
+
     if position_and_item.first().unwrap().parse::<u8>().is_err() {
         return writeln!(writer, "You must specify the item's position that will be edited. Please specify a position between 1 and {}, or try chartodo help", todo_buf.len() - 1).expect("writeln failed");
+    }
+
+    if position_and_item.first().unwrap().parse::<u8>().unwrap() == 0 {
+        return writeln!(writer, "The item's position can't be zero. Please specify a position between 1 and {}, or try chartodo help", todo_buf.len() - 1).expect("writeln failed");
     }
 
     if position_and_item.first().unwrap().parse::<usize>().unwrap() > todo_buf.len() - 1 {
@@ -277,14 +288,6 @@ pub fn edit_todo_item(position_and_item: Vec<String>) {
 
     if position_and_item.get(1).unwrap().len() > 30 {
         return writeln!(writer, "Editing a todo item to be longer than 30 characters is not allowed. Please try again, or try chartodo help").expect("writeln failed");
-    }
-
-    if position_and_item.get(1).unwrap() == "-----" {
-        return writeln!(
-            writer,
-            "----- is an invalid todo item. Please try again, or try chartodo help"
-        )
-        .expect("writeln failed");
     }
 
     // get the todo item, remove it from todo, and push it to done

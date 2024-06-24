@@ -84,7 +84,7 @@ pub fn create_almost_full_todo_list_test_file() -> Result<(), Box<dyn std::error
     path.push("general_list.txt");
 
     let mut test_file = File::create(path)?;
-    test_file.write_all(b"CHARTODO\n1: one\n2: two\n3: three\n4: four\n5: five\n6: six\n7: seven\n8: eight\n9: nine\n10: ten\n11: eleven\n12: twelve\n13: thirteen\n14: fourteen\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list")?;
+    test_file.write_all(b"CHARTODO\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven\ntwelve\nthirteen\nfourteen\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
 
     Ok(())
 }
@@ -101,7 +101,7 @@ pub fn create_almost_full_done_list_test_file() -> Result<(), Box<dyn std::error
     path.push("general_list.txt");
 
     let mut test_file = File::create(path)?;
-    test_file.write_all(b"CHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: list\n-----\nDONE\n1: one\n2: two\n3: three\n4: four\n5: five\n6: six\n7: seven\n8: eight\n9: nine\n10: ten\n11: eleven\n12: twelve\n13: thirteen\n14: fourteen")?;
+    test_file.write_all(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven\ntwelve\nthirteen\nfourteen")?;
 
     Ok(())
 }

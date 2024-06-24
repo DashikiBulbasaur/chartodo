@@ -27,22 +27,12 @@ pub fn remove_done_item(dones_to_remove: Vec<String>) {
 
     let writer = &mut std::io::stdout();
 
-    if dones_to_remove.is_empty() {
-        return writeln!(
-            writer,
-            "You must specify the done item's position that will be removed. A good example would be: chartodo rmdone 3, or chartodo rmdone . Please try again, or try 'chartodo help'."
-        )
-        .expect("writeln failed");
-    }
-
     if done_buf.len() == 1 {
         writeln!(
             writer,
             "The done list is already empty, so there are no done items that can be removed."
         )
         .expect("writeln failed");
-
-        return print_the_lists(todo_buf, done_buf);
     }
 
     let mut positions_sorted: Vec<usize> = vec![];
@@ -55,8 +45,15 @@ pub fn remove_done_item(dones_to_remove: Vec<String>) {
             positions_sorted.push(item.parse().unwrap());
         }
     });
+    drop(dones_to_remove);
+
+    positions_sorted.sort();
     positions_sorted.reverse();
     positions_sorted.dedup();
+
+    if positions_sorted.len() >= done_buf.len() - 1 {
+        return writeln!(writer, "The number of arguments you provided meet or exceed the done list's current filled length. You might as well do chartodo cleardone. For more information, try chartodo help").expect("writeln failed");
+    }
 
     positions_sorted.iter().for_each(|position| {
         done_buf.remove(*position);
@@ -80,24 +77,12 @@ pub fn item_not_done(dones_to_todos: Vec<String>) {
 
     let writer = &mut std::io::stdout();
 
-    if dones_to_todos.is_empty() {
-        return writeln!(
-            writer,
-            "You must specify the done item's position that will be reversed. A good example would be: chartodo notdone 3, or chartodo nd 3 4 5. Please try again, or try 'chartodo help'."
-        )
-        .expect("writeln failed");
-    }
-
     if done_buf.len() == 1 {
         return writeln!(
             writer,
             "The done list is already empty, so there are no done items that can be reversed."
         )
         .expect("writeln failed");
-    }
-
-    if (dones_to_todos.len()) + (todo_buf.len() - 1) > 15 {
-        return writeln!(writer, "The todo list is currently full. Try removing items or clearing it. For more information, try chartodo help").expect("writeln failed");
     }
 
     let mut positions_sorted: Vec<usize> = vec![];
@@ -110,8 +95,19 @@ pub fn item_not_done(dones_to_todos: Vec<String>) {
             positions_sorted.push(item.parse().unwrap());
         }
     });
+    drop(dones_to_todos);
+
+    positions_sorted.sort();
     positions_sorted.reverse();
     positions_sorted.dedup();
+
+    if positions_sorted.len() >= done_buf.len() - 1 {
+        return writeln!(writer, "The number of arguments you provided meet or exceed the done list's current filled length. You might as well just do chartodo notdoneall. For more information, try chartodo help").expect("writeln failed");
+    }
+
+    if (positions_sorted.len()) + (todo_buf.len() - 1) > 15 {
+        return writeln!(writer, "The todo list is currently full. Try removing items or clearing it. For more information, try chartodo help").expect("writeln failed");
+    }
 
     positions_sorted.iter().for_each(|position| {
         todo_buf.push(done_buf.get(*position).unwrap().to_string());
@@ -149,6 +145,45 @@ pub fn clear_done_list() {
     let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
 
     writeln!(writer, "The done list was cleared.\n").expect("writeln failed");
+
+    // NB: print the lists
+    print_the_lists(todo_buf, done_buf);
+}
+
+pub fn reverse_all_done_items_to_todo() {
+    let path = path_to_chartodo_file();
+
+    // NB: read file and create vecs
+    let (mut todo_buf, mut done_buf) = read_file_and_create_vecs(path.clone());
+
+    let writer = &mut std::io::stdout();
+
+    if done_buf.len() == 1 {
+        return writeln!(
+            writer,
+            "The todo list is empty, and so has no items that can be changed to done."
+        )
+        .expect("writeln failed");
+    }
+
+    if (todo_buf.len() - 1) + (done_buf.len() - 1) > 15 {
+        return writeln!(writer, "You're trying to reverse too many dones back to todos, and doing so would exceed the todo list's maximum length. Please remove some or clear all of the todo items. To see how, try chartodo help").expect("writeln failed");
+    }
+
+    done_buf
+        .iter()
+        .skip(1)
+        .for_each(|item| todo_buf.push(item.to_string()));
+    done_buf.clear();
+    done_buf.push("DONE".to_string());
+
+    // NB: after changes, write to file
+    let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
+
+    // NB: add positions to the lists
+    let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
+
+    writeln!(writer, "All dones were reversed back to todos\n").expect("writeln failed");
 
     // NB: print the lists
     print_the_lists(todo_buf, done_buf);

@@ -72,7 +72,7 @@ fn main() -> Result<()> {
             remove_done_item(
                 args
                     .item_identifier
-                    .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+                    .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             Ok(())
         }
@@ -80,7 +80,7 @@ fn main() -> Result<()> {
             item_not_done(
                 args
                     .item_identifier
-                    .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3. If you have more questions, try chartodo help or chartodo --help", args.command))?
+                    .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             Ok(())
         }
@@ -90,6 +90,10 @@ fn main() -> Result<()> {
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
             );
+            Ok(())
+        }
+        "notdoneall" | "nda" => {
+            reverse_all_done_items_to_todo();
             Ok(())
         }
         "" => {

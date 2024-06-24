@@ -150,22 +150,16 @@ mod todo_item_to_done_tests {
 
     #[test]
     fn trying_to_change_too_many_todo_items_to_done() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done")
+            .arg("1")
             .arg("1")
             .arg("2")
             .arg("3")
             .arg("4")
             .arg("5")
-            .arg("6")
-            .arg("7")
-            .arg("8")
-            .arg("9")
-            .arg("10")
-            .arg("11")
-            .arg("12")
-            .arg("13")
-            .arg("14")
             .arg("15")
             .arg("15");
         cmd.assert()
@@ -175,19 +169,11 @@ mod todo_item_to_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d")
             .arg("1")
+            .arg("1")
             .arg("2")
             .arg("3")
             .arg("4")
             .arg("5")
-            .arg("6")
-            .arg("7")
-            .arg("8")
-            .arg("9")
-            .arg("10")
-            .arg("11")
-            .arg("12")
-            .arg("13")
-            .arg("14")
             .arg("15")
             .arg("15");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
@@ -286,13 +272,13 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo");
         cmd.assert().try_failure()?.stderr(predicate::str::contains(
-            "Did not provide the todo item to be removed. Good example: chartodo rmtodo 3, or chartodo 3 4 5. If you have more questions, try chartodo help or chartodo --help",
+            "Did not provide the todo item(s) to be removed. Good example: chartodo rmtodo 3, or chartodo rmtodo 3 4 5. If you have more questions, try chartodo help or chartodo --help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt");
         cmd.assert().try_failure()?.stderr(predicate::str::contains(
-            "Did not provide the todo item to be removed. Good example: chartodo rmt 3, or chartodo 3 4 5. If you have more questions, try chartodo help or chartodo --help",
+            "Did not provide the todo item(s) to be removed. Good example: chartodo rmt 3, or chartodo rmt 3 4 5. If you have more questions, try chartodo help or chartodo --help",
         ));
 
         Ok(())
@@ -319,13 +305,40 @@ mod remove_todo_item_tests {
     }
 
     #[test]
+    fn too_many_todo_items_to_remove() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo")
+            .arg("1")
+            .arg("1")
+            .arg("3")
+            .arg("2")
+            .arg("4")
+            .arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains("The number of your arguments meet or exceed the todo list's current filled length. At this point, you might as well just do chartodo cleartodo. For more information, try chartodo help"));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt")
+            .arg("1")
+            .arg("1")
+            .arg("3")
+            .arg("2")
+            .arg("4")
+            .arg("5");
+        cmd.assert().try_success()?.stdout(predicate::str::contains("The number of your arguments meet or exceed the todo list's current filled length. At this point, you might as well just do chartodo cleartodo. For more information, try chartodo help"));
+
+        Ok(())
+    }
+
+    #[test]
     fn todo_item_removed_correctly() -> Result<(), Box<dyn std::error::Error>> {
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("5");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "'list' was removed from todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+            "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
         let _ = create_test_file();
@@ -333,7 +346,43 @@ mod remove_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("5");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "'list' was removed from todo\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+            "CHARTODO\n1: this\n2: is\n3: the\n4: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_items_removed_correctly() -> Result<(), Box<dyn std::error::Error>> {
+        // and some invalids
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo")
+            .arg("5")
+            .arg("1")
+            .arg("b")
+            .arg("3")
+            .arg("")
+            .arg("0")
+            .arg("15");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "CHARTODO\n1: is\n2: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+        ));
+
+        let _ = create_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt")
+            .arg("5")
+            .arg("1")
+            .arg("b")
+            .arg("3")
+            .arg("")
+            .arg("0")
+            .arg("15");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "CHARTODO\n1: is\n2: todo\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
         Ok(())
@@ -407,6 +456,23 @@ mod change_all_todos_to_done_tests {
     }
 
     #[test]
+    fn done_list_is_gonna_be_full_clear_it_first() -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_almost_full_done_list_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("doneall");
+        cmd.assert().try_success()?.stdout(predicate::str::contains("All todos were changed to done.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: todo\n5: list"));
+
+        let _ = create_almost_full_done_list_test_file();
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("da");
+        cmd.assert().try_success()?.stdout(predicate::str::contains("All todos were changed to done.\n\nCHARTODO\n-----\nDONE\n1: this\n2: is\n3: the\n4: todo\n5: list"));
+
+        Ok(())
+    }
+
+    #[test]
     fn all_todos_were_changed_to_done() -> Result<(), Box<dyn std::error::Error>> {
         let _ = create_test_file();
 
@@ -450,17 +516,49 @@ mod edit_todo_item_tests {
     }
 
     #[test]
-    fn todo_item_to_be_edited_to_is_missing() -> Result<(), Box<dyn std::error::Error>> {
+    fn correctly_check_todo_list_is_empty_when_editing_todo_item(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_empty_todo_test_file();
+
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("edit").arg("3");
-        cmd.assert().try_failure()?.stderr(predicate::str::contains(
-            "Error: Did not specify what you want the todo item to be edited to. Good example: chartodo edit 3 abc. If you have more questions, try chartodo help or chartodo --help",
+        cmd.arg("edit").arg("5").arg("abc");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type chartodo help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("e").arg("4");
-        cmd.assert().try_failure()?.stderr(predicate::str::contains(
-            "Error: Did not specify what you want the todo item to be edited to. Good example: chartodo e 4 abc. If you have more questions, try chartodo help or chartodo --help",
+        cmd.arg("e").arg("5").arg("abc");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type chartodo help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn too_many_or_missing_arguments_to_edit_todo_item() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("edit").arg("3");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify both the item's position and what to edit it to, and no more/less. Good example: chartodo edit 3 abc. Please try again, or try chartodo help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("e").arg("3");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify both the item's position and what to edit it to, and no more/less. Good example: chartodo edit 3 abc. Please try again, or try chartodo help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("edit").arg("4").arg("5").arg("abc");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify both the item's position and what to edit it to, and no more/less. Good example: chartodo edit 3 abc. Please try again, or try chartodo help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("e").arg("4").arg("5").arg("abc");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify both the item's position and what to edit it to, and no more/less. Good example: chartodo edit 3 abc. Please try again, or try chartodo help",
         ));
 
         Ok(())
@@ -471,13 +569,30 @@ mod edit_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be edited. A good example would be: 'chartodo edit 3 abc', and if a todo item existed at position 3, it would be changed to 'abc'. Please try again, or try 'chartodo help'.",
+            "You must provide the todo item's position that will be edited. Please try again, or try chartodo help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be edited. A good example would be: 'chartodo edit 3 abc', and if a todo item existed at position 3, it would be changed to 'abc'. Please try again, or try 'chartodo help'.",
+            "You must provide the todo item's position that will be edited. Please try again, or try chartodo help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn todo_item_to_be_edited_to_is_empty() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("edit").arg("3").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify what the todo item will be edited to. Please try again, or try chartodo help",
+        ));
+
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("e").arg("abc").arg("");
+        cmd.assert().try_success()?.stdout(predicate::str::contains(
+            "You must specify what the todo item will be edited to. Please try again, or try chartodo help",
         ));
 
         Ok(())
@@ -486,36 +601,18 @@ mod edit_todo_item_tests {
     #[test]
     fn position_is_not_a_number_or_not_u8_for_todo_item_to_be_edited(
     ) -> Result<(), Box<dyn std::error::Error>> {
+        let _ = create_test_file();
+
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("a").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be edited, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo edit 3 abc', and if a todo item existed at position 3, it would be changed to 'abc'. Please try again, or try 'chartodo help'.",
+            "You must specify the item's position that will be edited. Please specify a position between 1 and 5, or try chartodo help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("e").arg("a").arg("abc");
+        cmd.arg("e").arg("b").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify the todo item's position that will be edited, and it has to be a number that is not zero or negative. For now, your number also can't be bigger than 255. A good example would be: 'chartodo edit 3 abc', and if a todo item existed at position 3, it would be changed to 'abc'. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn correctly_check_todo_list_is_empty_when_editing_todo_item(
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_empty_todo_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("edit").arg("5").arg("abc");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("e").arg("5").arg("abc");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is currently empty, so there are no todo items that can be edited. Try adding items to the todo list. To see how, type 'chartodo help'.",
+            "You must specify the item's position that will be edited. Please specify a position between 1 and 5, or try chartodo help",
         ));
 
         Ok(())
@@ -528,13 +625,13 @@ mod edit_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("0").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
+            "The item's position can't be zero. Please specify a position between 1 and 5, or try chartodo help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("0").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The position specified cannot be 0. Try a position that is between 1 and 5. Please try again, or try 'chartodo help'.",
+            "The item's position can't be zero. Please specify a position between 1 and 5, or try chartodo help",
         ));
 
         Ok(())
@@ -547,32 +644,13 @@ mod edit_todo_item_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("10").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is smaller than your specified position; therefore, the item you want to edit doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
+            "The position you specified is bigger than the todo list. Please specify a position between 1 and 5, or try chartodo help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("10").arg("abc");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "The todo list is smaller than your specified position; therefore, the item you want to edit doesn't exist. The position has to be 5 or lower. Please try again, or try 'chartodo help'.",
-        ));
-
-        Ok(())
-    }
-
-    #[test]
-    fn todo_item_to_edited_to_is_not_specified() -> Result<(), Box<dyn std::error::Error>> {
-        let _ = create_test_file();
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("edit").arg("1").arg("");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify what you want todo item #1 to be changed to. A good example would be 'chartodo edit 1 new_todo'. Please try again, or try 'chartodo help'.",
-        ));
-
-        let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("e").arg("1").arg("");
-        cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You must specify what you want todo item #1 to be changed to. A good example would be 'chartodo edit 1 new_todo'. Please try again, or try 'chartodo help'.",
+            "The position you specified is bigger than the todo list. Please specify a position between 1 and 5, or try chartodo help",
         ));
 
         Ok(())
@@ -580,19 +658,20 @@ mod edit_todo_item_tests {
 
     #[test]
     fn todo_item_to_be_edited_to_is_too_long() -> Result<(), Box<dyn std::error::Error>> {
-        // TODO: decreae this to 30
         let _ = create_test_file();
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("edit").arg("1").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        cmd.arg("edit")
+            .arg("1")
+            .arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "Editing a todo item to be longer than 150 characters is not allowed. Please try again, or try 'chartodo help'.",
+            "Editing a todo item to be longer than 30 characters is not allowed. Please try again, or try chartodo help",
         ));
 
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("e").arg("1").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        cmd.arg("e").arg("1").arg("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "Editing a todo item to be longer than 150 characters is not allowed. Please try again, or try 'chartodo help'.",
+            "Editing a todo item to be longer than 30 characters is not allowed. Please try again, or try chartodo help",
         ));
 
         Ok(())
@@ -608,12 +687,10 @@ mod edit_todo_item_tests {
             "Todo item 'list' was changed to 'abc'.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: abc\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
-        let _ = create_test_file();
-
         let mut cmd = Command::cargo_bin("chartodo")?;
-        cmd.arg("e").arg("5").arg("abc");
+        cmd.arg("e").arg("5").arg("xyz");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "Todo item 'list' was changed to 'abc'.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: abc\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
+            "Todo item 'abc' was changed to 'xyz'.\n\nCHARTODO\n1: this\n2: is\n3: the\n4: todo\n5: xyz\n-----\nDONE\n1: this\n2: is\n3: the\n4: done\n5: list",
         ));
 
         Ok(())
