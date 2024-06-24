@@ -72,6 +72,40 @@ pub fn create_both_lists_empty_test_file() -> Result<(), Box<dyn std::error::Err
     Ok(())
 }
 
+#[allow(dead_code)]
+pub fn create_almost_full_todo_list_test_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    path.push("chartodo");
+
+    // note: this is just me being careful
+    if !path.exists() {
+        let _ = std::fs::create_dir(path.clone());
+    }
+    path.push("general_list.txt");
+
+    let mut test_file = File::create(path)?;
+    test_file.write_all(b"CHARTODO\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven\ntwelve\nthirteen\nfourteen\n-----\nDONE\nthis\nis\nthe\ndone\nlist")?;
+
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub fn create_almost_full_done_list_test_file() -> Result<(), Box<dyn std::error::Error>> {
+    let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
+    path.push("chartodo");
+
+    // note: this is just me being careful
+    if !path.exists() {
+        let _ = std::fs::create_dir(path.clone());
+    }
+    path.push("general_list.txt");
+
+    let mut test_file = File::create(path)?;
+    test_file.write_all(b"CHARTODO\nthis\nis\nthe\ntodo\nlist\n-----\nDONE\none\ntwo\nthree\nfour\nfive\nsix\nseven\neight\nnine\nten\neleven\ntwelve\nthirteen\nfourteen")?;
+
+    Ok(())
+}
+
 #[test]
 fn list_prints_correctly() -> Result<(), Box<dyn std::error::Error>> {
     // note: I really don't like doing it this way, but the program only ever accesses one file
