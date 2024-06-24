@@ -161,7 +161,7 @@ pub fn reverse_all_done_items_to_todo() {
     if done_buf.len() == 1 {
         return writeln!(
             writer,
-            "The todo list is empty, and so has no items that can be changed to done."
+            "The done list is empty, and so has no items that can be changed back to todo"
         )
         .expect("writeln failed");
     }
