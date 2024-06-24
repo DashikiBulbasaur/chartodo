@@ -2,7 +2,7 @@ use assert_cmd::prelude::*;
 use predicates::prelude::*;
 use std::{fs::File, io::Write, process::Command};
 
-// cargo test --test helpers -- --test-threads=1
+// cargo test --test outputs_helpers -- --test-threads=1
 
 pub fn create_test_file() -> Result<(), Box<dyn std::error::Error>> {
     let mut path = dirs::data_dir().expect("could not get path $HOME/.local/share/");
@@ -183,6 +183,7 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     Commands:
     help, h
         show help
+        example: chartodo help
     list, l
         show the todo list
         example: chartodo list
@@ -190,12 +191,15 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
         add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
         example: chartodo add new-item
+        example: chartodo add 1st-item 2nd-item 3rd-item
     done, d
         change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done
+        example: chartodo done 3
+        example: chartodo d 5 1 3 2
     rmtodo, rmt
         remove a todo item from the list, using a numbered position to specify which one
-        example: 'chartodo rmt 4' would remove the fourth todo item
+        example: chartodo rmt 4
+        example: chartodo rmt 4 3 2
     cleartodo, ct
         clear the todo list
         example: chartodo cleartodo
@@ -211,12 +215,17 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     rmdone, rmd
         removes a done item at the specified position
         example: chartodo rmd 4
+        exmaple: chartodo rmdone 1 2 3
     notdone, nd
         reverses a done item back to a todo item
         example: chartodo nd 3
+        example: chartodo notdone 3 2 1 5
     edit, e
         changes a todo item, with its position specified, to what you want
         example: chartodo edit 3 change-item-to-this
+    notdoneall, nda
+        reverses all done items back to todo
+        example: chartodo nda
     ",
     ));
 
@@ -229,6 +238,7 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     Commands:
     help, h
         show help
+        example: chartodo help
     list, l
         show the todo list
         example: chartodo list
@@ -236,12 +246,15 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
         add an item to the todo list. To add a multi-word item, replace space with something like -
         example: chartodo add item
         example: chartodo add new-item
+        example: chartodo add 1st-item 2nd-item 3rd-item
     done, d
         change a todo item to done, using a numbered position to specify which one
-        example: 'chartodo done 3' would change the third todo item to done
+        example: chartodo done 3
+        example: chartodo d 5 1 3 2
     rmtodo, rmt
         remove a todo item from the list, using a numbered position to specify which one
-        example: 'chartodo rmt 4' would remove the fourth todo item
+        example: chartodo rmt 4
+        example: chartodo rmt 4 3 2
     cleartodo, ct
         clear the todo list
         example: chartodo cleartodo
@@ -257,12 +270,17 @@ fn help_is_shown_correctly() -> Result<(), Box<dyn std::error::Error>> {
     rmdone, rmd
         removes a done item at the specified position
         example: chartodo rmd 4
+        exmaple: chartodo rmdone 1 2 3
     notdone, nd
         reverses a done item back to a todo item
         example: chartodo nd 3
+        example: chartodo notdone 3 2 1 5
     edit, e
         changes a todo item, with its position specified, to what you want
         example: chartodo edit 3 change-item-to-this
+    notdoneall, nda
+        reverses all done items back to todo
+        example: chartodo nda
     ",
     ));
 
