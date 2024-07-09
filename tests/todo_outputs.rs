@@ -191,7 +191,7 @@ mod todo_item_to_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("5").arg("4");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You're trying to change too many todos to done, as doing so would exceed the done list's max length. Try marking fewer todos as done, or remove some done items/clear the done list. For more information, try chartodo help",
+            "CHARTODO\n1: this\n2: is\n3: the\n-----\nDONE\n1: list\n2: todo",
         ));
 
         let _ = create_almost_full_done_list_test_file();
@@ -199,7 +199,7 @@ mod todo_item_to_done_tests {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("1").arg("4");
         cmd.assert().try_success()?.stdout(predicate::str::contains(
-            "You're trying to change too many todos to done, as doing so would exceed the done list's max length. Try marking fewer todos as done, or remove some done items/clear the done list. For more information, try chartodo help",
+            "CHARTODO\n1: is\n2: the\n3: list\n-----\nDONE\n1: todo\n2: this",
         ));
 
         Ok(())
