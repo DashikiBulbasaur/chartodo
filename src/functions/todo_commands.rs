@@ -104,7 +104,8 @@ pub fn change_todo_item_to_done(todos_to_done: Vec<String>) {
     }
 
     if positions_sorted.len() + (done_buf.len() - 1) > 15 {
-        return writeln!(writer, "You're trying to change too many todos to done, as doing so would exceed the done list's max length. Try marking fewer todos as done, or remove some done items/clear the done list. For more information, try chartodo help").expect("writeln failed");
+        done_buf.clear();
+        done_buf.push("DONE".to_string());
     }
 
     // for each position in the list, remove from todo and push to done

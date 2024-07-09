@@ -80,6 +80,7 @@ Commands (argument chaining is available where it makes sense):
 ### Tips on usage
 
 1. Commands that take positions as arguments will ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
+2. Max character len for todo items is 30, and the max len for both lists is 15
 
 ## Milestones
 
