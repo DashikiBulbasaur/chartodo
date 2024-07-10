@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Tasks {
     pub todo: Vec<Task>,
     pub done: Vec<Task>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Task {
     pub task: String,
     pub date: Option<String>,
