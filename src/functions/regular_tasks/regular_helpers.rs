@@ -15,16 +15,15 @@ const CHARTODO_PATH: &str = "linux: $HOME/.local/share/chartodo/
     mac: /Users/your_user/Library/Application Support/chartodo/";
 
 fn path_to_regular_tasks() -> PathBuf {
+    // get the data dir XDG spec and return it with path to regular_tasks.json
     let mut regular_tasks_path = dirs::data_dir()
-        .with_context(|| {
-            format!(
+        .context(    
                 "linux: couldn't get $HOME/.local/share/
                 windows: couldn't get C:/Users/your_user/AppData/Local/
                 mac: couldn't get /Users/your_user/Library/Application Support/
                 
                 those directories should exist for your OS. please double check that they do."
-            )
-        })
+        )
         .expect("something went wrong with fetching the user's data dirs");
     regular_tasks_path.push("chartodo/regular_tasks.json");
 
@@ -37,13 +36,11 @@ fn path_to_regular_tasks() -> PathBuf {
 pub fn regular_tasks_create_dir_and_file_if_needed() {
     // get data dir and check if chartodo folder exists. if not, create it
     let mut regular_tasks_path = dirs::data_dir()
-        .with_context(|| {
-            format!(
+        .context(
                 "linux: couldn't get $HOME/.local/share/
                 windows: couldn't get C:/Users/your_user/AppData/Local/
                 mac: couldn't get /Users/your_user/Library/Application Support/"
-            )
-        })
+        )
         .expect("something went wrong with fetching the user's data dirs");
     regular_tasks_path.push("chartodo");
 
@@ -51,26 +48,22 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         // note: this isn't create_dir_all cuz if god forbid the file paths leading up to it
         // somehow don't exist, i'd rather it just fail than to force create them
         std::fs::create_dir(regular_tasks_path.clone())
-            .with_context(|| {
-                format!(
+            .context(
                     "linux: couldn't create dir $HOME/.local/share/chartodo/
                 windows: couldn't create dir C:/Users/your_user/AppData/Local/chartodo/
                 mac: couldn't create dir /Users/your_user/Library/Application Support/chartodo/"
-                )
-            })
+            )
             .expect("something went wrong with creating chartodo folder");
     }
     regular_tasks_path.push("regular_tasks.json");
 
     // check if the old file exists, and push its contents to new json
     let mut old_path = dirs::data_dir()
-        .with_context(|| {
-            format!(
+        .context(
                 "linux: couldn't get $HOME/.local/share/
                 windows: couldn't get C:/Users/your_user/AppData/Local/
                 mac: couldn't get /Users/your_user/Library/Application Support/"
-            )
-        })
+        )
         .expect("something went wrong with fetching the user's data dirs");
     old_path.push("chartodo");
     old_path.push("general_list.txt");
@@ -128,9 +121,8 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         "#;
 
         let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            with_context(|| 
-                format!(
-                    "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this")
+            context( 
+                    "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
                 ).
             expect("changing str to tasks struct failed");
 
@@ -185,6 +177,7 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
         }
     }
 
+    // create vec<task> for both todo and done
     let mut vec_of_todos: Vec<Task> = vec![];
     todo_buf.iter().for_each(|item| {
         let task = Task {
@@ -236,9 +229,14 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
             )
         })
         .expect("failed to write old contents to new json file");
+
+    // now that the old contents have been transferred, remove old file
+    std::fs::remove_file(old_path).with_context(|| format!("couldn't remove old general_list.txt in the following dirs: 
+    {}", CHARTODO_PATH)).expect("anyhow's with_context failed?");
 }
 
 pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
+    // write the changes to the new file
     let regular_tasks_file = File::create(path_to_regular_tasks())
         .with_context(|| {
             format!(
@@ -261,6 +259,7 @@ pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
 }
 
 pub fn open_regular_tasks_and_return_tasks_struct() -> Tasks {
+    // open file and parse
     let regular_tasks_file = File::open(path_to_regular_tasks())
         .with_context(|| {
             format!(

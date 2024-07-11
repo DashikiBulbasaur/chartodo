@@ -1,61 +1,71 @@
-use super::helpers::*;
-use std::{io::Write, path::PathBuf};
-
-// NB: the general flow for each functionality are
-// 1. read the file and create vecs for the two lists
-// 2. if needed, modify a list/both lists, then write to the same file
-// 3. add positions to the vec lists
-// 4. print the lists
-
-// TODO: reduce the length of some of the errors
-
-// linux: $HOME/.local/share/chartodo/general_list.txt
-// windows: C:\Users\some_user\AppData\Local\chartodo\general_list.txt
-// mac: /Users/some_user/Library/Application Support/chartodo/general_list.txt
-fn path_to_chartodo_file() -> PathBuf {
-    let mut path = dirs::data_dir().unwrap();
-    path.push("chartodo/general_list.txt");
-
-    path
-}
+use crate::functions::regular_tasks::regular_helpers::*;
+use std::io::Write;
+use comfy_table::*;
+use super::general_helpers::*;
+use presets::UTF8_FULL;
+use modifiers::UTF8_ROUND_CORNERS;
 
 pub fn list() {
-    let path = path_to_chartodo_file();
+    // housekeeping
+    regular_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+    let mut table = Table::new();
 
-    // NB: read from file and separate it into vecs
-    let (todo_buf, done_buf) = read_file_and_create_vecs(path);
-    // NB: add positions to todo_buf and done_buf before printing
-    let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
-    // NB: print the lists
-    print_the_lists(todo_buf, done_buf);
+    // open file and parse
+    let regular_tasks = open_regular_tasks_and_return_tasks_struct();
+
+    // get strings to print
+    let (regular_todo, regular_done) = regular_tasks_list(regular_tasks);
+
+    table
+        .load_preset(UTF8_FULL)
+        .apply_modifier(UTF8_ROUND_CORNERS)
+        .set_content_arrangement(ContentArrangement::Dynamic)
+        .set_header(vec![
+            Cell::new("CHARTODO").add_attribute(Attribute::Bold),
+        ])
+        .add_row(vec![
+            format!("{}", regular_todo),
+        ])
+        .add_row(vec![
+            format!("{}", regular_done),
+        ]);
+
+    writeln!(writer, "{table}").expect("writeln failed");
 }
 
-pub fn clear_both_lists() {
-    let path = path_to_chartodo_file();
-
-    // NB: read file and create vecs
-    let (mut todo_buf, mut done_buf) = read_file_and_create_vecs(path.clone());
-
+pub fn clear_all_lists() {
+    // housekeeping
+    regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
 
-    if todo_buf.len() == 1 && done_buf.len() == 1 {
-        return writeln!(writer, "The todo and done lists are already empty.")
-            .expect("writeln failed");
+    // open file and parse
+    let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
+
+    // check if all lists are empty
+    if regular_tasks.todo.is_empty() && regular_tasks.done.is_empty() {
+        return writeln!(writer, "All of the lists are currently empty.").expect("writeln failed");
     }
 
-    todo_buf.clear();
-    todo_buf.push("CHARTODO".to_string());
-    done_buf.clear();
-    done_buf.push("DONE".to_string());
+    // clear all lists
+    regular_tasks.todo.clear();
+    regular_tasks.done.clear();
+}
 
-    // NB: after changes, write to file
-    let (todo_buf, done_buf) = create_new_file_and_write(path, todo_buf, done_buf);
+pub fn clear_regular_tasks() {
+    // housekeeping
+    regular_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
 
-    // NB: add positions to the lists
-    let (todo_buf, done_buf) = add_positions_to_todo_and_done(todo_buf, done_buf);
+    // open file and parse
+    let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
-    writeln!(writer, "The todo and done lists were cleared.\n").expect("writeln failed");
+    // check if all lists are empty
+    if regular_tasks.todo.is_empty() && regular_tasks.done.is_empty() {
+        return writeln!(writer, "The regular task lists are currently empty.").expect("writeln failed");
+    }
 
-    // NB: print the lists
-    print_the_lists(todo_buf, done_buf);
+    // clear all lists
+    regular_tasks.todo.clear();
+    regular_tasks.done.clear();
 }

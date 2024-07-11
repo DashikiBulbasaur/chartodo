@@ -2,7 +2,7 @@ mod functions;
 
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
-use functions::{done_commands::*, general_commands::*, todo_commands::*};
+use functions::{general_commands::*, regular_tasks::{regular_todo::*, regular_done::*}};
 use std::io::Write;
 
 #[derive(Parser)]
@@ -29,71 +29,87 @@ fn main() -> Result<()> {
             Ok(())
         }
         "add" | "a" => {
-            add_todo_item(
+            regular_tasks_add_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
+            list();
             Ok(())
         }
         "done" | "d" => {
-            change_todo_item_to_done(
+            regular_tasks_change_todo_to_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be changed to done. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
+            list();
             Ok(())
         }
         "rmtodo" | "rmt" => {
-            remove_todo_item(
+            regular_tasks_remove_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
+            list();
             Ok(())
         }
         "cleartodo" | "ct" => {
-            clear_todo_list();
+            regular_tasks_clear_todo();
+            list();
             Ok(())
         }
         "doneall" | "da" => {
-            change_all_todos_to_done();
+            regular_tasks_change_all_todo_to_done();
+            list();
             Ok(())
         }
         "cleardone" | "cd" => {
-            clear_done_list();
+            regular_tasks_clear_done();
+            list();
             Ok(())
         }
-        "clearall" | "ca" => {
-            clear_both_lists();
+        "clearregular" | "cr" => {
+            clear_regular_tasks();
+            list();
             Ok(())
         }
         "rmdone" | "rmd" => {
-            remove_done_item(
+            regular_tasks_remove_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
+            list();
             Ok(())
         }
         "notdone" | "nd" => {
-            item_not_done(
+            regular_tasks_not_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
+            list();
             Ok(())
         }
         "edit" | "e" => {
-            edit_todo_item(
+            regular_tasks_edit_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
             );
+            list();
             Ok(())
         }
         "notdoneall" | "nda" => {
-            reverse_all_done_items_to_todo();
+            regular_tasks_reverse_all_dones();
+            list();
+            Ok(())
+        }
+        "clearall" | "ca" => {
+            clear_all_lists();
+            list();
             Ok(())
         }
         "" => {
@@ -158,9 +174,9 @@ fn help() {
     cleardone, cd
         clear the done list
         example: chartodo cd
-    clearall, ca
-        clear both todo and done lists
-        example: chartodo clearall
+    clearregular, cr
+        clear the regular todo and done lists
+        example: chartodo clearregular
     rmdone, rmd
         removes a done item at the specified position
         example: chartodo rmd 4

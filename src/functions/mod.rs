@@ -1,8 +1,6 @@
-pub mod done_commands;
 pub mod general_commands;
-pub mod todo_commands;
+pub mod regular_tasks;
 
-mod helpers;
+mod general_helpers;
 mod json_file_structs;
 
-pub mod regular_tasks;
