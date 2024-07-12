@@ -84,7 +84,7 @@ pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) {
 
     // change todos to dones one by one
     todos_to_dones.iter().for_each(|position| {
-        regular_tasks.done.push(regular_tasks.todo.get(*position - 1).unwrap().clone());
+        regular_tasks.done.push(regular_tasks.todo.get(*position - 1).unwrap().to_owned());
         regular_tasks.todo.remove(*position - 1);
     });
 

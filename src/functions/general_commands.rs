@@ -1,4 +1,4 @@
-use crate::functions::regular_tasks::regular_helpers::*;
+use crate::functions::{regular_tasks::regular_helpers::*, deadline_tasks::deadline_helpers::*};
 use std::io::Write;
 use comfy_table::*;
 use super::general_helpers::*;
@@ -8,14 +8,17 @@ use modifiers::UTF8_ROUND_CORNERS;
 pub fn list() {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
+    deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
     let mut table = Table::new();
 
     // open file and parse
     let regular_tasks = open_regular_tasks_and_return_tasks_struct();
+    let deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // get strings to print
     let (regular_todo, regular_done) = regular_tasks_list(regular_tasks);
+    let (deadline_todo, deadline_done) = deadline_tasks_list(deadline_tasks);
 
     table
         .load_preset(UTF8_FULL)
@@ -23,12 +26,15 @@ pub fn list() {
         .set_content_arrangement(ContentArrangement::Dynamic)
         .set_header(vec![
             Cell::new("CHARTODO").add_attribute(Attribute::Bold),
+            Cell::new("DEADLINE").add_attribute(Attribute::Bold),
         ])
         .add_row(vec![
             format!("{}", regular_todo),
+            format!("{}", deadline_todo),
         ])
         .add_row(vec![
             format!("{}", regular_done),
+            format!("{}", deadline_done),
         ]);
 
     writeln!(writer, "{table}").expect("writeln failed");

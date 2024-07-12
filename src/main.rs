@@ -2,7 +2,11 @@ mod functions;
 
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
-use functions::{general_commands::*, regular_tasks::{regular_todo::*, regular_done::*}};
+use functions::{
+    deadline_tasks::{deadline_done::*, deadline_todo::*},
+    general_commands::*,
+    regular_tasks::{regular_done::*, regular_todo::*},
+};
 use std::io::Write;
 
 #[derive(Parser)]
@@ -109,6 +113,14 @@ fn main() -> Result<()> {
         }
         "clearall" | "ca" => {
             clear_all_lists();
+            list();
+            Ok(())
+        }
+        "deadline-add" | "dl-a" => {
+            deadline_tasks_add(
+                args.item_identifier
+                    .context("didn't provide a deadline add argument")?,
+            );
             list();
             Ok(())
         }

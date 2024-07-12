@@ -1,4 +1,5 @@
-use super::json_file_structs::Tasks;
+use super::json_file_structs::*;
+use chrono::Local;
 
 pub fn regular_tasks_list(regular_tasks: Tasks) -> (String, String) {
     let mut regular_todo = String::from("");
@@ -25,6 +26,58 @@ pub fn regular_tasks_list(regular_tasks: Tasks) -> (String, String) {
             let regular_done = "DONE\n---\n".to_string() + regular_done;
             (regular_todo.to_string(), regular_done)
         }
+    }
+}
+
+pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
+    let mut deadline_todo = String::from("");
+    let mut counter: u8 = 1;
+    deadline_tasks.todo.iter().for_each(|item| {
+        let task = format!(
+            "{}: {}\n    {}: {} {}\n",
+            counter,
+            item.task,
+            check_if_due_or_not(item.date.clone().unwrap(), item.time.clone().unwrap()),
+            item.date.clone().unwrap(),
+            item.time.clone().unwrap()
+        );
+        counter += 1;
+        deadline_todo.push_str(&task);
+    });
+    let deadline_todo = deadline_todo.trim_end();
+
+    let mut deadline_done = String::from("");
+    let mut counter: u8 = 1;
+    deadline_tasks.done.iter().for_each(|item| {
+        let task = format!(
+            "{}: {}\n    {}: {} {}\n",
+            counter,
+            item.task,
+            check_if_due_or_not(item.date.clone().unwrap(), item.time.clone().unwrap()),
+            item.date.clone().unwrap(),
+            item.time.clone().unwrap()
+        );
+        counter += 1;
+        deadline_done.push_str(&task);
+    });
+    let deadline_done = deadline_done.trim_end();
+
+    match deadline_done.is_empty() {
+        true => (deadline_todo.to_string(), deadline_done.to_string()),
+        false => {
+            let deadline_done = "DONE\n---\n".to_string() + deadline_done;
+            (deadline_todo.to_string(), deadline_done)
+        }
+    }
+}
+
+fn check_if_due_or_not(date: String, time: String) -> String {
+    if date < Local::now().date_naive().to_string()
+        || date == Local::now().date_naive().to_string() && time < Local::now().time().to_string()
+    {
+        "MISSED".to_string()
+    } else {
+        "due".to_string()
     }
 }
 

@@ -71,8 +71,8 @@ pub fn deadline_tasks_create_dir_and_file_if_needed() {
             "todo": [
                 {
                     "task": "breathe-once-before-2099",
-                    "date": 2099-01-01,
-                    "time": 00:00,
+                    "date": "2099-01-01",
+                    "time": "00:00",
                     "repeat_number": null,
                     "repeat_unit": null,
                     "repeat_done": null
@@ -119,7 +119,15 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
     deadline_tasks
 }
 
-pub fn write_changes_to_new_deadline_tasks(deadline_tasks: Tasks) {
+pub fn write_changes_to_new_deadline_tasks(mut deadline_tasks: Tasks) {
+    // sort before writing. just being random w clone and to_owned
+    deadline_tasks
+        .todo
+        .sort_by_key(|item| (item.date.to_owned().unwrap(), item.time.to_owned().unwrap()));
+    deadline_tasks
+        .done
+        .sort_by_key(|item| (item.date.clone().unwrap(), item.time.clone().unwrap()));
+
     // write the changes to the new file
     let deadline_tasks_file = File::create(path_to_deadline_tasks())
         .with_context(|| {
