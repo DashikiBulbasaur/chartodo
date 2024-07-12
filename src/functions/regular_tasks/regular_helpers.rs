@@ -44,6 +44,7 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         .expect("something went wrong with fetching the user's data dirs");
     regular_tasks_path.push("chartodo");
 
+    // check if chartodo folder exists
     if !regular_tasks_path.exists() {
         // note: this isn't create_dir_all cuz if god forbid the file paths leading up to it
         // somehow don't exist, i'd rather it just fail than to force create them
