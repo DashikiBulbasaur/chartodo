@@ -1,9 +1,9 @@
-use crate::functions::{regular_tasks::regular_helpers::*, deadline_tasks::deadline_helpers::*};
-use std::io::Write;
-use comfy_table::*;
 use super::general_helpers::*;
-use presets::UTF8_FULL;
+use crate::functions::{deadline_tasks::deadline_helpers::*, regular_tasks::regular_helpers::*};
+use comfy_table::*;
 use modifiers::UTF8_ROUND_CORNERS;
+use presets::UTF8_FULL;
+use std::io::Write;
 
 pub fn list() {
     // housekeeping
@@ -43,19 +43,27 @@ pub fn list() {
 pub fn clear_all_lists() {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
+    deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
+    let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // check if all lists are empty
-    if regular_tasks.todo.is_empty() && regular_tasks.done.is_empty() {
+    if regular_tasks.todo.is_empty()
+        && regular_tasks.done.is_empty()
+        && deadline_tasks.todo.is_empty()
+        && deadline_tasks.done.is_empty()
+    {
         return writeln!(writer, "All of the lists are currently empty.").expect("writeln failed");
     }
 
     // clear all lists
     regular_tasks.todo.clear();
     regular_tasks.done.clear();
+    deadline_tasks.todo.clear();
+    deadline_tasks.done.clear();
 }
 
 pub fn clear_regular_tasks() {
@@ -68,10 +76,30 @@ pub fn clear_regular_tasks() {
 
     // check if all lists are empty
     if regular_tasks.todo.is_empty() && regular_tasks.done.is_empty() {
-        return writeln!(writer, "The regular task lists are currently empty.").expect("writeln failed");
+        return writeln!(writer, "The regular task lists are currently empty.")
+            .expect("writeln failed");
     }
 
     // clear all lists
     regular_tasks.todo.clear();
     regular_tasks.done.clear();
+}
+
+pub fn clear_deadline_tasks() {
+    // housekeeping
+    deadline_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
+
+    // check if all lists are empty
+    if deadline_tasks.todo.is_empty() && deadline_tasks.done.is_empty() {
+        return writeln!(writer, "The deadline task lists are currently empty.")
+            .expect("writeln failed");
+    }
+
+    // clear all lists
+    deadline_tasks.todo.clear();
+    deadline_tasks.done.clear();
 }

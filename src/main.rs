@@ -3,7 +3,7 @@ mod functions;
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
 use functions::{
-    deadline_tasks::{deadline_done::*, deadline_todo::*},
+    deadline_tasks::deadline_todo::*,
     general_commands::*,
     regular_tasks::{regular_done::*, regular_todo::*},
 };
@@ -74,7 +74,7 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "clearregular" | "cr" => {
+        "clearboth" | "cb" => {
             clear_regular_tasks();
             list();
             Ok(())
@@ -111,16 +111,26 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "clearall" | "ca" => {
-            clear_all_lists();
-            list();
-            Ok(())
-        }
         "deadline-add" | "dl-a" => {
             deadline_tasks_add(
                 args.item_identifier
                     .context("didn't provide a deadline add argument")?,
             );
+            list();
+            Ok(())
+        }
+        "deadline-addnotime" | "dl-ant" => {
+            deadline_tasks_add_no_time(args.item_identifier.context("didn't provide a deadline-addnotime argument")?);
+            list();
+            Ok(())
+        }
+        "deadline-clearboth" | "dl-cb" => {
+            clear_deadline_tasks();
+            list();
+            Ok(())
+        }
+        "clearall" | "ca" => {
+            clear_all_lists();
             list();
             Ok(())
         }
@@ -157,52 +167,70 @@ fn help() {
         "
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
-    Commands:
-    help, h
+    help | h
         show help
         example: chartodo help
-    list, l
+    list | l
         show the todo list
         example: chartodo list
-    add, a
-        add an item to the todo list. To add a multi-word item, replace space with something like -
-        example: chartodo add item
-        example: chartodo add new-item
-        example: chartodo add 1st-item 2nd-item 3rd-item
-    done, d
-        change a todo item to done, using a numbered position to specify which one
-        example: chartodo done 3
-        example: chartodo d 5 1 3 2
-    rmtodo, rmt
-        remove a todo item from the list, using a numbered position to specify which one
-        example: chartodo rmt 4
-        example: chartodo rmt 4 3 2
-    cleartodo, ct
-        clear the todo list
-        example: chartodo cleartodo
-    doneall, da
-        change all todo items to done
-        example: chartodo da
-    cleardone, cd
-        clear the done list
-        example: chartodo cd
-    clearregular, cr
-        clear the regular todo and done lists
-        example: chartodo clearregular
-    rmdone, rmd
-        removes a done item at the specified position
-        example: chartodo rmd 4
-        exmaple: chartodo rmdone 1 2 3
-    notdone, nd
-        reverses a done item back to a todo item
-        example: chartodo nd 3
-        example: chartodo notdone 3 2 1 5
-    edit, e
-        changes a todo item, with its position specified, to what you want
-        example: chartodo edit 3 change-item-to-this
-    notdoneall, nda
-        reverses all done items back to todo
-        example: chartodo nda
+    clearall | ca
+        clear everything (TODO, DEADLINE, REPEATING)
+        example: chartodo ca
+
+    TODO:
+        add | a
+            add an item to the todo list. To add a multi-word item, replace space with something like -
+            example: chartodo add item
+            example: chartodo add new-item
+            example: chartodo add 1st-item 2nd-item 3rd-item
+        done | d
+            change a todo item to done, using a numbered position to specify which one
+            example: chartodo done 3
+            example: chartodo d 5 1 3 2
+        rmtodo | rmt
+            remove a todo item from the list, using a numbered position to specify which one
+            example: chartodo rmt 4
+            example: chartodo rmt 4 3 2
+        cleartodo | ct
+            clear the todo list
+            example: chartodo cleartodo
+        doneall | da
+            change all todo items to done
+            example: chartodo da
+        cleardone | cd
+            clear the done list
+            example: chartodo cd
+        clearboth | cb
+            clear the regular todo and done lists
+            example: chartodo clearregular
+        rmdone | rmd
+            removes a done item at the specified position
+            example: chartodo rmd 4
+            example: chartodo rmdone 1 2 3
+        notdone | nd
+            reverses a done item back to a todo item
+            example: chartodo nd 3
+            example: chartodo notdone 3 2 1 5
+        edit | e
+            changes a todo item, with its position specified, to what you want
+            example: chartodo edit 3 change-item-to-this
+        notdoneall | nda
+            reverses all done items back to todo
+            example: chartodo nda
+
+    DEADLINE:
+        deadline-add | dl-a
+            adds a task with a day and time limit. date format: yy-mm-dd. time format: 24-hour
+            example: chartodo dl-a go-on-a-run 2099-01-01 08:00
+            example: chartodo dl-a go-shopping 2030-12-01 13:00 go-bowling 2030-12-01 15:30
+            note that there is no space in the time format
+        deadline-addnotime | dl-ant
+            adds a deadline task. no time is specified and it defaults to 00:00
+            example: chartodo dl-ant midnight 2099-12-12
+            example: chartodo dl-ant homework1-due 2100-01-01 homework2 2200-01-01
+        deadline-clearboth | dl-cb
+            clears both of the deadline todo and done lists
+            example: chartodo dl-cb
     "
     )
     .expect("writeln failed");

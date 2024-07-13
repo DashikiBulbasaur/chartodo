@@ -34,7 +34,7 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     deadline_tasks.todo.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n    {}: {} {}\n",
+            "{}: {}\n   {}: {} {}\n",
             counter,
             item.task,
             check_if_due_or_not(item.date.clone().unwrap(), item.time.clone().unwrap()),
@@ -50,10 +50,9 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     deadline_tasks.done.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n    {}: {} {}\n",
+            "{}: {}\n   {} {}\n",
             counter,
             item.task,
-            check_if_due_or_not(item.date.clone().unwrap(), item.time.clone().unwrap()),
             item.date.clone().unwrap(),
             item.time.clone().unwrap()
         );
