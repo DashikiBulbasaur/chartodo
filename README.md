@@ -124,6 +124,20 @@ Commands (argument chaining is available where it makes sense):
         deadline-clearboth | dl-cb
             clears both of the deadline todo and done lists
             example: chartodo dl-cb
+        deadline-rmdone | dl-rmd
+            removes a deadline done item
+            example: chartodo dl-rmd 1
+            example: chartodo dl-rmd 1 2 3 4 5
+        deadline-notdone | dl-nd
+            reverses a deadline done item back to todo
+            example: chartodo dl-nd 1
+            example: chartodo dl-nd 1 2 3 4 5
+        deadline-cleardone | dl-cd
+            clears the deadline done list
+            example: chartodo dl-cd
+        deadline-notdoneall | dl-nda
+            reverses all deadline done items back to todo
+            example: chartodo dl-nda
 ```
 
 ### Tips on usage
@@ -149,6 +163,7 @@ The following functionalities are done
 - [x] rmdone 'x'
 - [x] notdone 'x'
 - [x] edit 'x' 'abc'
+- [x] notdoneall
 - [ ] addtoplace 'item' 'position' (may no longer be under consideration)
 - [ ] changeprio 'x-y' (may no longer be under consideration)
 - [ ] switchprio 'x-y' (may no longer be under consideration)
@@ -161,5 +176,6 @@ Some major milestones
 - [x] finish argument chaining
 - [ ] add deadline-based todo items
 - [ ] add repeating todo items
+- [ ] testing
 - [ ] available on crates.io
 - [ ] finish the advanced functionalities

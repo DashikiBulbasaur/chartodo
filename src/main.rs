@@ -3,7 +3,13 @@ mod functions;
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
 use functions::{
-    deadline_tasks::deadline_todo::*,
+    deadline_tasks::{
+        deadline_done::{
+            deadline_tasks_clear_done, deadline_tasks_not_done, deadline_tasks_notdoneall,
+            deadline_tasks_rmdone,
+        },
+        deadline_todo::*,
+    },
     general_commands::*,
     regular_tasks::{regular_done::*, regular_todo::*},
 };
@@ -198,6 +204,32 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "deadline-rmdone" | "dl-rmd" => {
+            deadline_tasks_rmdone(
+                args.item_identifier
+                    .context("didn't provide arguments for deadline-rmdone")?,
+            );
+            list();
+            Ok(())
+        }
+        "deadline-notdone" | "dl-nd" => {
+            deadline_tasks_not_done(
+                args.item_identifier
+                    .context("didn't provide arguments for deadline-notdone")?,
+            );
+            list();
+            Ok(())
+        }
+        "deadline-cleardone" | "dl-cd" => {
+            deadline_tasks_clear_done();
+            list();
+            Ok(())
+        }
+        "deadline-notdoneall" | "dl-nda" => {
+            deadline_tasks_notdoneall();
+            list();
+            Ok(())
+        }
         "clearall" | "ca" => {
             clear_all_lists();
             list();
@@ -330,6 +362,20 @@ fn help() {
         deadline-clearboth | dl-cb
             clears both of the deadline todo and done lists
             example: chartodo dl-cb
+        deadline-rmdone | dl-rmd
+            removes a deadline done item
+            example: chartodo dl-rmd 1
+            example: chartodo dl-rmd 1 2 3 4 5
+        deadline-notdone | dl-nd
+            reverses a deadline done item back to todo
+            example: chartodo dl-nd 1
+            example: chartodo dl-nd 1 2 3 4 5
+        deadline-cleardone | dl-cd
+            clears the deadline done list
+            example: chartodo dl-cd
+        deadline-notdoneall | dl-nda
+            reverses all deadline done items back to todo
+            example: chartodo dl-nda
     "
     )
     .expect("writeln failed");
