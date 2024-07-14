@@ -168,7 +168,7 @@ The following functionalities are done
 - [ ] changeprio 'x-y' (may no longer be under consideration)
 - [ ] switchprio 'x-y' (may no longer be under consideration)
 ---
-- [ ] deadline task commands
+- [x] deadline task commands
 - [ ] repeating task commands
 
 Some major milestones
