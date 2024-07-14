@@ -14,11 +14,11 @@ First, make sure you have [Rust installed](https://doc.rust-lang.org/book/ch01-0
 ```sh-session
 cargo install chartodo
 ```
-2. 
+2.
 ```sh-session
 cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch master
 ```
-3. clone the repo 
+3. clone the repo
 
 
 Then, to run, either
@@ -39,7 +39,7 @@ Commands (argument chaining is available where it makes sense):
     clearall | ca
         clear everything (TODO, DEADLINE, REPEATING)
         example: chartodo ca
-    
+
     TODO:
         add | a
             add an item to the todo list. To add a multi-word item, replace space with something like -
@@ -80,7 +80,7 @@ Commands (argument chaining is available where it makes sense):
         notdoneall | nda
             reverses all done items back to todo
             example: chartodo nda
-    
+
     DEADLINE:
         deadline-add | dl-a
             adds a task with a day and time limit. date format: yy-mm-dd. time format: 24-hour
@@ -91,6 +91,36 @@ Commands (argument chaining is available where it makes sense):
             adds a deadline task. no time is specified and it defaults to 00:00
             example: chartodo dl-ant midnight 2099-12-12
             example: chartodo dl-ant homework1-due 2100-01-01 homework2 2200-01-01
+        deadline-addnodate | dl-and
+            adds a deadline task. no date is specified and it defaults to your current date
+            example: chartodo dl-and homework-due-today 23:59
+            example: chartodo dl-and essay-due-today 23:59
+        deadline-done | dl-d
+            mark one/several deadline task(s) as done
+            example: chartodo dl-d 1
+            example: chartodo dl-d 1 2 3 4 5
+        deadline-rmtodo | dl-rmt
+            remove one or several todo item(s)
+            example: chartodo dl-rmt 1
+            example: chartodo dl-rmt 1 2 3 4 5
+        deadline-cleartodo | deadline-ct
+            clear the deadline todo list
+            example: chartodo dl-ct
+        deadline-doneall | dl-da
+            mark the entire deadline todo list as done
+            example: chartodo dl-da
+        deadline-editall | dl-ea
+            edit all the parameters of a deadline todo task
+            example: chartodo dl-ea 1 new-item 2150-01-01 00:00
+        deadline-edittask | dl-eta
+            edit the task parameter of a deadline todo task
+            example: chartodo dl-eta 1 new-item
+        deadline-editdate | dl-ed
+            edit the date parameter of a deadline todo task
+            example: chartodo dl-eta 1 2150-01-1
+        deadline-edittime | dl-eti
+            edit the time parameter of a deadline todo task
+            example: chartodo dl-eta 1 23:59
         deadline-clearboth | dl-cb
             clears both of the deadline todo and done lists
             example: chartodo dl-cb
@@ -100,7 +130,7 @@ Commands (argument chaining is available where it makes sense):
 
 1. Commands that take positions as arguments will sometimes ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
 2. Max character len for todo items is 15, and the max len for done lists is 10. This is arbitrary and can be changed in the future, to an extent, upon a user's request.
-3. Max character len for tasks is 40. This isn't arbitrary as I don't want to encourage super-long tasks that wrap in the terminal and look ugly. 
+3. Max character len for tasks is 40. This isn't arbitrary as I don't want to encourage super-long tasks that wrap in the terminal and look ugly.
 
 ## Milestones
 
@@ -108,7 +138,7 @@ The following functionalities are done
 - [x] list
 - [x] help
 - [x] clearall
-
+---
 - [x] add 'x'
 - [x] done 'x'
 - [x] rmtodo 'x'
@@ -122,7 +152,7 @@ The following functionalities are done
 - [ ] addtoplace 'item' 'position' (may no longer be under consideration)
 - [ ] changeprio 'x-y' (may no longer be under consideration)
 - [ ] switchprio 'x-y' (may no longer be under consideration)
-
+---
 - [ ] deadline task commands
 - [ ] repeating task commands
 

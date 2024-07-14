@@ -50,7 +50,7 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     deadline_tasks.done.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n   {} {}\n",
+            "{}: {}\n   due: {} {}\n",
             counter,
             item.task,
             item.date.clone().unwrap(),
