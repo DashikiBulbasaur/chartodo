@@ -87,6 +87,41 @@ notes:
 
 after adding time-based/deadline-based todo items, comfy-table crate might be a good option to show separation of the lists
 
+DEADLINE 
+1. ~ deadline-add, dl-a new-item 2024-01-01 00:00
+  > argument chaining for all of 1s
+
+1a. ~ deadline-addnotime, dl-ant new-item 2024-01-01
+  > adds a new deadline item with no time. it instead defaults to 00:00
+
+1b. ~ deadline-addnodate, dl-and new-item 00:00
+  > adds a new deadline with no date. it instead defaults to current date with the specified time
+
+2. ~ deadline-done, dl-d 1 2 3 4 5
+
+3. ~ deadline-rmtodo, dl-rmt 1 2 3 4 5
+
+4. ~ deadline-cleartodo, dl-ct 
+
+5. ~ deadline-cleardone, dl-cd 
+
+6. ~ deadline-clearall, dl-ca 
+
+7. ~ deadline-rmdone, dl-rmd 1 2 3 4
+
+8. ~ deadline-notdone, dl-nd 1 2 3
+
+9. ~ deadline-notdoneall, dl-nda 
+
+10. ~ deadline-editall, dl-ea #position 'new-item' 'date' 'time'
+  > no argument chaining 
+
+10a. ~ deadline-edittask, dl-eta #position 'new-item'
+
+10b. ~ deadline-editdate, dl-ed #position 'date'
+
+10c. ~ deadline-edittime, dl-eti #position 'time'
+
 questions:
 1. should the file containing the lists have `TODO`, `--`, and `DONE` in it too?
   simpler to just print them anytime, altho it might be less resource intensive
@@ -110,6 +145,7 @@ thoughts on the future:
   etc. This can overcomplicate things though, especially on a CLI interface. 
   Still a good chance I'm doing this, but only after I'm done and satisfied with 
   the initial state of the program.
+1. that is no longer happening
 
 
   
