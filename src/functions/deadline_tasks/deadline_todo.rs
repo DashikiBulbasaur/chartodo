@@ -45,6 +45,8 @@ pub fn deadline_tasks_add(add: Vec<String>) {
             repeat_number: None,
             repeat_unit: None,
             repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
         };
 
         // check time. if correct, change format and add to struct
@@ -115,6 +117,8 @@ pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) {
             repeat_number: None,
             repeat_unit: None,
             repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
         };
 
         // check date and add to struct
@@ -183,6 +187,8 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) {
             repeat_number: None,
             repeat_unit: None,
             repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
         };
 
         // check time. if correct, change format and add to struct

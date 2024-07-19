@@ -125,18 +125,18 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "deadline-addnotime" | "dl-ant" => {
+        "deadline-addonlydate" | "dl-aod" => {
             deadline_tasks_add_no_time(
                 args.item_identifier
-                    .context("didn't provide a deadline-addnotime argument")?,
+                    .context("didn't provide a deadline-addonlydate argument")?,
             );
             list();
             Ok(())
         }
-        "deadline-addnodate" | "dl-and" => {
+        "deadline-addonlytime" | "dl-aot" => {
             deadline_tasks_add_no_date(
                 args.item_identifier
-                    .context("didn't provide a deadline-addnodate argument")?,
+                    .context("didn't provide a deadline-addonlytime argument")?,
             );
             list();
             Ok(())
@@ -325,14 +325,14 @@ fn help() {
             example: chartodo dl-a go-on-a-run 2099-01-01 08:00
             example: chartodo dl-a go-shopping 2030-12-01 13:00 go-bowling 2030-12-01 15:30
             note that there is no space in the time format
-        deadline-addnotime | dl-ant
-            adds a deadline task. no time is specified and it defaults to 00:00
-            example: chartodo dl-ant midnight 2099-12-12
-            example: chartodo dl-ant homework1-due 2100-01-01 homework2 2200-01-01
-        deadline-addnodate | dl-and
-            adds a deadline task. no date is specified and it defaults to your current date
-            example: chartodo dl-and homework-due-today 23:59
-            example: chartodo dl-and essay-due-today 23:59
+        deadline-addonlydate | dl-aod
+            adds a deadline task. only the date is specified and time defaults to 00:00
+            example: chartodo dl-aod midnight 2099-12-12
+            example: chartodo dl-aod homework1-due 2100-01-01 homework2 2200-01-01
+        deadline-addonlytime | dl-aot
+            adds a deadline task. only the time is specified and date defaults to current date
+            example: chartodo dl-aot homework-due-today 23:59
+            example: chartodo dl-aot essay-due-today 23:59
         deadline-done | dl-d
             mark one/several deadline task(s) as done
             example: chartodo dl-d 1
