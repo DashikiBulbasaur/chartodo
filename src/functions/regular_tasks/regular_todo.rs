@@ -33,6 +33,8 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
             repeat_number: None,
             repeat_unit: None,
             repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
         };
         regular_tasks.todo.push(item);
     });

@@ -17,12 +17,12 @@ const CHARTODO_PATH: &str = "linux: $HOME/.local/share/chartodo/
 fn path_to_regular_tasks() -> PathBuf {
     // get the data dir XDG spec and return it with path to regular_tasks.json
     let mut regular_tasks_path = dirs::data_dir()
-        .context(    
-                "linux: couldn't get $HOME/.local/share/
+        .context(
+            "linux: couldn't get $HOME/.local/share/
                 windows: couldn't get C:/Users/your_user/AppData/Local/
                 mac: couldn't get /Users/your_user/Library/Application Support/
-                
-                those directories should exist for your OS. please double check that they do."
+
+                those directories should exist for your OS. please double check that they do.",
         )
         .expect("something went wrong with fetching the user's data dirs");
     regular_tasks_path.push("chartodo/regular_tasks.json");
@@ -37,9 +37,9 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
     // get data dir and check if chartodo folder exists. if not, create it
     let mut regular_tasks_path = dirs::data_dir()
         .context(
-                "linux: couldn't get $HOME/.local/share/
+            "linux: couldn't get $HOME/.local/share/
                 windows: couldn't get C:/Users/your_user/AppData/Local/
-                mac: couldn't get /Users/your_user/Library/Application Support/"
+                mac: couldn't get /Users/your_user/Library/Application Support/",
         )
         .expect("something went wrong with fetching the user's data dirs");
     regular_tasks_path.push("chartodo");
@@ -50,9 +50,9 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         // somehow don't exist, i'd rather it just fail than to force create them
         std::fs::create_dir(regular_tasks_path.clone())
             .context(
-                    "linux: couldn't create dir $HOME/.local/share/chartodo/
+                "linux: couldn't create dir $HOME/.local/share/chartodo/
                 windows: couldn't create dir C:/Users/your_user/AppData/Local/chartodo/
-                mac: couldn't create dir /Users/your_user/Library/Application Support/chartodo/"
+                mac: couldn't create dir /Users/your_user/Library/Application Support/chartodo/",
             )
             .expect("something went wrong with creating chartodo folder");
     }
@@ -61,9 +61,9 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
     // check if the old file exists, and push its contents to new json
     let mut old_path = dirs::data_dir()
         .context(
-                "linux: couldn't get $HOME/.local/share/
+            "linux: couldn't get $HOME/.local/share/
                 windows: couldn't get C:/Users/your_user/AppData/Local/
-                mac: couldn't get /Users/your_user/Library/Application Support/"
+                mac: couldn't get /Users/your_user/Library/Application Support/",
         )
         .expect("something went wrong with fetching the user's data dirs");
     old_path.push("chartodo");
@@ -78,8 +78,9 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         std::fs::remove_file(&old_path)
             .with_context(|| {
                 format!(
-                    "old general_list.txt file exists and couldn't remove in the following dirs: 
-                {}", CHARTODO_PATH
+                    "old general_list.txt file exists and couldn't remove in the following dirs:
+                {}",
+                    CHARTODO_PATH
                 )
             })
             .expect("couldn't remove old file");
@@ -90,8 +91,9 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         let regular_tasks_json = File::create(regular_tasks_path)
             .with_context(|| {
                 format!(
-                    "couldn't create regular_tasks json file in the following dirs: 
-                {}", CHARTODO_PATH
+                    "couldn't create regular_tasks json file in the following dirs:
+                {}",
+                    CHARTODO_PATH
                 )
             })
             .expect("couldn't create new regular_tasks.json file");
@@ -105,7 +107,9 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
                     "time": null,
                     "repeat_number": null,
                     "repeat_unit": null,
-                    "repeat_done": null
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null,
                 }
             ],
             "done": [
@@ -115,27 +119,35 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
                     "time": null,
                     "repeat_number": null,
                     "repeat_unit": null,
-                    "repeat_done": null
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null,
                 }
             ]
         }
         "#;
 
         let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context( 
+            context(
                     "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
                 ).
             expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(regular_tasks_json);
-        serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks).with_context(|| format!("failed to write fresh regular tasks to new regular_tasks json file in: 
-            {}", CHARTODO_PATH))
-        .expect("failed to write fresh regular tasks to regular_tasks json file");
+        serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
+            .with_context(|| {
+                format!(
+                    "failed to write fresh regular tasks to new regular_tasks json file in:
+            {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("failed to write fresh regular tasks to regular_tasks json file");
     }
 }
 
 fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf) {
-    let file = File::open(old_path).with_context(|| format!("couldn't open old file in the following dirs: 
+    let file = File::open(old_path).with_context(|| format!("couldn't open old file in the following dirs:
 {}", CHARTODO_PATH
 )).expect("old file not found even though it was already checked that it exists. something went very wrong");
 
@@ -188,6 +200,8 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
             repeat_number: None,
             repeat_unit: None,
             repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
         };
 
         vec_of_todos.push(task);
@@ -202,6 +216,8 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
             repeat_number: None,
             repeat_unit: None,
             repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
         };
 
         vec_of_dones.push(task);
@@ -216,8 +232,9 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
     let regular_tasks_json = File::create(new_json)
         .with_context(|| {
             format!(
-                "couldn't create regular_tasks json file in the following dirs: 
-            {}", CHARTODO_PATH
+                "couldn't create regular_tasks json file in the following dirs:
+            {}",
+                CHARTODO_PATH
             )
         })
         .expect("couldn't create new regular_tasks.json file");
@@ -225,15 +242,23 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
     serde_json::to_writer_pretty(&mut write_to_file, &regular_tasks)
         .with_context(|| {
             format!(
-                "couldn't write old contens to regular_tasks json file in the following dirs: 
-            {}", CHARTODO_PATH
+                "couldn't write old contens to regular_tasks json file in the following dirs:
+            {}",
+                CHARTODO_PATH
             )
         })
         .expect("failed to write old contents to new json file");
 
     // now that the old contents have been transferred, remove old file
-    std::fs::remove_file(old_path).with_context(|| format!("couldn't remove old general_list.txt in the following dirs: 
-    {}", CHARTODO_PATH)).expect("anyhow's with_context failed?");
+    std::fs::remove_file(old_path)
+        .with_context(|| {
+            format!(
+                "couldn't remove old general_list.txt in the following dirs:
+    {}",
+                CHARTODO_PATH
+            )
+        })
+        .expect("anyhow's with_context failed?");
 }
 
 pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
@@ -241,7 +266,7 @@ pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
     let regular_tasks_file = File::create(path_to_regular_tasks())
         .with_context(|| {
             format!(
-                "couldn't create new regular_tasks.json file in the following directories: 
+                "couldn't create new regular_tasks.json file in the following directories:
 {}",
                 CHARTODO_PATH
             )
@@ -251,7 +276,7 @@ pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
     serde_json::to_writer_pretty(&mut write_to_file, &regular_tasks)
         .with_context(|| {
             format!(
-                "failed to write changes to regular_tasks.json in the following dirs: 
+                "failed to write changes to regular_tasks.json in the following dirs:
     {}",
                 CHARTODO_PATH
             )
@@ -264,7 +289,7 @@ pub fn open_regular_tasks_and_return_tasks_struct() -> Tasks {
     let regular_tasks_file = File::open(path_to_regular_tasks())
         .with_context(|| {
             format!(
-                "couldn't open regular_tasks.json in the following directories: 
+                "couldn't open regular_tasks.json in the following directories:
                 {}",
                 CHARTODO_PATH
             )
@@ -273,7 +298,7 @@ pub fn open_regular_tasks_and_return_tasks_struct() -> Tasks {
     let regular_tasks: Tasks = serde_json::from_reader(regular_tasks_file)
         .with_context(|| {
             format!(
-                "failed to parse struct from regular_tasks.json in the following dirs: 
+                "failed to parse struct from regular_tasks.json in the following dirs:
                 {}",
                 CHARTODO_PATH
             )
