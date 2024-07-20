@@ -162,6 +162,9 @@ REPEATING important:
             new interval and unit-time can be added to it. once a due date has been met and the task is done, then before making a new
             due date, reset the original datetime first to the previous due datetime
 
+REPEATING questions:
+    1. should i give users the ability to edit the due date and time of repeating tasks? i think so
+
 
 questions:
 1. should the file containing the lists have `TODO`, `--`, and `DONE` in it too?

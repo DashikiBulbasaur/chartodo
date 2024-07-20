@@ -6,9 +6,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-// linux: $HOME/.local/share/chartodo/deadline_tasks.json
-// windows: C:\Users\some_user\AppData\Local\chartodo\deadline_tasks.json
-// mac: /Users/some_user/Library/Application Support/chartodo/deadline_tasks.json
+// linux: $HOME/.local/share/chartodo/repeating_tasks.json
+// windows: C:\Users\some_user\AppData\Local\chartodo\repeating_tasks.json
+// mac: /Users/some_user/Library/Application Support/chartodo/repeating_tasks.json
 
 const CHARTODO_PATH: &str = "linux: $HOME/.local/share/chartodo/
     windows: C:/Users/your_user/AppData/Local/chartodo/
@@ -77,7 +77,7 @@ pub fn repeating_tasks_create_dir_and_file_if_needed() {
                     "repeat_number": 100,
                     "repeat_unit": "years",
                     "repeat_done": false,
-                    "repeat_original_date": "2100-01-01",
+                    "repeat_original_date": "2000-01-01",
                     "repeat_original_time": "00:00"
                 }
             ],

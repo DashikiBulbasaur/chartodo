@@ -3,15 +3,10 @@ mod functions;
 use anyhow::{Context, Ok, Result};
 use clap::Parser;
 use functions::{
-    deadline_tasks::{
-        deadline_done::{
-            deadline_tasks_clear_done, deadline_tasks_not_done, deadline_tasks_notdoneall,
-            deadline_tasks_rmdone,
-        },
-        deadline_todo::*,
-    },
+    deadline_tasks::{deadline_done::*, deadline_todo::*},
     general_commands::*,
     regular_tasks::{regular_done::*, regular_todo::*},
+    repeating_tasks::{repeating_done::*, repeating_todo::*},
 };
 use std::io::Write;
 
@@ -230,6 +225,27 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "repeating-add" | "rp-a" => {
+            repeating_tasks_add(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-add")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-done" | "rp-d" => {
+            repeating_tasks_done(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-add")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-clearboth" | "rp-cb" => {
+            clear_repeating_tasks();
+            list();
+            Ok(())
+        }
         "clearall" | "ca" => {
             clear_all_lists();
             list();
@@ -376,6 +392,21 @@ fn help() {
         deadline-notdoneall | dl-nda
             reverses all deadline done items back to todo
             example: chartodo dl-nda
+
+    REPEATING:
+        repeating-add | rp-a
+            add a repeating task. the task starts from your current date and time
+            note that for the repeating time interval, only the following units are allowed:
+                seconds, minutes, hours, days, weeks, months, years
+            example: chartodo rp-a gym 2 days
+            example: chartood rp-a gym 2 days mow 1 week
+        repeating-done | rp-d
+            mark repeating todos as done
+            example: chartodo rp-d 1
+            example: chartodo rp-d 1 2 3 4 5
+        repeating-clearboth | rp-cb
+            clear the repeating todo and done lists
+            example: chartodo rp-cb
     "
     )
     .expect("writeln failed");

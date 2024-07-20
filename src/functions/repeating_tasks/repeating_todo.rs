@@ -24,7 +24,7 @@ pub fn repeating_tasks_add(add: Vec<String>) {
 
     // loop thru the deadline args and parse for correctness
     // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_deadlines: Vec<Task> = vec![];
+    let mut new_repeatings: Vec<Task> = vec![];
     while counter > 0 {
         // note for interviews: my first instinct was to keep accessing last elem and delete as i go
 
@@ -82,13 +82,13 @@ pub fn repeating_tasks_add(add: Vec<String>) {
         repeating_task.repeat_original_time = Some(repeat_original_time);
 
         // push new correct Task to a vec
-        new_deadlines.push(repeating_task);
+        new_repeatings.push(repeating_task);
 
         counter -= 1;
     }
 
     // one by one, add new deadline tasks
-    new_deadlines
+    new_repeatings
         .iter()
         .for_each(|task| repeating_tasks.todo.push(task.to_owned()));
 
@@ -134,4 +134,76 @@ fn add_to_local_now(interval: u32, unit: String) -> (String, String, String, Str
     let repeat_original_time = format!("{}", return_original_now.format("%H:%M"));
 
     (date, time, repeat_original_date, repeat_original_time)
+}
+
+// note to self: i have to give users the ability to edit the due date and time of repeating tasks
+
+pub fn repeating_tasks_done(done: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
+        )
+        .expect("writeln failed");
+    }
+
+    // filter for viable positions
+    let mut dones: Vec<usize> = vec![];
+    done.iter().for_each(|item| {
+        if item.parse::<usize>().is_ok()
+        && !item.is_empty() // this will never trigger smh
+        && item.parse::<usize>().unwrap() != 0
+        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+        {
+            dones.push(item.parse().unwrap());
+        }
+    });
+    drop(done);
+
+    // reverse sort the positions
+    dones.sort();
+    dones.reverse();
+    dones.dedup();
+
+    // check if the user basically specified the entire list
+    if dones.len() >= repeating_tasks.todo.len() {
+        return writeln!(
+            writer,
+            "ERROR: You've specified the entire list. Might as well do chartodo repeating-doneall"
+        )
+        .expect("writeln failed");
+    }
+
+    // if changing todos to done means the done list overflows, clear done list
+    if dones.len() + repeating_tasks.done.len() > 10 {
+        repeating_tasks.done.clear();
+    }
+
+    // before pushing to done, change each repeat_done field in each specified todo to true
+    dones.iter().for_each(|position| {
+        repeating_tasks
+            .todo
+            .get_mut(*position - 1)
+            .unwrap()
+            .repeat_done = Some(true);
+    });
+
+    // change todos to dones one by one
+    dones.iter().for_each(|position| {
+        repeating_tasks
+            .done
+            .push(repeating_tasks.todo.get(*position - 1).unwrap().to_owned());
+        repeating_tasks.todo.remove(*position - 1);
+    });
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
 }

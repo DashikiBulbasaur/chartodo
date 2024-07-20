@@ -138,13 +138,31 @@ Commands (argument chaining is available where it makes sense):
         deadline-notdoneall | dl-nda
             reverses all deadline done items back to todo
             example: chartodo dl-nda
+
+    REPEATING:
+        repeating-add | rp-a
+            add a repeating task. the task starts from your current date and time
+            note that for the repeating time interval, only the following units are allowed:
+                seconds, minutes, hours, days, weeks, months, years
+            example: chartodo rp-a gym 2 days
+            example: chartood rp-a gym 2 days mow 1 week
+        repeating-done | rp-d
+            mark repeating todos as done
+            example: chartodo rp-d 1
+            example: chartodo rp-d 1 2 3 4 5
+        repeating-clearboth | rp-cb
+            clear the repeating todo and done lists
+            example: chartodo rp-cb
 ```
 
 ### Tips on usage
 
-1. Commands that take positions as arguments will sometimes ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
-2. Max character len for todo items is 15, and the max len for done lists is 10. This is arbitrary and can be changed in the future, to an extent, upon a user's request.
-3. Max character len for tasks is 40. This isn't arbitrary as I don't want to encourage super-long tasks that wrap in the terminal and look ugly.
+1. Commands that take positions as arguments will ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
+2. Max character len for todo items is 15, and the max len for done lists is 10. This is arbitrary and can be increased upon a user's request.
+3. Max character len for tasks is 40. This isn't arbitrary as I don't want to encourage super-long tasks that wrap in the terminal. It can be increased upon request.
+4. Spaces in the program are used to differentiate separate arguments, so multi-word tasks can instead be separated by a character such as -, e.g., multi-word-task-item
+5. For the repeating tasks, the maximum interval for the repeating time is 4294967295.
+6. When marking any todo (regular, deadline, repeating) task as done and it would exceed the done list's current set max len, the done list automatically deletes everything it has. This is so users don't have to worry about the done list being too full when marking todos as done. This can be changed upon request.
 
 ## Milestones
 
@@ -153,29 +171,24 @@ The following functionalities are done
 - [x] help
 - [x] clearall
 ---
-- [x] add 'x'
-- [x] done 'x'
-- [x] rmtodo 'x'
-- [x] cleartodo
-- [x] doneall
-- [x] cleardone
-- [x] clearboth
-- [x] rmdone 'x'
-- [x] notdone 'x'
-- [x] edit 'x' 'abc'
-- [x] notdoneall
+REGULAR advanced:
 - [ ] addtoplace 'item' 'position' (may no longer be under consideration)
 - [ ] changeprio 'x-y' (may no longer be under consideration)
 - [ ] switchprio 'x-y' (may no longer be under consideration)
 ---
-- [x] deadline task commands
-- [ ] repeating task commands
+REPEATING advanced:
+- [ ] add repeating task that starts on a given datetime, along with being able to later edit that given starting datetime
+- [ ] add repeating task that ends on a given datetime, along with being able to edit that given ending datetime. The main advantage of this is if a user wants to add a monthly task that's due at the end of every month, but it's already the middle of the month
+---
+- [x] regular task commands (basic)
+- [x] deadline task commands (basic)
+- [ ] repeating task commands (basic)
 
 Some major milestones
 - [x] finish the basic functionalities
 - [x] finish argument chaining
-- [ ] add deadline-based todo items
+- [x] add deadline-based todo items
 - [ ] add repeating todo items
 - [ ] testing
 - [ ] available on crates.io
-- [ ] finish the advanced functionalities
+- [ ] finish the advanced functionalities?
