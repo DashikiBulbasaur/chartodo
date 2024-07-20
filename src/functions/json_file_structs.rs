@@ -14,7 +14,7 @@ pub struct Task {
     #[serde(default = "return_default_time")]
     pub time: Option<String>,
     #[serde(default = "return_default_repeat_number")]
-    pub repeat_number: Option<usize>,
+    pub repeat_number: Option<u32>,
     #[serde(default = "return_default_repeat_unit")]
     pub repeat_unit: Option<String>,
     #[serde(default = "return_default_repeat_done")]
@@ -41,7 +41,8 @@ fn return_default_time() -> Option<String> {
     None
 }
 
-fn return_default_repeat_number() -> Option<usize> {
+fn return_default_repeat_number() -> Option<u32> {
+    // u32 is 4294967296 - 1
     None
 }
 
