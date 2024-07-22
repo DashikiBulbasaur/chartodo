@@ -137,6 +137,7 @@ fn add_to_local_now(interval: u32, unit: String) -> (String, String, String, Str
 }
 
 // note to self: i have to give users the ability to edit the due date and time of repeating tasks
+// reasoning: idk i forgot. if i can't come up with/remember the reason for thinking this, this is off the table
 
 pub fn repeating_tasks_done(done: Vec<String>) {
     // housekeeping

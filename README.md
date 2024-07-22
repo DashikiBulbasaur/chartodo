@@ -150,6 +150,10 @@ Commands (argument chaining is available where it makes sense):
             mark repeating todos as done
             example: chartodo rp-d 1
             example: chartodo rp-d 1 2 3 4 5
+        repeating-notdone | rp-nd
+            reverse repeating todos back to done
+            example: chartodo rp-nd 1
+            example: chartodo rp-nd 1 2 3 4 5
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb

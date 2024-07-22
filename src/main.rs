@@ -236,7 +236,15 @@ fn main() -> Result<()> {
         "repeating-done" | "rp-d" => {
             repeating_tasks_done(
                 args.item_identifier
-                    .context("didn't provide arguments for repeating-add")?,
+                    .context("didn't provide arguments for repeating-done")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-notdone" | "rp-nd" => {
+            repeating_tasks_not_done(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-notdone")?,
             );
             list();
             Ok(())
@@ -404,6 +412,10 @@ fn help() {
             mark repeating todos as done
             example: chartodo rp-d 1
             example: chartodo rp-d 1 2 3 4 5
+        repeating-notdone | rp-nd
+            reverse repeating todos back to done
+            example: chartodo rp-nd 1
+            example: chartodo rp-nd 1 2 3 4 5
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb
