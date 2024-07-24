@@ -96,6 +96,15 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
                 && now_time > task.time.clone().unwrap())
         {
             // get new original date+time, and prepare to change string to naivedatetime
+            // note: design decision time. for finished repeating tasks, should I use the original due datetime as
+            // the starting datetime for a refreshed repeating task? Or should I use Local::now as the starting
+            // datetime, aka the moment that this function is called to print the list?
+            //
+            // answer: i think i'll keep the original due datetime -> new starting datetime feature. i think this is
+            // to avoid having two different repeating-type tasks, and this is much cleaner + easier. i can
+            // just do a rp-reset command that resets the starting datetime to local now
+            // 2) And also to keep the starting + ending datetimes consistent and not actually contingent
+            // on when the list was shown/printed
             let new_original_date = task.date.clone().unwrap();
             let new_original_time = task.time.clone().unwrap();
             let add_to_this = new_original_date.clone() + " " + &new_original_time;
@@ -173,7 +182,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     repeating_tasks.todo.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n   interval: {} {}\n   {}: {} {}\n",
+            "{}: {}\n   interval: every {} {}\n   {}: {} {}\n",
             counter,
             item.task,
             item.repeat_number.unwrap(),
@@ -191,7 +200,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     repeating_tasks.done.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n   interval: {} {}\n   done: {} {}\n",
+            "{}: {}\n   interval: every {} {}\n   done: {} {}\n",
             counter,
             item.task,
             item.repeat_number.unwrap(),

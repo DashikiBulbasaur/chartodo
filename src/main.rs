@@ -233,6 +233,22 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "repeating-addstart" | "rp-as" => {
+            repeating_tasks_add_start_datetime(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-addstart")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-reset" | "rp-r" => {
+            repeating_tasks_reset_original_datetime_to_now(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-reset")?,
+            );
+            list();
+            Ok(())
+        }
         "repeating-done" | "rp-d" => {
             repeating_tasks_done(
                 args.item_identifier
@@ -245,6 +261,14 @@ fn main() -> Result<()> {
             repeating_tasks_not_done(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-notdone")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-rmtodo" | "rp-rmt" => {
+            repeating_tasks_rmtodo(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-rmtodo")?,
             );
             list();
             Ok(())
@@ -408,14 +432,26 @@ fn help() {
                 seconds, minutes, hours, days, weeks, months, years
             example: chartodo rp-a gym 2 days
             example: chartood rp-a gym 2 days mow 1 week
+        repeating-addstart | rp-as
+            add a repeating task that starts on your specified datetime
+            example: chartodo rp-as task 3 days 2099-01-01 00:00
+            example: charotodo rp-as task 3 days 2099-01-01 00:00 task2 4 days 2100-01-01 03:03
+        repeating-reset | rp-r
+            reset the starting datetime of a repeating task to your current date and time
+            example: chartodo rp-r 1
+            example: chartodo rp-r 1 2 3 4 5
         repeating-done | rp-d
             mark repeating todos as done
             example: chartodo rp-d 1
             example: chartodo rp-d 1 2 3 4 5
         repeating-notdone | rp-nd
-            reverse repeating todos back to done
+            reverse repeating dones back to todo
             example: chartodo rp-nd 1
             example: chartodo rp-nd 1 2 3 4 5
+        repeating-rmtodo | rp-rmt
+            remove a repeating todo task
+            example: chartodo rp-rmt 1
+            example: chartodo rp-rmt 1 2 3 4 5
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb

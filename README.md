@@ -146,14 +146,26 @@ Commands (argument chaining is available where it makes sense):
                 seconds, minutes, hours, days, weeks, months, years
             example: chartodo rp-a gym 2 days
             example: chartood rp-a gym 2 days mow 1 week
+        repeating-addstart | rp-as
+            add a repeating task that starts on your specified datetime
+            example: chartodo rp-as task 3 days 2099-01-01 00:00
+            example: charotodo rp-as task 3 days 2099-01-01 00:00 task2 4 days 2100-01-01 03:03
+        repeating-reset | rp-r
+            reset the starting datetime of a repeating task to your current date and time
+            example: chartodo rp-r 1
+            example: chartodo rp-r 1 2 3 4 5
         repeating-done | rp-d
             mark repeating todos as done
             example: chartodo rp-d 1
             example: chartodo rp-d 1 2 3 4 5
         repeating-notdone | rp-nd
-            reverse repeating todos back to done
+            reverse repeating dones back to todo
             example: chartodo rp-nd 1
             example: chartodo rp-nd 1 2 3 4 5
+        repeating-rmtodo | rp-rmt
+            remove a repeating todo task
+            example: chartodo rp-rmt 1
+            example: chartodo rp-rmt 1 2 3 4 5
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb
@@ -170,11 +182,7 @@ Commands (argument chaining is available where it makes sense):
 
 ## Milestones
 
-The following functionalities are done
-- [x] list
-- [x] help
-- [x] clearall
----
+The following functionalities are done:
 REGULAR advanced:
 - [ ] addtoplace 'item' 'position' (may no longer be under consideration)
 - [ ] changeprio 'x-y' (may no longer be under consideration)
@@ -189,10 +197,11 @@ REPEATING advanced:
 - [ ] repeating task commands (basic)
 
 Some major milestones
-- [x] finish the basic functionalities
+- [x] finish the regular task commands
 - [x] finish argument chaining
 - [x] add deadline-based todo items
 - [ ] add repeating todo items
 - [ ] testing
 - [ ] available on crates.io
+- [ ] switch to proper argument chaining (if possible), i.e., -a -d -rmt
 - [ ] finish the advanced functionalities?

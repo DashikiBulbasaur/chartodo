@@ -164,6 +164,8 @@ REPEATING important:
 
 REPEATING questions:
     1. should i give users the ability to edit the due date and time of repeating tasks? i think so
+    1a. i think i also need to give users the ability to edit the starting datetime
+    2. i need to do a command that resets the starting datetime to current Local::now
 
 
 questions:
