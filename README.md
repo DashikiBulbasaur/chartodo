@@ -166,6 +166,10 @@ Commands (argument chaining is available where it makes sense):
             remove a repeating todo task
             example: chartodo rp-rmt 1
             example: chartodo rp-rmt 1 2 3 4 5
+        repeating-rmdone | rp-rmd
+            remove one/several repeating done task(s)
+            example: chartodo rp-rmd 1
+            example: chartodo rp-rmd 1 2 3 4 5
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb
@@ -182,7 +186,6 @@ Commands (argument chaining is available where it makes sense):
 
 ## Milestones
 
-The following functionalities are done:
 REGULAR advanced:
 - [ ] addtoplace 'item' 'position' (may no longer be under consideration)
 - [ ] changeprio 'x-y' (may no longer be under consideration)
@@ -195,10 +198,11 @@ REPEATING advanced:
 - [x] regular task commands (basic)
 - [x] deadline task commands (basic)
 - [ ] repeating task commands (basic)
-
+---
 Some major milestones
 - [x] finish the regular task commands
 - [x] finish argument chaining
+- [x] switch file format to json
 - [x] add deadline-based todo items
 - [ ] add repeating todo items
 - [ ] testing

@@ -273,6 +273,14 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "repeating-rmdone" | "rp-rmd" => {
+            repeating_tasks_rmdone(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-rmdone")?,
+            );
+            list();
+            Ok(())
+        }
         "repeating-clearboth" | "rp-cb" => {
             clear_repeating_tasks();
             list();
@@ -452,6 +460,10 @@ fn help() {
             remove a repeating todo task
             example: chartodo rp-rmt 1
             example: chartodo rp-rmt 1 2 3 4 5
+        repeating-rmdone | rp-rmd
+            remove one/several repeating done task(s)
+            example: chartodo rp-rmd 1
+            example: chartodo rp-rmd 1 2 3 4 5
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb

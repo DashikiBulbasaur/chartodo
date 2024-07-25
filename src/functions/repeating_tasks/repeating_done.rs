@@ -67,3 +67,58 @@ pub fn repeating_tasks_not_done(not_done: Vec<String>) {
 // TODO: for each error message that pops up when the user has specified the entire list without doing ...doneall,
 // change it to specify that the len and how much they've specified are below 5.
 // reasoning: annoying when trying to do a command and the program says to do ...doneall when there's only one item in the todo/done list
+
+pub fn repeating_tasks_rmdone(done_remove: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if the done list is empty
+    if repeating_tasks.done.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The repeating done list is currently empty.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // filter for viable items
+    let mut dones_remove: Vec<usize> = vec![];
+    done_remove.iter().for_each(|item| {
+        if item.parse::<usize>().is_ok()
+        && !item.is_empty() // this will never trigger smh
+        && item.parse::<usize>().unwrap() != 0
+        && item.parse::<usize>().unwrap() <= repeating_tasks.done.len()
+        {
+            dones_remove.push(item.parse().unwrap());
+        }
+    });
+    drop(done_remove);
+
+    // reverse sort
+    dones_remove.sort();
+    dones_remove.reverse();
+    dones_remove.dedup();
+
+    // check if user wants to remove all of the items
+    if dones_remove.len() >= repeating_tasks.done.len() && repeating_tasks.done.len() > 5 {
+        return writeln!(
+            writer,
+            "ERROR: You want to remove all of the finished tasks in a relatively long repeating done list. You might as well do repeating-cleardone.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // remove each item one by one
+    dones_remove.iter().for_each(|position| {
+        repeating_tasks.done.remove(*position - 1);
+    });
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}
