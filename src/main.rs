@@ -23,13 +23,13 @@ struct Cli {
 fn main() -> Result<()> {
     let args = Cli::parse();
 
-    // TODO: better error handling (anyhow crate) for commands that expect some extra arg
     match args.command.as_str() {
-        "help" | "h" => {
+        // bug here where commands that don't take additional commands, e,g., help, list, doneall, etc., will still activate even if item_identifier isn't empty (which it should be in those cases). program works fine even w/ the bug but it annoyed me, hence the if conditions
+        "help" | "h" if args.item_identifier.is_none() => {
             help();
             Ok(())
         }
-        "list" | "l" => {
+        "list" | "l" if args.item_identifier.is_none() => {
             list();
             Ok(())
         }
@@ -60,22 +60,22 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "cleartodo" | "ct" => {
+        "cleartodo" | "ct" if args.item_identifier.is_none() => {
             regular_tasks_clear_todo();
             list();
             Ok(())
         }
-        "doneall" | "da" => {
+        "doneall" | "da" if args.item_identifier.is_none() => {
             regular_tasks_change_all_todo_to_done();
             list();
             Ok(())
         }
-        "cleardone" | "cd" => {
+        "cleardone" | "cd" if args.item_identifier.is_none() => {
             regular_tasks_clear_done();
             list();
             Ok(())
         }
-        "clearboth" | "cb" => {
+        "clearboth" | "cb" if args.item_identifier.is_none() => {
             clear_regular_tasks();
             list();
             Ok(())
@@ -107,7 +107,7 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "notdoneall" | "nda" => {
+        "notdoneall" | "nda" if args.item_identifier.is_none() => {
             regular_tasks_reverse_all_dones();
             list();
             Ok(())
@@ -152,12 +152,12 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "deadline-cleartodo" | "dl-ct" => {
+        "deadline-cleartodo" | "dl-ct" if args.item_identifier.is_none() => {
             deadline_tasks_clear_todo();
             list();
             Ok(())
         }
-        "deadline-doneall" | "dl-da" => {
+        "deadline-doneall" | "dl-da" if args.item_identifier.is_none() => {
             deadline_tasks_done_all();
             list();
             Ok(())
@@ -194,7 +194,7 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "deadline-clearboth" | "dl-cb" => {
+        "deadline-clearboth" | "dl-cb" if args.item_identifier.is_none() => {
             clear_deadline_tasks();
             list();
             Ok(())
@@ -215,12 +215,12 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "deadline-cleardone" | "dl-cd" => {
+        "deadline-cleardone" | "dl-cd" if args.item_identifier.is_none() => {
             deadline_tasks_clear_done();
             list();
             Ok(())
         }
-        "deadline-notdoneall" | "dl-nda" => {
+        "deadline-notdoneall" | "dl-nda" if args.item_identifier.is_none() => {
             deadline_tasks_notdoneall();
             list();
             Ok(())
@@ -241,10 +241,10 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "repeating-reset" | "rp-r" => {
-            repeating_tasks_reset_original_datetime_to_now(
+        "repeating-addend" | "rp-ae" => {
+            repeating_tasks_add_end(
                 args.item_identifier
-                    .context("didn't provide arguments for repeating-reset")?,
+                    .context("didn't provide arguments for repeating-addend")?,
             );
             list();
             Ok(())
@@ -253,6 +253,14 @@ fn main() -> Result<()> {
             repeating_tasks_done(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-done")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-reset" | "repeating-donereset" | "rp-r" | "rp-dr" => {
+            repeating_tasks_reset_original_datetime_to_now(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-reset")?,
             );
             list();
             Ok(())
@@ -281,12 +289,22 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
-        "repeating-clearboth" | "rp-cb" => {
+        "repeating-doneall" | "rp-da" if args.item_identifier.is_none() => {
+            repeating_tasks_doneall();
+            list();
+            Ok(())
+        }
+        "repeating-notdoneall" | "rp-nda" if args.item_identifier.is_none() => {
+            repeating_tasks_not_done_all();
+            list();
+            Ok(())
+        }
+        "repeating-clearboth" | "rp-cb" if args.item_identifier.is_none() => {
             clear_repeating_tasks();
             list();
             Ok(())
         }
-        "clearall" | "ca" => {
+        "clearall" | "ca" if args.item_identifier.is_none() => {
             clear_all_lists();
             list();
             Ok(())
@@ -344,36 +362,36 @@ fn help() {
             change a todo item to done, using a numbered position to specify which one
             example: chartodo done 3
             example: chartodo d 5 1 3 2
+        notdone | nd
+            reverses a done item back to a todo item
+            example: chartodo nd 3
+            example: chartodo notdone 3 2 1 5
         rmtodo | rmt
             remove a todo item from the list, using a numbered position to specify which one
             example: chartodo rmt 4
             example: chartodo rmt 4 3 2
-        cleartodo | ct
-            clear the todo list
-            example: chartodo cleartodo
+        rmdone | rmd
+            removes a done item at the specified position
+            example: chartodo rmd 4
+            example: chartodo rmdone 1 2 3
         doneall | da
             change all todo items to done
             example: chartodo da
+        notdoneall | nda
+            reverses all done items back to todo
+            example: chartodo nda
+        cleartodo | ct
+            clear the todo list
+            example: chartodo cleartodo
         cleardone | cd
             clear the done list
             example: chartodo cd
         clearboth | cb
             clear both todo and done lists
             example: chartodo clearall
-        rmdone | rmd
-            removes a done item at the specified position
-            example: chartodo rmd 4
-            exmaple: chartodo rmdone 1 2 3
-        notdone | nd
-            reverses a done item back to a todo item
-            example: chartodo nd 3
-            example: chartodo notdone 3 2 1 5
         edit | e
             changes a todo item, with its position specified, to what you want
             example: chartodo edit 3 change-item-to-this
-        notdoneall | nda
-            reverses all done items back to todo
-            example: chartodo nda
 
     DEADLINE:
         deadline-add | dl-a
@@ -393,16 +411,33 @@ fn help() {
             mark one/several deadline task(s) as done
             example: chartodo dl-d 1
             example: chartodo dl-d 1 2 3 4 5
+        deadline-notdone | dl-nd
+            reverses a deadline done item back to todo
+            example: chartodo dl-nd 1
+            example: chartodo dl-nd 1 2 3 4 5
         deadline-rmtodo | dl-rmt
             remove one or several todo item(s)
             example: chartodo dl-rmt 1
             example: chartodo dl-rmt 1 2 3 4 5
-        deadline-cleartodo | deadline-ct
-            clear the deadline todo list
-            example: chartodo dl-ct
+        deadline-rmdone | dl-rmd
+            removes a deadline done item
+            example: chartodo dl-rmd 1
+            example: chartodo dl-rmd 1 2 3 4 5
         deadline-doneall | dl-da
             mark the entire deadline todo list as done
             example: chartodo dl-da
+        deadline-notdoneall | dl-nda
+            reverses all deadline done items back to todo
+            example: chartodo dl-nda
+        deadline-cleartodo | deadline-ct
+            clear the deadline todo list
+            example: chartodo dl-ct
+        deadline-cleardone | dl-cd
+            clears the deadline done list
+            example: chartodo dl-cd
+        deadline-clearboth | dl-cb
+            clears both of the deadline todo and done lists
+            example: chartodo dl-cb
         deadline-editall | dl-ea
             edit all the parameters of a deadline todo task
             example: chartodo dl-ea 1 new-item 2150-01-01 00:00
@@ -411,27 +446,10 @@ fn help() {
             example: chartodo dl-eta 1 new-item
         deadline-editdate | dl-ed
             edit the date parameter of a deadline todo task
-            example: chartodo dl-eta 1 2150-01-1
+            example: chartodo dl-ed 1 2150-01-1
         deadline-edittime | dl-eti
             edit the time parameter of a deadline todo task
-            example: chartodo dl-eta 1 23:59
-        deadline-clearboth | dl-cb
-            clears both of the deadline todo and done lists
-            example: chartodo dl-cb
-        deadline-rmdone | dl-rmd
-            removes a deadline done item
-            example: chartodo dl-rmd 1
-            example: chartodo dl-rmd 1 2 3 4 5
-        deadline-notdone | dl-nd
-            reverses a deadline done item back to todo
-            example: chartodo dl-nd 1
-            example: chartodo dl-nd 1 2 3 4 5
-        deadline-cleardone | dl-cd
-            clears the deadline done list
-            example: chartodo dl-cd
-        deadline-notdoneall | dl-nda
-            reverses all deadline done items back to todo
-            example: chartodo dl-nda
+            example: chartodo dl-eti 1 23:59
 
     REPEATING:
         repeating-add | rp-a
@@ -444,14 +462,20 @@ fn help() {
             add a repeating task that starts on your specified datetime
             example: chartodo rp-as task 3 days 2099-01-01 00:00
             example: charotodo rp-as task 3 days 2099-01-01 00:00 task2 4 days 2100-01-01 03:03
-        repeating-reset | rp-r
-            reset the starting datetime of a repeating task to your current date and time
-            example: chartodo rp-r 1
-            example: chartodo rp-r 1 2 3 4 5
+        repeating-addend | rp-ae
+            add a repeating task that ends on your specified datetime
+            example: chartodo rp-ae task 3 days 2099-01-01 00:00
+            example: charotodo rp-ae task 3 days 2099-01-01 00:00 task2 4 days 2100-01-01 03:03
         repeating-done | rp-d
             mark repeating todos as done
             example: chartodo rp-d 1
             example: chartodo rp-d 1 2 3 4 5
+        repeating-reset | repeating-donereset | rp-r | rp-dr
+            reset the starting datetime of a repeating task to your current date and time
+                functionally, this can also be used to mark a repeating task as 'done' but
+                immediately start the interval again with your current date and time
+            example: chartodo rp-r 1 | chartodo rp-dr 1
+            example: chartodo rp-r 1 2 3 4 5 | chartodo rp-dr 1 2 3 4 5
         repeating-notdone | rp-nd
             reverse repeating dones back to todo
             example: chartodo rp-nd 1
@@ -464,6 +488,12 @@ fn help() {
             remove one/several repeating done task(s)
             example: chartodo rp-rmd 1
             example: chartodo rp-rmd 1 2 3 4 5
+        repeating-doneall | rp-da
+            mark all repeating tasks as done
+            example: chartodo rp-da
+        repeating-notdoneall | rp-nda
+            reverse all finished repeating tasks back to todo
+            example: chartodo rp-nda
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb

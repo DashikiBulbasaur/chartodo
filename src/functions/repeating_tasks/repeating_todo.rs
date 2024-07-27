@@ -281,10 +281,10 @@ fn add_to_given_starting_datetime(
 ) -> (String, String, String, String) {
     // get a starting datetime to add to it
     // note: i wish i didn't have to do naivedate + naivetime -> str -> naivedatetime
-    // note: this commented-out formatting check might be unnecessary, but i'm keeping it anyway just in case the parsing ever fails and I know what checks to add
-    // let start_date = format!("{}", start_date.format("%Y-%m-%d"));
-    // let start_time = format!("{}", start_time.format("%H:%M"));
-    let starting_datetime = start_date.to_string() + " " + &start_time.to_string();
+    // note: this separate formatting + combining into string is necessary for correct parsing
+    let start_date = format!("{}", start_date.format("%Y-%m-%d"));
+    let start_time = format!("{}", start_time.format("%H:%M"));
+    let starting_datetime = start_date + " " + &start_time;
     let starting_datetime = NaiveDateTime::parse_from_str(starting_datetime.as_str(), "%Y-%m-%d %H:%M").expect("You should never be able to see this error. Somehow, when parsing a datetime from str in fn add_to_given_starting_datetime in path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should never happen since there were several checks that happened up to this point. If you see this, please open an issue on github.");
     let mut add_to_start = starting_datetime;
 
@@ -322,6 +322,259 @@ fn add_to_given_starting_datetime(
     let repeat_original_time = format!("{}", starting_datetime.format("%H:%M"));
 
     (date, time, repeat_original_date, repeat_original_time)
+}
+
+pub fn repeating_tasks_add_end(add_end: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // chartodo repeating-addend task 3 days 2030-01-01 00:00 task2 4 months 2031-01-01 00:00 => len % 5
+
+    // check if we have the right # of args
+    if add_end.len() % 5 != 0 {
+        return writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime. Proper example: chartodo rp-ae new-item 3 days 2099-01-01 00:00. Another: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-ae, there should be 5, 10, 12, etc. arguments.
+            NOTE: nothing on the list below changed.").expect("writeln failed");
+    }
+
+    // check how many sets of arguments there are
+    let mut counter = add_end.len() / 5;
+
+    // check if the user wants to add over 15 items
+    if counter > 15 {
+        return writeln!(writer, "ERROR: You want to add over 15 repeating tasks. Regardless of how many repeating tasks there currently are in the todo list, 15 is the maximum length for the todo list and you cannot add more than 15.
+            NOTE: nothing changed on the list below.").expect("writeln failed");
+    }
+
+    // check if adding to repeating would overflow it past 15
+    // note that this only triggers if the user only wants to add less than 15
+    if counter + repeating_tasks.todo.len() > 15 {
+        return writeln!(writer, "You're trying to add too many repeating tasks, as it would exceed the repeating todo list's max len of 15. Try removing at least {} items.
+            NOTE: nothing changed on the list below.", (repeating_tasks.todo.len() + counter) - 15).expect("writeln failed");
+    }
+
+    // loop thru the deadline args and parse for correctness
+    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
+    let mut new_repeating_ends: Vec<Task> = vec![];
+    while counter > 0 {
+        // chartodo repeating-addend task 3 days 2030-01-01 00:00 task2 4 months 2031-01-01 00:00 => len % 5
+
+        // end_time: get counter * 5 - 1
+        // end_date: get counter * 5 - 2
+        // unit: get counter * 5 - 3
+        // interval: get counter * 5 - 4
+        // task: get counter * 5 - 5
+
+        // check if the starting time is proper
+        let end_time: NaiveTime = match add_end.get(counter * 5 - 1).unwrap().parse() {
+            Ok(end_time) => end_time,
+            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper ending time in argument set {}. Provide a correct ending time in a 24-hour format, e.g., 23:04.
+                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
+        };
+
+        // check if starting date is proper
+        let end_date: NaiveDate = match add_end.get(counter * 5 - 2).unwrap().parse() {
+            Ok(end_date) => end_date,
+            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper ending date in argument set {}. Provide a correct ending date in a year-month-day format, e.g., 2024-05-12.
+                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
+        };
+
+        // check if unit time is proper
+        match add_end.get(counter * 5 - 3).unwrap().as_str() {
+            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week" | "months" | "month" | "years" | "year" => (),
+            _ => return writeln!(writer, "ERROR: You didn't provide a proper time unit in argument set {}. It has to be one of the following: minutes, hours, days, weeks, months, years.
+                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
+        }
+
+        // check if the interval is proper
+        let interval: u32 = match add_end.get(counter * 5 - 4).unwrap().parse() {
+            Ok(number) => number,
+            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper interval in argument set {}. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-ae gym 2 days 2000-01-01.
+                NOTE: nothing on the list below changed.", counter).expect("writeln failed"),
+        };
+
+        // check if interval is 0
+        if interval == 0 {
+            return writeln!(writer, "ERROR: You provided an interval of 0 in argument set {}. You can't have an interval of 0, otherwise why are you even making a new repeating task?
+                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
+        }
+
+        // create new Task struct
+        let mut repeating_task_end = Task {
+            task: "".to_string(),
+            date: None,
+            time: None,
+            repeat_number: None,
+            repeat_unit: None,
+            repeat_done: Some(false),
+            repeat_original_date: None,
+            repeat_original_time: None,
+        };
+
+        // check task is not over 40 chars. add to struct
+        if add_end.get(counter * 5 - 5).unwrap().len() > 40 {
+            return writeln!(writer, "ERROR: Your specified repeating task in argument set {} was over 40 characters long, which is not allowed.
+                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
+        };
+        repeating_task_end.task = add_end.get(counter * 5 - 5).unwrap().to_string();
+
+        // set interval and unit
+        repeating_task_end.repeat_number = Some(interval);
+        repeating_task_end.repeat_unit = Some(add_end.get(counter * 5 - 3).unwrap().to_owned());
+
+        // get the date, time, repeat_original_date, and repeat_original_time
+        let (date, time, repeat_original_date, repeat_original_time) =
+            subract_from_given_ending_datetime(
+                end_date,
+                end_time,
+                interval,
+                add_end.get(counter * 5 - 3).unwrap().to_owned(),
+            );
+
+        // set the remaining fields
+        repeating_task_end.date = Some(date);
+        repeating_task_end.time = Some(time);
+        repeating_task_end.repeat_original_date = Some(repeat_original_date);
+        repeating_task_end.repeat_original_time = Some(repeat_original_time);
+
+        // push new correct Task to a vec
+        new_repeating_ends.push(repeating_task_end);
+
+        counter -= 1;
+    }
+
+    // one by one, add new repeating tasks with starts
+    new_repeating_ends
+        .iter()
+        .for_each(|task| repeating_tasks.todo.push(task.to_owned()));
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}
+
+fn subract_from_given_ending_datetime(
+    end_date: NaiveDate,
+    end_time: NaiveTime,
+    interval: u32,
+    unit: String,
+) -> (String, String, String, String) {
+    // get a starting datetime to add to it
+    // note: i wish i didn't have to do naivedate + naivetime -> str -> naivedatetime
+    // note: this separate formatting + combining into string is necessary for correct parsing
+    let end_date = format!("{}", end_date.format("%Y-%m-%d"));
+    let end_time = format!("{}", end_time.format("%H:%M"));
+    let ending_datetime = end_date + " " + &end_time;
+    let ending_datetime = NaiveDateTime::parse_from_str(ending_datetime.as_str(), "%Y-%m-%d %H:%M").expect("You should never be able to see this error. Somehow, when parsing a datetime from str in fn subtract_from_given_ending_datetime in path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should never happen since there were several checks that happened up to this point. If you see this, please open an issue on github.");
+    let mut subtract_from_end = ending_datetime;
+
+    match unit.as_str() {
+        "minutes" | "minute" => subtract_from_end -= Duration::minutes(interval.into()),
+        "hours" | "hour" => subtract_from_end -= Duration::hours(interval.into()),
+        "days" | "day" => {
+            subtract_from_end = subtract_from_end
+                .checked_sub_days(Days::new(interval.into()))
+                .unwrap()
+        }
+        "weeks" | "week" => {
+            let interval: u64 = interval.into();
+            subtract_from_end = subtract_from_end
+                .checked_sub_days(Days::new(interval * 7))
+                .unwrap()
+        }
+        "months" | "month" => {
+            subtract_from_end = subtract_from_end
+                .checked_sub_months(Months::new(interval))
+                .unwrap()
+        }
+        "years" | "year" => {
+            subtract_from_end = subtract_from_end
+                .checked_sub_months(Months::new(interval * 12))
+                .unwrap()
+        }
+        // this arm should never activate
+        _ => (),
+    }
+
+    let date = format!("{}", ending_datetime.format("%Y-%m-%d"));
+    let time = format!("{}", ending_datetime.format("%H:%M"));
+    let repeat_original_date = format!("{}", subtract_from_end.format("%Y-%m-%d"));
+    let repeat_original_time = format!("{}", subtract_from_end.format("%H:%M"));
+
+    (date, time, repeat_original_date, repeat_original_time)
+}
+
+pub fn repeating_tasks_done(done: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
+        )
+        .expect("writeln failed");
+    }
+
+    // filter for viable positions
+    let mut dones: Vec<usize> = vec![];
+    done.iter().for_each(|item| {
+        if item.parse::<usize>().is_ok()
+        && !item.is_empty() // this will never trigger smh
+        && item.parse::<usize>().unwrap() != 0
+        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+        {
+            dones.push(item.parse().unwrap());
+        }
+    });
+    drop(done);
+
+    // reverse sort the positions
+    dones.sort();
+    dones.reverse();
+    dones.dedup();
+
+    // check if the user basically specified the entire list
+    if dones.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
+        return writeln!(
+            writer,
+            "ERROR: You've specified the entire repeating todo list that's relatively long. Might as well do chartodo repeating-doneall
+            NOTE: nothing on the list below has changed"
+        )
+        .expect("writeln failed");
+    }
+
+    // if changing todos to done means the done list overflows, clear done list
+    if dones.len() + repeating_tasks.done.len() > 10 {
+        repeating_tasks.done.clear();
+    }
+
+    // before pushing to done, change each repeat_done field in each specified todo to true
+    dones.iter().for_each(|position| {
+        repeating_tasks
+            .todo
+            .get_mut(*position - 1)
+            .unwrap()
+            .repeat_done = Some(true);
+    });
+
+    // change todos to dones one by one
+    dones.iter().for_each(|position| {
+        repeating_tasks
+            .done
+            .push(repeating_tasks.todo.get(*position - 1).unwrap().to_owned());
+        repeating_tasks.todo.remove(*position - 1);
+    });
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
 }
 
 pub fn repeating_tasks_reset_original_datetime_to_now(reset: Vec<String>) {
@@ -409,77 +662,6 @@ pub fn repeating_tasks_reset_original_datetime_to_now(reset: Vec<String>) {
     write_changes_to_new_repeating_tasks(repeating_tasks);
 }
 
-pub fn repeating_tasks_done(done: Vec<String>) {
-    // housekeeping
-    repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
-
-    // open file and parse
-    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
-
-    // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        return writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
-        )
-        .expect("writeln failed");
-    }
-
-    // filter for viable positions
-    let mut dones: Vec<usize> = vec![];
-    done.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
-        {
-            dones.push(item.parse().unwrap());
-        }
-    });
-    drop(done);
-
-    // reverse sort the positions
-    dones.sort();
-    dones.reverse();
-    dones.dedup();
-
-    // check if the user basically specified the entire list
-    if dones.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return writeln!(
-            writer,
-            "ERROR: You've specified the entire repeating todo list that's relatively long. Might as well do chartodo repeating-doneall
-            NOTE: nothing on the list below has changed"
-        )
-        .expect("writeln failed");
-    }
-
-    // if changing todos to done means the done list overflows, clear done list
-    if dones.len() + repeating_tasks.done.len() > 10 {
-        repeating_tasks.done.clear();
-    }
-
-    // before pushing to done, change each repeat_done field in each specified todo to true
-    dones.iter().for_each(|position| {
-        repeating_tasks
-            .todo
-            .get_mut(*position - 1)
-            .unwrap()
-            .repeat_done = Some(true);
-    });
-
-    // change todos to dones one by one
-    dones.iter().for_each(|position| {
-        repeating_tasks
-            .done
-            .push(repeating_tasks.todo.get(*position - 1).unwrap().to_owned());
-        repeating_tasks.todo.remove(*position - 1);
-    });
-
-    // write changes to file
-    write_changes_to_new_repeating_tasks(repeating_tasks);
-}
-
 pub fn repeating_tasks_rmtodo(rmtodo: Vec<String>) {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
@@ -531,6 +713,44 @@ pub fn repeating_tasks_rmtodo(rmtodo: Vec<String>) {
         repeating_tasks.todo.remove(*position - 1);
     });
     drop(rmtodos);
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}
+
+pub fn repeating_tasks_doneall() {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "The repeating todo list is currently empty, so you can't change any todos to done."
+        )
+        .expect("writeln failed");
+    }
+
+    // clear done list if it will overflow
+    if repeating_tasks.todo.len() + repeating_tasks.done.len() > 10 {
+        repeating_tasks.done.clear();
+    }
+
+    // before pushing, change each repeat_done field to true
+    repeating_tasks.todo.iter_mut().for_each(|task| {
+        task.repeat_done = Some(true);
+    });
+
+    // push all todos to done
+    repeating_tasks
+        .todo
+        .iter()
+        .for_each(|item| repeating_tasks.done.push(item.to_owned()));
+    repeating_tasks.todo.clear();
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
