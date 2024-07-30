@@ -755,3 +755,87 @@ pub fn repeating_tasks_doneall() {
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
 }
+
+pub fn repeating_tasks_clear_todo() {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(writer, "ERROR: The repeating todo list is currently empty. Try adding items to it first before removing any.
+            NOTE: nothing changed on the list below.").expect("writeln failed");
+    }
+
+    // clear todo list
+    repeating_tasks.todo.clear();
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}
+
+pub fn repeating_tasks_show_start(start: Vec<String>) -> String {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+
+    // open file and parse
+    let repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return String::from(
+            "error: the repeating todo list is currently empty. try adding items to it first.",
+        );
+    }
+
+    // filter for viable positions
+    let mut starts: Vec<usize> = vec![];
+    start.iter().for_each(|item| {
+        if item.parse::<usize>().is_ok()
+        && !item.is_empty() // this will never trigger smh
+        && item.parse::<usize>().unwrap() != 0
+        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+        {
+            starts.push(item.parse().unwrap());
+        }
+    });
+    drop(start);
+
+    // sort and dedup (sort first cuz dedup is faster if it's sorted, and sort makes it nicer)
+    starts.sort();
+    starts.dedup();
+
+    // check if user wants to show starts for all of the items
+    if starts.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
+        return String::from("ERROR: you might as well do repeating-startall since you want to show the starting datetimes for all of the repeating tasks.");
+    }
+
+    let mut show_starts = String::from("");
+    starts.iter().for_each(|position| {
+        let task_and_start = format!(
+            "task: {}\n\tstart: {} {}\n",
+            repeating_tasks.todo.get(*position - 1).unwrap().task,
+            repeating_tasks
+                .todo
+                .get(*position - 1)
+                .unwrap()
+                .repeat_original_date
+                .as_ref()
+                .unwrap(),
+            repeating_tasks
+                .todo
+                .get(*position - 1)
+                .unwrap()
+                .repeat_original_time
+                .as_ref()
+                .unwrap()
+        );
+        show_starts.push_str(task_and_start.as_str());
+    });
+    let show_starts = show_starts.trim_end();
+
+    show_starts.to_string()
+}

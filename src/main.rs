@@ -299,9 +299,28 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "repeating-cleartodo" | "rp-ct" if args.item_identifier.is_none() => {
+            repeating_tasks_clear_todo();
+            list();
+            Ok(())
+        }
+        "repeating-cleardone" | "rp-cd" if args.item_identifier.is_none() => {
+            repeating_tasks_clear_done();
+            list();
+            Ok(())
+        }
         "repeating-clearboth" | "rp-cb" if args.item_identifier.is_none() => {
             clear_repeating_tasks();
             list();
+            Ok(())
+        }
+        "repeating-start" | "rp-s" => {
+            let show_starts = repeating_tasks_show_start(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-start")?,
+            );
+            let writer = &mut std::io::stdout();
+            writeln!(writer, "{}", show_starts).expect("writeln failed");
             Ok(())
         }
         "clearall" | "ca" if args.item_identifier.is_none() => {
@@ -494,9 +513,19 @@ fn help() {
         repeating-notdoneall | rp-nda
             reverse all finished repeating tasks back to todo
             example: chartodo rp-nda
+        repeating-cleartodo | rp-ct
+            delete all of the repeating todo tasks
+            example: chartodo rp-ct
+        repeating-cleardone | rp-cd
+            delete all of the finished repeating tasks
+            example: chartodo rp-cd
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb
+        repeating-start | rp-s
+            show the starting datetime of one or more repeating tasks
+            example: chartodo rp-s 1
+            example: chartodo rp-s 1 2 3 4 5
     "
     )
     .expect("writeln failed");

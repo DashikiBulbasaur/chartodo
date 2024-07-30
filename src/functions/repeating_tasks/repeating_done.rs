@@ -162,3 +162,28 @@ pub fn repeating_tasks_not_done_all() {
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
 }
+
+pub fn repeating_tasks_clear_done() {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if the done list is empty
+    if repeating_tasks.done.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The deadline done list is currently empty.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // clear done list
+    repeating_tasks.done.clear();
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}

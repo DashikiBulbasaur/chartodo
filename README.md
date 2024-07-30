@@ -182,9 +182,19 @@ Commands (argument chaining is available where it makes sense):
         repeating-notdoneall | rp-nda
             reverse all finished repeating tasks back to todo
             example: chartodo rp-nda
+        repeating-cleartodo | rp-ct
+            delete all of the repeating todo tasks
+            example: chartodo rp-ct
+        repeating-cleardone | rp-cd
+            delete all of the finished repeating tasks
+            example: chartodo rp-cd
         repeating-clearboth | rp-cb
             clear the repeating todo and done lists
             example: chartodo rp-cb
+        repeating-start | rp-s
+            show the starting datetime of one or more repeating tasks
+            example: chartodo rp-s 1
+            example: chartodo rp-s 1 2 3 4 5
 ```
 
 ### Tips on usage
@@ -198,24 +208,23 @@ Commands (argument chaining is available where it makes sense):
 
 ## Milestones
 
-REGULAR advanced:
-- [ ] addtoplace 'item' 'position' (may no longer be under consideration)
-- [ ] changeprio 'x-y' (may no longer be under consideration)
-- [ ] switchprio 'x-y' (may no longer be under consideration)
----
-- [ ] argument chaining on edit commands
----
-- [x] regular task commands (basic)
-- [x] deadline task commands (basic)
-- [ ] repeating task commands (basic)
----
-Some major milestones
+major:
 - [x] finish the regular task commands
 - [x] finish argument chaining
 - [x] switch file format to json
 - [x] add deadline-based todo items
 - [ ] add repeating todo items
-- [ ] testing
+- [ ] testing complete for launch
 - [ ] available on crates.io
 - [ ] switch to proper argument chaining (if possible), i.e., -a -d -rmt
 - [ ] finish the advanced functionalities?
+---
+Potential features:
+- [ ] regular: addtoplace 'item' 'position' (may no longer be under consideration)
+- [ ] regular: changeprio 'x-y' (may no longer be under consideration)
+- [ ] regular: switchprio 'x-y' (may no longer be under consideration)
+- [ ] deadline: if possible, smarter system where if a date/time argument isn't present after a dl-a command, then it defaults to the current date/00:00. afterwards, possibly remove dl-aod and dl-aot
+- [ ] repeating: if possible, smarter system on rp-as, rp-ae commands where if a date/time argument isn't present, then it defaults to the current date/00:00. note that for both deadline and repeating, i can just default to recognizing today/zero/0/midnight keywords
+- [ ] deadline and repeating: worth it to accept time args where it's just 13, 12, 16, 14, etc.? also worth it to possible show a more convenient date format such as 2030-november-12?
+- [ ] if possible, a move to a more conventional cli-style with Clap
+- [ ] all: argument chaining on edit commands
