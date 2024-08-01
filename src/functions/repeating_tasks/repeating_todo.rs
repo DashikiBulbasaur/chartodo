@@ -44,7 +44,7 @@ pub fn repeating_tasks_add(add: Vec<String>) {
                 NOTE: nothing on the list below changed.").expect("writeln failed")
         }
 
-        // check if the interval is proper
+        // check if the interval is proper. has to be u32
         let interval: u32 = match add.get(counter * 3 - 2).unwrap().parse() {
             Ok(number) => number,
             Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper interval for your repeating task. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-a gym 2 days.
@@ -187,15 +187,15 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
         // task: get counter * 5 - 5
 
         // check if the starting time is proper
-        let start_time: NaiveTime = match start.get(counter * 5 - 1).unwrap().parse() {
-            Ok(start_time) => start_time,
+        match NaiveTime::parse_from_str(start.get(counter * 5 - 1).unwrap().as_str(), "%H:%M") {
+            Ok(_) => (),
             Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper starting time in argument set {}. Provide a correct starting time in a 24-hour format, e.g., 23:04.
                 NOTE: nothing on the list below changed.", counter).expect("writeln failed")
         };
 
         // check if starting date is proper
-        let start_date: NaiveDate = match start.get(counter * 5 - 2).unwrap().parse() {
-            Ok(start_date) => start_date,
+        match NaiveDate::parse_from_str(start.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d") {
+            Ok(_) => (),
             Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper starting date in argument set {}. Provide a correct starting date in a year-month-day format, e.g., 2024-05-12.
                 NOTE: nothing on the list below changed.", counter).expect("writeln failed")
         };
@@ -246,8 +246,8 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
         // get the date, time, repeat_original_date, and repeat_original_time
         let (date, time, repeat_original_date, repeat_original_time) =
             add_to_given_starting_datetime(
-                start_date,
-                start_time,
+                start.get(counter * 5 - 2).unwrap().to_string(),
+                start.get(counter * 5 - 1).unwrap().to_string(),
                 interval,
                 start.get(counter * 5 - 3).unwrap().to_owned(),
             );
@@ -274,16 +274,16 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
 }
 
 fn add_to_given_starting_datetime(
-    start_date: NaiveDate,
-    start_time: NaiveTime,
+    start_date: String,
+    start_time: String,
     interval: u32,
     unit: String,
 ) -> (String, String, String, String) {
     // get a starting datetime to add to it
     // note: i wish i didn't have to do naivedate + naivetime -> str -> naivedatetime
     // note: this separate formatting + combining into string is necessary for correct parsing
-    let start_date = format!("{}", start_date.format("%Y-%m-%d"));
-    let start_time = format!("{}", start_time.format("%H:%M"));
+    // let start_date = format!("{}", start_date.format("%Y-%m-%d"));
+    // let start_time = format!("{}", start_time.format("%H:%M"));
     let starting_datetime = start_date + " " + &start_time;
     let starting_datetime = NaiveDateTime::parse_from_str(starting_datetime.as_str(), "%Y-%m-%d %H:%M").expect("You should never be able to see this error. Somehow, when parsing a datetime from str in fn add_to_given_starting_datetime in path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should never happen since there were several checks that happened up to this point. If you see this, please open an issue on github.");
     let mut add_to_start = starting_datetime;
@@ -369,14 +369,14 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
         // task: get counter * 5 - 5
 
         // check if the starting time is proper
-        let end_time: NaiveTime = match add_end.get(counter * 5 - 1).unwrap().parse() {
-            Ok(end_time) => end_time,
+        match NaiveTime::parse_from_str(add_end.get(counter * 5 - 1).unwrap().as_str(), "%H:%M") {
+            Ok(_) => (),
             Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper ending time in argument set {}. Provide a correct ending time in a 24-hour format, e.g., 23:04.
                 NOTE: nothing on the list below changed.", counter).expect("writeln failed")
-        };
+        }
 
         // check if starting date is proper
-        let end_date: NaiveDate = match add_end.get(counter * 5 - 2).unwrap().parse() {
+        match NaiveDate::parse_from_str(add_end.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d") {
             Ok(end_date) => end_date,
             Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper ending date in argument set {}. Provide a correct ending date in a year-month-day format, e.g., 2024-05-12.
                 NOTE: nothing on the list below changed.", counter).expect("writeln failed")
@@ -428,8 +428,8 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
         // get the date, time, repeat_original_date, and repeat_original_time
         let (date, time, repeat_original_date, repeat_original_time) =
             subract_from_given_ending_datetime(
-                end_date,
-                end_time,
+                add_end.get(counter * 5 - 2).unwrap().to_string(),
+                add_end.get(counter * 5 - 1).unwrap().to_string(),
                 interval,
                 add_end.get(counter * 5 - 3).unwrap().to_owned(),
             );
@@ -456,16 +456,16 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
 }
 
 fn subract_from_given_ending_datetime(
-    end_date: NaiveDate,
-    end_time: NaiveTime,
+    end_date: String,
+    end_time: String,
     interval: u32,
     unit: String,
 ) -> (String, String, String, String) {
     // get a starting datetime to add to it
     // note: i wish i didn't have to do naivedate + naivetime -> str -> naivedatetime
     // note: this separate formatting + combining into string is necessary for correct parsing
-    let end_date = format!("{}", end_date.format("%Y-%m-%d"));
-    let end_time = format!("{}", end_time.format("%H:%M"));
+    // let end_date = format!("{}", end_date.format("%Y-%m-%d"));
+    // let end_time = format!("{}", end_time.format("%H:%M"));
     let ending_datetime = end_date + " " + &end_time;
     let ending_datetime = NaiveDateTime::parse_from_str(ending_datetime.as_str(), "%Y-%m-%d %H:%M").expect("You should never be able to see this error. Somehow, when parsing a datetime from str in fn subtract_from_given_ending_datetime in path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should never happen since there were several checks that happened up to this point. If you see this, please open an issue on github.");
     let mut subtract_from_end = ending_datetime;
@@ -838,4 +838,172 @@ pub fn repeating_tasks_show_start(start: Vec<String>) -> String {
     let show_starts = show_starts.trim_end();
 
     show_starts.to_string()
+}
+
+pub fn repeating_tasks_edit_all(edit_all: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // chartodo rp-ea 1 task 3 days start/end 2000-01-01 00:00. note that the user has to specify if the datetime is the start or end
+
+    // the following ifs are the multitude of errors i have to check for
+
+    // check if we have the right number of arguments
+    if edit_all.len() != 7 {
+        return writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited. A proper example would be: chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00. If you wanted to edit the starting date instead, replace 'end' with 'start', e.g., chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00
+            NOTE: nothing changed on the list below.").expect("writeln failed");
+    }
+
+    // check if position is a valid number
+    if edit_all.first().unwrap().parse::<usize>().is_err() {
+        return writeln!(
+            writer,
+            "ERROR: You must provide a viable position. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            repeating_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // positions can't be zero
+    if edit_all.first().unwrap().parse::<usize>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "Positions can't be zero. They have to be 1 and above."
+        )
+        .expect("writeln failed");
+    }
+
+    // position not in range of todo list len
+    if edit_all.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
+        return writeln!(
+            writer,
+            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            repeating_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // new item can't be more than 40 chars
+    if edit_all.get(1).unwrap().len() > 40 {
+        return writeln!(
+            writer,
+            "ERROR: Editing a todo item to be more than 40 characters is not allowed.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // interval isn't proper
+    if edit_all.get(2).unwrap().parse::<u32>().is_err() {
+        return writeln!(
+            writer,
+            "ERROR: The interval provided isn't proper. It must be in the (inclusive) range of 1 - 4294967295.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // check if interval is 0
+    if edit_all.get(2).unwrap().parse::<u32>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // unit of time isn't proper
+    match edit_all.get(3).unwrap().as_str() {
+        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month" | "months" | "year" | "years" => (),
+        _ => return writeln!(writer, "ERROR: didn't provide a proper time unit for the interval. Proper examples: minutes, hours, days, weeks, months or years.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // date isn't proper
+    match NaiveDate::parse_from_str(edit_all.get(5).unwrap().as_str(), "%Y-%m-%d") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper date. Must be in the following format: Year-Month-Day, e.g., 2000-01-01.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // time isn't proper
+    match NaiveTime::parse_from_str(edit_all.last().unwrap().as_str(), "%H:%M") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper time. Must be in the following 24-hour format: H:M, e.g., 13:08.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // check if it's start or end and do the proper operation
+    let (date, time, repeat_original_date, repeat_original_time);
+    match edit_all.get(4).unwrap().as_str() {
+        "start" => {
+            (date, time, repeat_original_date, repeat_original_time) =
+                add_to_given_starting_datetime(
+                    edit_all.get(5).unwrap().to_string(),
+                    edit_all.last().unwrap().to_string(),
+                    edit_all.get(2).unwrap().parse::<u32>().unwrap(),
+                    edit_all.get(3).unwrap().to_string(),
+                )
+        }
+        "end" => {
+            (date, time, repeat_original_date, repeat_original_time) =
+                subract_from_given_ending_datetime(
+                    edit_all.get(5).unwrap().to_string(),
+                    edit_all.last().unwrap().to_string(),
+                    edit_all.get(2).unwrap().parse::<u32>().unwrap(),
+                    edit_all.get(3).unwrap().to_string(),
+                )
+        }
+        _ => {
+           return writeln!(writer, "ERROR: you must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else.
+               NOTE: nothing changed on the list below.").expect("writeln failed")
+        }
+    }
+
+    // get the task and edit
+    let position: usize = edit_all.first().unwrap().parse().unwrap();
+    repeating_tasks.todo.get_mut(position - 1).unwrap().task =
+        edit_all.first().unwrap().to_string();
+    repeating_tasks.todo.get_mut(position - 1).unwrap().date = Some(date);
+    repeating_tasks.todo.get_mut(position - 1).unwrap().time = Some(time);
+    repeating_tasks
+        .todo
+        .get_mut(position - 1)
+        .unwrap()
+        .repeat_number = Some(edit_all.get(2).unwrap().parse::<u32>().unwrap());
+    repeating_tasks
+        .todo
+        .get_mut(position - 1)
+        .unwrap()
+        .repeat_unit = Some(edit_all.get(3).unwrap().to_string());
+    repeating_tasks
+        .todo
+        .get_mut(position - 1)
+        .unwrap()
+        .repeat_original_date = Some(repeat_original_date);
+    repeating_tasks
+        .todo
+        .get_mut(position - 1)
+        .unwrap()
+        .repeat_original_time = Some(repeat_original_time);
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
 }

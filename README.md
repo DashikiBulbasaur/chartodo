@@ -195,6 +195,10 @@ Commands (argument chaining is available where it makes sense):
             show the starting datetime of one or more repeating tasks
             example: chartodo rp-s 1
             example: chartodo rp-s 1 2 3 4 5
+        repeating-editall | rp-ea
+            edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
+            example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01
+            example: chartodo rp-ea 1 new-repeating-task 3 days end 2100-01-01
 ```
 
 ### Tips on usage

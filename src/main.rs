@@ -323,6 +323,14 @@ fn main() -> Result<()> {
             writeln!(writer, "{}", show_starts).expect("writeln failed");
             Ok(())
         }
+        "repeating-editall" | "rp-ea" => {
+            repeating_tasks_edit_all(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-editall")?,
+            );
+            list();
+            Ok(())
+        }
         "clearall" | "ca" if args.item_identifier.is_none() => {
             clear_all_lists();
             list();
@@ -526,6 +534,10 @@ fn help() {
             show the starting datetime of one or more repeating tasks
             example: chartodo rp-s 1
             example: chartodo rp-s 1 2 3 4 5
+        repeating-editall | rp-ea
+            edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
+            example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01
+            example: chartodo rp-ea 1 new-repeating-task 3 days end 2100-01-01
     "
     )
     .expect("writeln failed");

@@ -182,7 +182,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     repeating_tasks.todo.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n   interval: every {} {}\n   {}: {} {}\n",
+            "{}: {}\n   interval: {} {}\n   {}: {} {}\n",
             counter,
             item.task,
             item.repeat_number.unwrap(),
@@ -200,7 +200,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     let mut counter: u8 = 1;
     repeating_tasks.done.iter().for_each(|item| {
         let task = format!(
-            "{}: {}\n   interval: every {} {}\n   done: {} {}\n",
+            "{}: {}\n   interval: {} {}\n   done: {} {}\n",
             counter,
             item.task,
             item.repeat_number.unwrap(),
