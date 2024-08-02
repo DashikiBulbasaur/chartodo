@@ -225,6 +225,14 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "deadline-editdatetime" | "dl-edt" => {
+            deadline_tasks_edit_datetime(
+                args.item_identifier
+                    .context("didn't provide arguments for deadline-editdatetime")?,
+            );
+            list();
+            Ok(())
+        }
         "repeating-add" | "rp-a" => {
             repeating_tasks_add(
                 args.item_identifier
@@ -331,6 +339,39 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "repeating-edittask" | "rp-eta" => {
+            repeating_tasks_edit_task(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-edittask")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-editinterval" | "rp-ei" => {
+            repeating_tasks_edit_interval(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-editinterval")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-editintervalunit" | "rp-eiu" => {
+            repeating_tasks_edit_interval_unit(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-editintervalunit")?,
+            );
+            list();
+            Ok(())
+        }
+        // note: I don't like unit, it's too vague. but time unit is also too long
+        "repeating-editunit" | "rp-eu" => {
+            repeating_tasks_edit_time_unit(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-editunit")?,
+            );
+            list();
+            Ok(())
+        }
         "clearall" | "ca" if args.item_identifier.is_none() => {
             clear_all_lists();
             list();
@@ -386,7 +427,7 @@ fn help() {
             example: chartodo add new-item
             example: chartodo add 1st-item 2nd-item 3rd-item
         done | d
-            change a todo item to done, using a numbered position to specify which one
+            change one or several todo item(s) to done, using the task's position to specify
             example: chartodo done 3
             example: chartodo d 5 1 3 2
         notdone | nd
@@ -477,6 +518,9 @@ fn help() {
         deadline-edittime | dl-eti
             edit the time parameter of a deadline todo task
             example: chartodo dl-eti 1 23:59
+        deadline-editdatetime | dl-edt
+            edit the date and time parameter of a deadline todo task
+            example: chartodo dl-edt 1 2100-01-01 13:00
 
     REPEATING:
         repeating-add | rp-a
@@ -538,6 +582,20 @@ fn help() {
             edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
             example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01
             example: chartodo rp-ea 1 new-repeating-task 3 days end 2100-01-01
+        repeating-edittask | rp-eta
+            edit the task parameter of a repeating task
+            example: chartodo rp-eta 1 new-task
+        repeating-editinterval | rp-ei
+            edit the interval of a repeating task
+            example: chartodo rp-ei 1 3
+            '1' would be the position of the repeating task and '3' would be the new interval,
+                i.e., change it to '3 days'
+        repeating-editunit | rp-eu
+            edit the time unit of a repeating task
+            example: chartodo rp-eu 1 weeks
+        repeating-editintervalunit | rp-eiu
+            edit the interval and time unit of a repeating task
+            example: chartodo rp-eiu 1 3 days
     "
     )
     .expect("writeln failed");

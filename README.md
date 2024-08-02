@@ -1,10 +1,6 @@
 # CHARTODO
 
-This is an all-in-one TODO cli application that's of my own design. I wanted to make a todo list that I and other people would actually use. It's currently a WIP.
-
-## Why the name CHARTODO
-
-I needed a unique name, and I like Pokemon and I also like Charmander and Charizard, and there's a joke about Rust being 'blazingly fast', so it seemed perfect to combine CHAR and TODO.
+Chartodo is a feature-rich all-in-one todo application (to the best of my abilities). I wanted to make a todo list that I and other people would actually use. It's currently a WIP.
 
 ## How to install and run
 
@@ -138,6 +134,9 @@ Commands (argument chaining is available where it makes sense):
         deadline-edittime | dl-eti
             edit the time parameter of a deadline todo task
             example: chartodo dl-eti 1 23:59
+        deadline-editdatetime | dl-edt
+            edit the date and time parameter of a deadline todo task
+            example: chartodo dl-edt 1 2100-01-01 13:00
 
     REPEATING:
         repeating-add | rp-a
@@ -199,6 +198,20 @@ Commands (argument chaining is available where it makes sense):
             edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
             example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01
             example: chartodo rp-ea 1 new-repeating-task 3 days end 2100-01-01
+        repeating-edittask | rp-eta
+            edit the task parameter of a repeating task
+            example: chartodo rp-eta 1 new-task
+        repeating-editinterval | rp-ei
+            edit the interval of a repeating task
+            example: chartodo rp-ei 1 3
+            '1' would be the position of the repeating task and '3' would be the new interval,
+                i.e., change it to '3 days'
+        repeating-editunit | rp-eu
+            edit the time unit of a repeating task
+            example: chartodo rp-eu 1 weeks
+        repeating-editintervalunit | rp-eiu
+            edit the interval and time unit of a repeating task
+            example: chartodo rp-eiu 1 3 days
 ```
 
 ### Tips on usage
