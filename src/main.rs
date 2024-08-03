@@ -372,6 +372,22 @@ fn main() -> Result<()> {
             list();
             Ok(())
         }
+        "repeating-editstart" | "rp-es" => {
+            repeating_tasks_edit_start(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-editstart")?,
+            );
+            list();
+            Ok(())
+        }
+        "repeating-editend" | "rp-ee" => {
+            repeating_tasks_edit_end(
+                args.item_identifier
+                    .context("didn't provide arguments for repeating-editend")?,
+            );
+            list();
+            Ok(())
+        }
         "clearall" | "ca" if args.item_identifier.is_none() => {
             clear_all_lists();
             list();
@@ -596,6 +612,12 @@ fn help() {
         repeating-editintervalunit | rp-eiu
             edit the interval and time unit of a repeating task
             example: chartodo rp-eiu 1 3 days
+        repeating-editstart | rp-es
+            edit the starting datetime of a repeating task
+            example: chartodo rp-es 2100-12-24 13:08
+        repeating-editend | rp-ee
+            edit the ending datetime of a repeating task
+            example: chartodo rp-ee 2100-12-24 13:08
     "
     )
     .expect("writeln failed");

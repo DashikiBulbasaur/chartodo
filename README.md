@@ -212,6 +212,12 @@ Commands (argument chaining is available where it makes sense):
         repeating-editintervalunit | rp-eiu
             edit the interval and time unit of a repeating task
             example: chartodo rp-eiu 1 3 days
+        repeating-editstart | rp-es
+            edit the starting datetime of a repeating task
+            example: chartodo rp-es 2100-12-24 13:08
+        repeating-editend | rp-ee
+            edit the ending datetime of a repeating task
+            example: chartodo rp-ee 2100-12-24 13:08
 ```
 
 ### Tips on usage
@@ -243,5 +249,6 @@ Potential features:
 - [ ] deadline: if possible, smarter system where if a date/time argument isn't present after a dl-a command, then it defaults to the current date/00:00. afterwards, possibly remove dl-aod and dl-aot
 - [ ] repeating: if possible, smarter system on rp-as, rp-ae commands where if a date/time argument isn't present, then it defaults to the current date/00:00. note that for both deadline and repeating, i can just default to recognizing today/zero/0/midnight keywords
 - [ ] deadline and repeating: worth it to accept time args where it's just 13, 12, 16, 14, etc.? also worth it to possible show a more convenient date format such as 2030-november-12?
+- [ ] sections within lists, e.g., (types of) homework, chores, etc.
 - [ ] if possible, a move to a more conventional cli-style with Clap
 - [ ] all: argument chaining on edit commands

@@ -1490,3 +1490,229 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
 }
+
+pub fn repeating_tasks_edit_start(edit_start: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // chartodo rp-es 1 2100-01-01 00:00
+
+    // the following ifs are the multitude of errors i have to check for
+
+    // check if we have the right number of arguments
+    if edit_start.len() != 3 {
+        return writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to. A proper example would be: chartodo rp-es 4 2100-12-24 13:08
+            NOTE: nothing changed on the list below.").expect("writeln failed");
+    }
+
+    // check if position is a valid number
+    if edit_start.first().unwrap().parse::<usize>().is_err() {
+        return writeln!(
+            writer,
+            "ERROR: You must provide a viable position. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            repeating_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // positions can't be zero
+    if edit_start.first().unwrap().parse::<usize>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "ERROR: Positions can't be zero. They have to be 1 and above.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // position not in range of todo list len
+    if edit_start.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
+        return writeln!(
+            writer,
+            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            repeating_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // date isn't proper
+    match NaiveDate::parse_from_str(edit_start.get(1).unwrap().as_str(), "%Y-%m-%d") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper date. Must be in the following format: Year-Month-Day, e.g., 2000-01-01.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // time isn't proper
+    match NaiveTime::parse_from_str(edit_start.last().unwrap().as_str(), "%H:%M") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper time. Must be in the following 24-hour format: H:M, e.g., 13:08.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // get the updated datetimes based on the given starting datetime
+    let position: usize = edit_start.first().unwrap().parse::<usize>().unwrap() - 1;
+    let (date, time, repeat_original_date, repeat_original_time) = add_to_given_starting_datetime(
+        edit_start.get(1).unwrap().to_string(),
+        edit_start.last().unwrap().to_string(),
+        repeating_tasks
+            .todo
+            .get(position)
+            .unwrap()
+            .repeat_number
+            .unwrap(),
+        repeating_tasks
+            .todo
+            .get(position)
+            .unwrap()
+            .repeat_unit
+            .as_ref()
+            .unwrap()
+            .to_string(),
+    );
+
+    // edit the task
+    repeating_tasks.todo.get_mut(position).unwrap().date = Some(date);
+    repeating_tasks.todo.get_mut(position).unwrap().time = Some(time);
+    repeating_tasks
+        .todo
+        .get_mut(position)
+        .unwrap()
+        .repeat_original_date = Some(repeat_original_date);
+    repeating_tasks
+        .todo
+        .get_mut(position)
+        .unwrap()
+        .repeat_original_time = Some(repeat_original_time);
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}
+
+pub fn repeating_tasks_edit_end(edit_end: Vec<String>) {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed");
+    }
+
+    // chartodo rp-ea 1 2100-12-24 13:08
+
+    // the following ifs are the multitude of errors i have to check for
+
+    // check if we have the right number of arguments
+    if edit_end.len() != 3 {
+        return writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to. A proper example would be: chartodo rp-ee 4 2100-12-14 13:08
+            NOTE: nothing changed on the list below.").expect("writeln failed");
+    }
+
+    // check if position is a valid number
+    if edit_end.first().unwrap().parse::<usize>().is_err() {
+        return writeln!(
+            writer,
+            "ERROR: You must provide a viable position. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            repeating_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // positions can't be zero
+    if edit_end.first().unwrap().parse::<usize>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "Positions can't be zero. They have to be 1 and above."
+        )
+        .expect("writeln failed");
+    }
+
+    // position not in range of todo list len
+    if edit_end.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
+        return writeln!(
+            writer,
+            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            repeating_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // date isn't proper
+    match NaiveDate::parse_from_str(edit_end.get(1).unwrap().as_str(), "%Y-%m-%d") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper date. Must be in the following format: Year-Month-Day, e.g., 2000-01-01.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // time isn't proper
+    match NaiveTime::parse_from_str(edit_end.last().unwrap().as_str(), "%H:%M") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper time. Must be in the following 24-hour format: H:M, e.g., 13:08.
+            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    }
+
+    // get the updated datetimes from the given ending datetime
+    let position: usize = edit_end.first().unwrap().parse::<usize>().unwrap() - 1;
+    let (date, time, repeat_original_date, repeat_original_time) =
+        subract_from_given_ending_datetime(
+            edit_end.get(1).unwrap().to_string(),
+            edit_end.last().unwrap().to_string(),
+            repeating_tasks
+                .todo
+                .get(position)
+                .unwrap()
+                .repeat_number
+                .unwrap(),
+            repeating_tasks
+                .todo
+                .get(position)
+                .unwrap()
+                .repeat_unit
+                .as_ref()
+                .unwrap()
+                .to_string(),
+        );
+
+    // get the task and edit
+    repeating_tasks.todo.get_mut(position).unwrap().date = Some(date);
+    repeating_tasks.todo.get_mut(position).unwrap().time = Some(time);
+    repeating_tasks
+        .todo
+        .get_mut(position)
+        .unwrap()
+        .repeat_original_date = Some(repeat_original_date);
+    repeating_tasks
+        .todo
+        .get_mut(position)
+        .unwrap()
+        .repeat_original_time = Some(repeat_original_time);
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+}
