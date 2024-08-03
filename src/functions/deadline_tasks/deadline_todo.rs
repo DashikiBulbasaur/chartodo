@@ -728,3 +728,92 @@ pub fn deadline_tasks_edit_time(position_time: Vec<String>) {
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
 }
+
+pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) {
+    // housekeeping
+    deadline_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if deadline_tasks.todo.is_empty() {
+        return writeln!(
+            writer,
+            "The deadline todo list is currently empty, so there are no todos that can be edited."
+        )
+        .expect("writeln failed");
+    }
+
+    // chartodo rp-edt 1 2001-01-01 00:00
+
+    // the following ifs are the multitude of errors i have to check for
+
+    // check if we have the right number of arguments
+    if edit_date_time.len() != 3 {
+        return writeln!(writer, "ERROR: You must specify the deadline todo's position and what to edit the datetime to. A proper example would be: chartodo deadline-editdatetime 4 2150-01-01 00:00.
+            NOTE: nothing changed on the list below.").expect("writeln failed");
+    }
+
+    // check if position is a valid number
+    if edit_date_time.first().unwrap().parse::<usize>().is_err() {
+        return writeln!(
+            writer,
+            "ERROR: You must provide a viable position. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            deadline_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // positions can't be zero
+    if edit_date_time.first().unwrap().parse::<usize>().unwrap() == 0 {
+        return writeln!(
+            writer,
+            "ERROR: Positions can't be zero. They have to be between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            deadline_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // position not in range of todo list len
+    if edit_date_time.first().unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len() {
+        return writeln!(
+            writer,
+            "ERROR: Your position exceed's the todo list's length. Try something between 1 and {}.
+            NOTE: nothing changed on the list below.",
+            deadline_tasks.todo.len()
+        )
+        .expect("writeln failed");
+    }
+
+    // date isn't proper
+    match NaiveDate::parse_from_str(edit_date_time.get(1).unwrap().as_str(), "%Y-%m-%d") {
+        Ok(_) => (),
+        Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper date in a year-month-day format. Proper example: 2100-12-24.
+            NOTE: nothing changed on the list below.").expect("writeln failed")
+    }
+
+    // time isn't proper
+    match NaiveTime::parse_from_str(edit_date_time.last().unwrap().as_str(), "%H:%M") {
+        Ok(_) => (),
+        Err(_) => return writeln!(
+            writer,
+            "ERROR: You didn't provide a proper time in a 24-hour format. Proper example: 13:28.
+            NOTE: nothing changed on the list below."
+        )
+        .expect("writeln failed"),
+    }
+
+    // edit todo item
+    let position: usize = edit_date_time.first().unwrap().parse().unwrap();
+    deadline_tasks.todo.get_mut(position - 1).unwrap().date =
+        Some(edit_date_time.get(1).unwrap().to_string());
+    deadline_tasks.todo.get_mut(position - 1).unwrap().time =
+        Some(edit_date_time.last().unwrap().to_owned());
+
+    // write changes to file
+    write_changes_to_new_deadline_tasks(deadline_tasks);
+}

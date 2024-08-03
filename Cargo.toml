@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.5.9", features = ["derive"] }
+clap = { version = "4.5.11", features = ["derive"] }
 dirs = "5.0.1"
 anyhow = "1.0.86"
 serde_json = "1.0.120"
@@ -13,5 +13,5 @@ comfy-table = "7.1.1"
 chrono = "0.4.38"
 
 [dev-dependencies]
-assert_cmd = "2.0.14"
-predicates = "3.1.0"
+assert_cmd = "2.0.15"
+predicates = "3.1.2"

@@ -6,7 +6,7 @@ pub struct Tasks {
     pub done: Vec<Task>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub struct Task {
     pub task: String,
     #[serde(default = "return_default_date")]
@@ -14,7 +14,7 @@ pub struct Task {
     #[serde(default = "return_default_time")]
     pub time: Option<String>,
     #[serde(default = "return_default_repeat_number")]
-    pub repeat_number: Option<usize>,
+    pub repeat_number: Option<u32>,
     #[serde(default = "return_default_repeat_unit")]
     pub repeat_unit: Option<String>,
     #[serde(default = "return_default_repeat_done")]
@@ -41,7 +41,8 @@ fn return_default_time() -> Option<String> {
     None
 }
 
-fn return_default_repeat_number() -> Option<usize> {
+fn return_default_repeat_number() -> Option<u32> {
+    // u32 is 4294967296 - 1
     None
 }
 
@@ -53,6 +54,7 @@ fn return_default_repeat_done() -> Option<bool> {
     None
 }
 
+// to anyone reading this, the purpose of original date+time is so that if the user wants to set a new interval number and/or unit, there needs to be a record of when the task starts
 fn return_default_repeat_original_date() -> Option<String> {
     None
 }
