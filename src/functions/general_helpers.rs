@@ -39,9 +39,9 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
             "{}: {}\n   {}: {} {}\n",
             counter,
             item.task,
-            check_if_due_or_not(item.date.clone().unwrap(), item.time.clone().unwrap()),
-            item.date.clone().unwrap(),
-            item.time.clone().unwrap()
+            check_if_due_or_not(item.date.as_ref().unwrap(), item.time.as_ref().unwrap()),
+            item.date.as_ref().unwrap(),
+            item.time.as_ref().unwrap()
         );
         counter += 1;
         deadline_todo.push_str(&task);
@@ -55,8 +55,8 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
             "{}: {}\n   done: {} {}\n",
             counter,
             item.task,
-            item.date.clone().unwrap(),
-            item.time.clone().unwrap()
+            item.date.as_ref().unwrap(),
+            item.time.as_ref().unwrap()
         );
         counter += 1;
         deadline_done.push_str(&task);
@@ -72,9 +72,9 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
     }
 }
 
-fn check_if_due_or_not(date: String, time: String) -> String {
-    if date < Local::now().date_naive().to_string()
-        || date == Local::now().date_naive().to_string() && time < Local::now().time().to_string()
+fn check_if_due_or_not(date: &String, time: &String) -> String {
+    if date < &Local::now().date_naive().to_string()
+        || date == &Local::now().date_naive().to_string() && time < &Local::now().time().to_string()
     {
         "MISSED".to_string()
     } else {
@@ -84,17 +84,22 @@ fn check_if_due_or_not(date: String, time: String) -> String {
 
 pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     // check if any repeating tasks are done first. if they are, push to todo and remove from done
-    let now_date = Local::now().date_naive().to_string();
-    let now_time = Local::now().time().to_string();
+    // housekeeping
+    let now_date = &Local::now().date_naive().to_string();
+    let now_time = &Local::now().time().to_string();
     let mut remove_these: Vec<Task> = vec![];
+
+    // pretty sure the following is an expensive action
+    let mut check_if_sorted: bool = true;
     repeating_tasks.done.iter().for_each(|task| {
         // double check that repeat_done = true and check if due date+time passed
         // note: that double check may not be necessary
-        if (task.repeat_done.unwrap() && now_date > task.date.clone().unwrap())
+        if (task.repeat_done.unwrap() && now_date > task.date.as_ref().unwrap())
             | (task.repeat_done.unwrap()
-                && now_date == task.date.clone().unwrap()
-                && now_time > task.time.clone().unwrap())
+                && now_date == task.date.as_ref().unwrap()
+                && now_time > task.time.as_ref().unwrap())
         {
+            check_if_sorted = false;
             // get new original date+time, and prepare to change string to naivedatetime
             // note: design decision time. for finished repeating tasks, should I use the original due datetime as
             // the starting datetime for a refreshed repeating task? Or should I use Local::now as the starting
@@ -105,11 +110,13 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
             // just do a rp-reset command that resets the starting datetime to local now
             // 2) And also to keep the starting + ending datetimes consistent and not actually contingent
             // on when the list was shown/printed
+
+            // potential TODO: remove these clones? don't think it's possible
             let new_original_date = task.date.clone().unwrap();
             let new_original_time = task.time.clone().unwrap();
             let add_to_this = new_original_date.clone() + " " + &new_original_time;
 
-            // change to naivedatetime
+            // change to naivedatetime. also being random w/ eprintln and exit
             let mut change_to_date_time_and_add = match NaiveDateTime::parse_from_str(add_to_this.as_str(), "%Y-%m-%d %H:%M") {
                 Ok(datetime) => datetime,
                 Err(_) => {
@@ -119,7 +126,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
             };
 
             // based on the time unit, add to naivedatetime
-            match task.repeat_unit.clone().unwrap().as_str() {
+            match task.repeat_unit.as_ref().unwrap().as_str() {
                 "minutes" | "minute" => change_to_date_time_and_add += Duration::minutes(task.repeat_number.unwrap().into()),
                 "hours" | "hour" => change_to_date_time_and_add += Duration::hours(task.repeat_number.unwrap().into()),
                 "days" | "day" => {
@@ -166,17 +173,37 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
             remove_these.push(task.to_owned());
         }
     });
+    // this is an expensive action.
+    // TODO: keep track of index and then remove based on position. can also insert baesd on known position
+    // TODO: note that if I can insert and remove instead of push and retain, I have to consider whether sorting would be needed
     remove_these.iter().for_each(|task| {
         repeating_tasks.done.retain(|i| *i != *task);
     });
 
-    // sort before changing to strings
-    repeating_tasks
+    // before sorting, check if anything was changed at all
+    // sort_by_key is commented out since it uses clone and I'd like to avoid that. still, sort_by may take longer
+    /* repeating_tasks
         .todo
         .sort_by_key(|item| (item.date.to_owned().unwrap(), item.time.to_owned().unwrap()));
     repeating_tasks
         .done
-        .sort_by_key(|item| (item.date.clone().unwrap(), item.time.clone().unwrap()));
+        .sort_by_key(|item| (item.date.to_owned().unwrap(), item.time.to_owned().unwrap()));
+        */
+
+    if !check_if_sorted {
+        repeating_tasks
+            .todo
+            .sort_by(|x, y| x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()));
+        repeating_tasks
+            .todo
+            .sort_by(|x, y| x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()));
+        repeating_tasks
+            .done
+            .sort_by(|x, y| x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()));
+        repeating_tasks
+            .done
+            .sort_by(|x, y| x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()));
+    }
 
     let mut repeating_todo = String::from("");
     let mut counter: u8 = 1;
@@ -187,7 +214,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
             item.task,
             item.repeat_number.unwrap(),
             item.repeat_unit.clone().unwrap(),
-            check_if_due_or_not(item.date.clone().unwrap(), item.time.clone().unwrap()),
+            check_if_due_or_not(item.date.as_ref().unwrap(), item.time.as_ref().unwrap()),
             item.date.clone().unwrap(),
             item.time.clone().unwrap()
         );
