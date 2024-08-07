@@ -129,13 +129,19 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
 }
 
 pub fn write_changes_to_new_deadline_tasks(mut deadline_tasks: Tasks) {
-    // sort before writing. just being random w clone and to_owned
+    // sort before writing. this used to be sort_by_key w/ cloning
     deadline_tasks
         .todo
-        .sort_by_key(|item| (item.date.to_owned().unwrap(), item.time.to_owned().unwrap()));
+        .sort_by(|x, y| x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()));
+    deadline_tasks
+        .todo
+        .sort_by(|x, y| x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()));
     deadline_tasks
         .done
-        .sort_by_key(|item| (item.date.clone().unwrap(), item.time.clone().unwrap()));
+        .sort_by(|x, y| x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()));
+    deadline_tasks
+        .done
+        .sort_by(|x, y| x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()));
 
     // write the changes to the new file
     let deadline_tasks_file = File::create(path_to_deadline_tasks())

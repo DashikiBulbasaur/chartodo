@@ -10,13 +10,12 @@ First, make sure you have [Rust installed](https://doc.rust-lang.org/book/ch01-0
 ```sh-session
 cargo install chartodo
 ```
-2.
+2. via github
 ```sh-session
 cargo install --git https://github.com/DashikiBulbasaur/chartodo.git --branch master
 ```
-3. clone the repo
-
-
+3. clone the repository
+---
 Then, to run, either
 
 1. on your terminal, type chartodo [COMMAND], e.g., `chartodo list`
@@ -231,12 +230,11 @@ Commands (argument chaining is available where it makes sense):
 
 ## Milestones
 
-major:
 - [x] finish the regular task commands
 - [x] finish argument chaining
 - [x] switch file format to json
 - [x] add deadline-based todo items
-- [ ] add repeating todo items
+- [x] add repeating todo items
 - [ ] testing complete for launch
 - [ ] available on crates.io
 - [ ] switch to proper argument chaining (if possible), i.e., -a -d -rmt
@@ -248,7 +246,6 @@ Potential features:
 - [ ] regular: switchprio 'x-y' (may no longer be under consideration)
 - [ ] deadline: if possible, smarter system where if a date/time argument isn't present after a dl-a command, then it defaults to the current date/00:00. afterwards, possibly remove dl-aod and dl-aot
 - [ ] repeating: if possible, smarter system on rp-as, rp-ae commands where if a date/time argument isn't present, then it defaults to the current date/00:00. note that for both deadline and repeating, i can just default to recognizing today/zero/0/midnight keywords
-- [ ] deadline and repeating: worth it to accept time args where it's just 13, 12, 16, 14, etc.? also worth it to possible show a more convenient date format such as 2030-november-12?
 - [ ] sections within lists, e.g., (types of) homework, chores, etc.
 - [ ] if possible, a move to a more conventional cli-style with Clap
 - [ ] all: argument chaining on edit commands
