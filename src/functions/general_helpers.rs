@@ -1,7 +1,6 @@
 use super::json_file_structs::*;
 use super::repeating_tasks::repeating_helpers::*;
 use chrono::{Days, Duration, Local, Months, NaiveDateTime};
-use std::process::exit;
 
 pub fn regular_tasks_list(regular_tasks: Tasks) -> (String, String) {
     let mut regular_todo = String::from("");
@@ -121,7 +120,7 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
                 Ok(datetime) => datetime,
                 Err(_) => {
                     eprintln!("ERROR: While changing a repeating task that was marked done back to todo since the due date had passed, there was an error with parsing the set date and time to a NaiveDateTime struct. Parsing it to that ensures that I can set a new due date and time since the old due date + time passed and the repeating task is now not done. You should never be able to see this");
-                    exit(1);
+                    std::process::exit(1);
                 }
             };
 
@@ -191,18 +190,18 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
         */
 
     if !check_if_sorted {
-        repeating_tasks
-            .todo
-            .sort_by(|x, y| x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()));
-        repeating_tasks
-            .todo
-            .sort_by(|x, y| x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()));
-        repeating_tasks
-            .done
-            .sort_by(|x, y| x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()));
-        repeating_tasks
-            .done
-            .sort_by(|x, y| x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()));
+        repeating_tasks.todo.sort_by(|x, y| {
+            match x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()) {
+                std::cmp::Ordering::Equal => x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()),
+                lesser_or_greater => lesser_or_greater,
+            }
+        });
+        repeating_tasks.done.sort_by(|x, y| {
+            match x.date.as_ref().unwrap().cmp(y.date.as_ref().unwrap()) {
+                std::cmp::Ordering::Equal => x.time.as_ref().unwrap().cmp(y.time.as_ref().unwrap()),
+                lesser_or_greater => lesser_or_greater,
+            }
+        });
     }
 
     let mut repeating_todo = String::from("");
@@ -241,7 +240,9 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     let repeating_done = repeating_done.trim_end();
 
     // write changes to file. wanted to do this after sorting, but for borrowing reasons, can't
-    write_changes_to_new_repeating_tasks(repeating_tasks);
+    if !check_if_sorted {
+        write_changes_to_new_repeating_tasks(repeating_tasks);
+    }
 
     match repeating_done.is_empty() {
         true => (repeating_todo.to_string(), repeating_done.to_string()),
