@@ -175,6 +175,8 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     // this is an expensive action.
     // TODO: keep track of index and then remove based on position. can also insert baesd on known position
     // TODO: note that if I can insert and remove instead of push and retain, I have to consider whether sorting would be needed
+    // note that inserting and removing based on position can be expensive depending on the position
+    // i would also have to remove from highest to lowest position
     remove_these.iter().for_each(|task| {
         repeating_tasks.done.retain(|i| *i != *task);
     });
