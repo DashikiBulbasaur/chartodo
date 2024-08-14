@@ -109,7 +109,7 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
                     "repeat_unit": null,
                     "repeat_done": null,
                     "repeat_original_date": null,
-                    "repeat_original_time": null,
+                    "repeat_original_time": null
                 }
             ],
             "done": [
@@ -121,7 +121,7 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
                     "repeat_unit": null,
                     "repeat_done": null,
                     "repeat_original_date": null,
-                    "repeat_original_time": null,
+                    "repeat_original_time": null
                 }
             ]
         }
@@ -295,28 +295,82 @@ pub fn open_regular_tasks_and_return_tasks_struct() -> Tasks {
             )
         })
         .expect("couldn't open regular_tasks.json file");
-    let regular_tasks: Tasks = serde_json::from_reader(regular_tasks_file)
-        .with_context(|| {
-            format!(
-                "failed to parse struct from regular_tasks.json in the following dirs:
+
+    // this is to check if somehow the file exists but there is nothing in it
+    // if there is nothing in it, write some data
+    let regular_tasks: Tasks = match serde_json::from_reader(regular_tasks_file) {
+        Ok(tasks) => tasks,
+        Err(_) => {
+            let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this is the todo list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+            "#;
+
+            let open_regular_tasks_file = File::open(path_to_regular_tasks())
+                .with_context(|| {
+                    format!(
+                        "couldn't open regular_tasks.json in the following directories:
+                        {}",
+                        CHARTODO_PATH
+                    )
+                })
+                .expect("couldn't open regular_tasks.json file");
+            let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+                context(
+                        "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                    ).
+                expect("changing str to tasks struct failed");
+
+            let mut write_to_file = BufWriter::new(open_regular_tasks_file);
+            serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
+                .with_context(|| {
+                    format!(
+                        "failed to write fresh regular tasks to new regular_tasks json file in:
                 {}",
-                CHARTODO_PATH
-            )
-        })
-        .expect("failed to parse regular_tasks.json as struct");
+                        CHARTODO_PATH
+                    )
+                })
+                .expect("failed to write fresh regular tasks to regular_tasks json file");
+
+            fresh_regular_tasks
+        }
+    };
 
     regular_tasks
 }
 
+// cargo test regular_helpers_unit_tests -- --test-threads=1
 #[cfg(test)]
 mod regular_helpers_unit_tests {
     use super::*;
 
-    #[test]
-    fn aaaa_regular_tasks_clone_file() {
-        // name is aaaa so it's done first
-        // since we will be modifying the original file to run a test, the original data must be
-        // preserved first
+    fn regular_tasks_copy_path() -> PathBuf {
+        // get the path for regular_tasks_copy.json, which will be used to hold the original contents
+        // of regular_tasks.json while it's getting modified
         let mut regular_tasks_copy_path = dirs::data_dir()
             .context(
                 "linux: couldn't get $HOME/.local/share/
@@ -328,33 +382,29 @@ mod regular_helpers_unit_tests {
             .expect("something went wrong with fetching the user's data dirs");
         regular_tasks_copy_path.push("chartodo/regular_tasks_copy.json");
 
-        std::fs::copy(path_to_regular_tasks(), regular_tasks_copy_path)
-            .context("failed to copy regular_tasks.json to regular_tasks_copy.json")
-            .expect("anyhow context failed");
+        regular_tasks_copy_path
     }
 
     #[test]
-    fn zzzz_rename_copy_to_original() {
-        // name is zzzz so it's done last
-        // now that tests are done, rename the modified original and rename copy to original
+    fn regular_tasks_copy_path_is_correct() {
+        // funny that i'm testing a helper fn inside a mod that's supposed to test fns outside of it
+        let linux_path = "/.local/share/chartodo/regular_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks_copy.json";
+        let mut got_regular_tasks_copy_path: bool = false;
+        let regular_tasks_copy_path = regular_tasks_copy_path();
+        let regular_tasks_copy_path = regular_tasks_copy_path.to_str().unwrap();
 
-        std::fs::remove_file(path_to_regular_tasks())
-            .context("failed delete modified regular_tasks.json after running tests")
-            .expect("anyhow context failed");
+        if regular_tasks_copy_path.contains(linux_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(windows_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(mac_path) {
+            got_regular_tasks_copy_path = true;
+        }
 
-        let mut regular_tasks_copy = dirs::data_dir()
-                    .context(
-                        "linux: couldn't get $HOME/.local/share/
-                            windows: couldn't get C:/Users/your_user/AppData/Local/
-                            mac: couldn't get /Users/your_user/Library/Application Support/
-
-                            those directories should exist for your OS. please double check that they do.",
-                    )
-                    .expect("something went wrong with fetching the user's data dirs");
-        regular_tasks_copy.push("chartodo/regular_tasks_copy.json");
-        std::fs::rename(regular_tasks_copy, path_to_regular_tasks())
-            .context("failed to rename regular_tasks_copy to regular_tasks")
-            .expect("anyhow context failed");
+        assert!(got_regular_tasks_copy_path);
     }
 
     #[test]
@@ -376,5 +426,97 @@ mod regular_helpers_unit_tests {
         }
 
         assert!(got_regular_tasks_path);
+    }
+
+    #[test]
+    fn aaaa_regular_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(regular_tasks_copy_path())
+            .context("failed to create regular_tasks_copy.json")
+            .expect("anyhow context, error received");
+
+        std::fs::copy(path_to_regular_tasks(), regular_tasks_copy_path())
+            .context("failed to copy regular_tasks.json to regular_tasks_copy.json")
+            .expect("anyhow context failed");
+    }
+
+    #[test]
+    fn opening_regular_tasks_is_correct() {
+        // write new struct to file rust
+        let fresh_regular_tasks = r#"
+        {
+            "todo": [
+                {
+                    "task": "this is the todo list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                }
+            ],
+            "done": [
+                {
+                    "task": "this is the done list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                }
+            ]
+        }
+        "#;
+
+        let open_regular_tasks_file = File::create(path_to_regular_tasks())
+            .with_context(|| {
+                format!(
+                    "couldn't open regular_tasks.json in the following directories:
+                    {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("couldn't open regular_tasks.json file");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+            context(
+                    "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                ).
+            expect("changing str to tasks struct failed");
+
+        let mut write_to_file = BufWriter::new(open_regular_tasks_file);
+        serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
+            .with_context(|| {
+                format!(
+                    "failed to write fresh regular tasks to new regular_tasks json file in:
+            {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("failed to write fresh regular tasks to regular_tasks json file");
+
+        // after writing struct to file, read it and check that it spits out the same struct
+        let test_struct = open_regular_tasks_and_return_tasks_struct();
+
+        assert_eq!(test_struct, fresh_regular_tasks);
+    }
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, rename the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_regular_tasks())
+            .context("failed delete modified regular_tasks.json after running tests")
+            .expect("anyhow context failed");
+
+        std::fs::rename(regular_tasks_copy_path(), path_to_regular_tasks())
+            .context("failed to rename regular_tasks_copy to regular_tasks")
+            .expect("anyhow context failed");
     }
 }
