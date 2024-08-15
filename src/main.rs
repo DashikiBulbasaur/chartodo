@@ -23,8 +23,10 @@ struct Cli {
 fn main() -> Result<()> {
     let args = Cli::parse();
 
+    // since printing the list is separate from normal commands (due to how repeating tasks are handled), and since functions
+    // will print to the terminal if an user error occurs, to avoid printing both the list and error if an error occurs,
+    // we'll flag via bool for an error from a fn and won't print the list if it was tripped
     match args.command.as_str() {
-        // bug here where commands that don't take additional commands, e,g., help, list, doneall, etc., will still activate even if item_identifier isn't empty (which it should be in those cases). program works fine even w/ the bug but it annoyed me, hence the if conditions
         "help" | "h" if args.item_identifier.is_none() => {
             help();
             Ok(())
@@ -34,12 +36,15 @@ fn main() -> Result<()> {
             Ok(())
         }
         "add" | "a" => {
-            regular_tasks_add_todo(
+            let error_status = regular_tasks_add_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "done" | "d" => {

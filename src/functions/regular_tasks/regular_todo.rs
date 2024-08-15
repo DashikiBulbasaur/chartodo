@@ -2,7 +2,7 @@ use super::regular_helpers::*;
 use crate::functions::json_file_structs::*;
 use std::io::Write;
 
-pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
+pub fn regular_tasks_add_todo(add_todo: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -21,7 +21,10 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
 
     // check if user wants to add too many todo items
     if add_todos.len() + regular_tasks.todo.len() >= 15 {
-        return writeln!(writer, "You want to add too many todo items. The maximum length of the todo list is only 15. With the current length of the todo list, please only add {} or less", 15 - regular_tasks.todo.len()).expect("writeln failed");
+        writeln!(writer, "ERROR: You want to add too many todo items. The maximum length of the todo list is only 15. With the current length of the todo list, please only add {} or less", 15 - regular_tasks.todo.len()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // add todos
@@ -41,6 +44,9 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_regular_tasks(regular_tasks);
+
+    // error = false
+    false
 }
 
 pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) {

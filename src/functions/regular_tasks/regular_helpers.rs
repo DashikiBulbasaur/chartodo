@@ -129,7 +129,7 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
 
         let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
             context(
-                    "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                    "the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
                 ).
             expect("changing str to tasks struct failed");
 
@@ -341,7 +341,7 @@ pub fn open_regular_tasks_and_return_tasks_struct() -> Tasks {
                 .expect("couldn't open regular_tasks.json file");
             let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
                 context(
-                        "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                        "the fresh data to put in an empty regular_tasks file wasn't correct. you should never be able to see this"
                     ).
                 expect("changing str to tasks struct failed");
 
@@ -485,7 +485,7 @@ mod regular_helpers_unit_tests {
             .expect("couldn't open regular_tasks.json file");
         let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
             context(
-                    "somehow the fucking data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                    "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
                 ).
             expect("changing str to tasks struct failed");
 
@@ -513,10 +513,10 @@ mod regular_helpers_unit_tests {
 
         std::fs::remove_file(path_to_regular_tasks())
             .context("failed delete modified regular_tasks.json after running tests")
-            .expect("anyhow context failed");
+            .expect("failed to delete regular_tasks.json after regular_helpers unit tests");
 
         std::fs::rename(regular_tasks_copy_path(), path_to_regular_tasks())
             .context("failed to rename regular_tasks_copy to regular_tasks")
-            .expect("anyhow context failed");
+            .expect("failed to rename regular_tasks_copy to regular_tasks after tests were done");
     }
 }
