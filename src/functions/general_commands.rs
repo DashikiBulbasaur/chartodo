@@ -49,7 +49,7 @@ pub fn list() {
     writeln!(writer, "{table}").expect("writeln failed");
 }
 
-pub fn clear_all_lists() {
+pub fn clear_all_lists() -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     deadline_tasks_create_dir_and_file_if_needed();
@@ -69,7 +69,10 @@ pub fn clear_all_lists() {
         && repeating_tasks.todo.is_empty()
         && repeating_tasks.done.is_empty()
     {
-        return writeln!(writer, "All of the lists are currently empty.").expect("writeln failed");
+        writeln!(writer, "ERROR: All of the lists are currently empty.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear all lists
@@ -79,9 +82,12 @@ pub fn clear_all_lists() {
     deadline_tasks.done.clear();
     repeating_tasks.todo.clear();
     repeating_tasks.done.clear();
+
+    // error = false
+    false
 }
 
-pub fn clear_regular_tasks() {
+pub fn clear_regular_tasks() -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -91,16 +97,22 @@ pub fn clear_regular_tasks() {
 
     // check if all lists are empty
     if regular_tasks.todo.is_empty() && regular_tasks.done.is_empty() {
-        return writeln!(writer, "The regular task lists are currently empty.")
+        writeln!(writer, "ERROR: The regular task lists are currently empty.")
             .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear all lists
     regular_tasks.todo.clear();
     regular_tasks.done.clear();
+
+    // error = false
+    false
 }
 
-pub fn clear_deadline_tasks() {
+pub fn clear_deadline_tasks() -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -110,16 +122,25 @@ pub fn clear_deadline_tasks() {
 
     // check if all lists are empty
     if deadline_tasks.todo.is_empty() && deadline_tasks.done.is_empty() {
-        return writeln!(writer, "The deadline task lists are currently empty.")
-            .expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The deadline task lists are currently empty."
+        )
+        .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear all lists
     deadline_tasks.todo.clear();
     deadline_tasks.done.clear();
+
+    // error = false
+    false
 }
 
-pub fn clear_repeating_tasks() {
+pub fn clear_repeating_tasks() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -129,11 +150,20 @@ pub fn clear_repeating_tasks() {
 
     // check if all lists are empty
     if repeating_tasks.todo.is_empty() && repeating_tasks.done.is_empty() {
-        return writeln!(writer, "The repeating task lists are currently empty.")
-            .expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The repeating task lists are currently empty."
+        )
+        .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear all lists
     repeating_tasks.todo.clear();
     repeating_tasks.done.clear();
+
+    // error = false
+    false
 }

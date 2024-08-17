@@ -25,7 +25,7 @@ fn main() -> Result<()> {
 
     // since printing the list is separate from normal commands (due to how repeating tasks are handled), and since functions
     // will print to the terminal if an user error occurs, to avoid printing both the list and error if an error occurs,
-    // we'll flag via bool for an error from a fn and won't print the list if it was tripped
+    // we'll flag via bool for an error from a fn (if necessary) and won't print the list if it was tripped
     match args.command.as_str() {
         "help" | "h" if args.item_identifier.is_none() => {
             help();
@@ -48,73 +48,103 @@ fn main() -> Result<()> {
             Ok(())
         }
         "done" | "d" => {
-            regular_tasks_change_todo_to_done(
+            let error_status = regular_tasks_change_todo_to_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be changed to done. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "rmtodo" | "rmt" => {
-            regular_tasks_remove_todo(
+            let error_status = regular_tasks_remove_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "cleartodo" | "ct" if args.item_identifier.is_none() => {
-            regular_tasks_clear_todo();
-            list();
+            let error_status = regular_tasks_clear_todo();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "doneall" | "da" if args.item_identifier.is_none() => {
-            regular_tasks_change_all_todo_to_done();
-            list();
+            let error_status = regular_tasks_change_all_todo_to_done();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "cleardone" | "cd" if args.item_identifier.is_none() => {
-            regular_tasks_clear_done();
-            list();
+            let error_status = regular_tasks_clear_done();
+            if !error_status {
+                list()
+            }
+
             Ok(())
         }
         "clearboth" | "cb" if args.item_identifier.is_none() => {
-            clear_regular_tasks();
-            list();
+            let error_status = clear_regular_tasks();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "rmdone" | "rmd" => {
-            regular_tasks_remove_done(
+            let error_status = regular_tasks_remove_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "notdone" | "nd" => {
-            regular_tasks_not_done(
+            let error_status = regular_tasks_not_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "edit" | "e" => {
-            regular_tasks_edit_todo(
+            let error_status = regular_tasks_edit_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "notdoneall" | "nda" if args.item_identifier.is_none() => {
-            regular_tasks_reverse_all_dones();
-            list();
+            let error_status = regular_tasks_reverse_all_dones();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-add" | "dl-a" => {
@@ -200,8 +230,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "deadline-clearboth" | "dl-cb" if args.item_identifier.is_none() => {
-            clear_deadline_tasks();
-            list();
+            let error_status = clear_deadline_tasks();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-rmdone" | "dl-rmd" => {
@@ -323,8 +356,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-clearboth" | "rp-cb" if args.item_identifier.is_none() => {
-            clear_repeating_tasks();
-            list();
+            let error_status = clear_repeating_tasks();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-start" | "rp-s" => {
@@ -394,8 +430,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "clearall" | "ca" if args.item_identifier.is_none() => {
-            clear_all_lists();
-            list();
+            let error_status = clear_all_lists();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "" => {
