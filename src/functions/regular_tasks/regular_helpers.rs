@@ -435,11 +435,11 @@ mod regular_helpers_unit_tests {
         // preserved first
         std::fs::File::create(regular_tasks_copy_path())
             .context("failed to create regular_tasks_copy.json")
-            .expect("anyhow context, error received");
+            .expect("failed to create a copy during unit test");
 
         std::fs::copy(path_to_regular_tasks(), regular_tasks_copy_path())
             .context("failed to copy regular_tasks.json to regular_tasks_copy.json")
-            .expect("anyhow context failed");
+            .expect("failed to copy original file to copy file during unit test");
     }
 
     #[test]

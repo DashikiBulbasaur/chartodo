@@ -15,7 +15,7 @@ const CHARTODO_PATH: &str = "linux: $HOME/.local/share/chartodo/
     mac: /Users/your_user/Library/Application Support/chartodo/";
 
 fn path_to_deadline_tasks() -> PathBuf {
-    // get the data dir XDG spec and return it with path to regular_tasks.json
+    // get the data dir XDG spec and return it with path to deadline_tasks.json
     let mut deadline_tasks_path = dirs::data_dir()
         .context(
             "linux: couldn't get $HOME/.local/share/
@@ -87,7 +87,7 @@ pub fn deadline_tasks_create_dir_and_file_if_needed() {
 
         let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
             context(
-                    "somehow the fucking data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+                    "the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
                 ).
             expect("changing str to tasks struct failed");
 
@@ -115,15 +115,59 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
             )
         })
         .expect("couldn't open deadline_tasks.json file");
-    let deadline_tasks: Tasks = serde_json::from_reader(deadline_tasks_file)
-        .with_context(|| {
-            format!(
-                "failed to parse struct from deadline_tasks.json in the following dirs:
+
+    // this is to check if somehow the file exists but there is nothing in it
+    // if there is nothing in it, write some data
+    let deadline_tasks: Tasks = match serde_json::from_reader(deadline_tasks_file) {
+        Ok(tasks) => tasks,
+        Err(_) => {
+            let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "breathe-once-before-2099",
+                        "date": "2099-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+            "#;
+
+            let open_deadline_tasks_file = File::open(path_to_deadline_tasks())
+                .with_context(|| {
+                    format!(
+                        "couldn't open deadline_tasks.json in the following directories:
+                        {}",
+                        CHARTODO_PATH
+                    )
+                })
+                .expect("couldn't open deadline_tasks.json file");
+            let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+                context(
+                        "the fresh data to put in an empty deadline_tasks file wasn't correct. you should never be able to see this"
+                    ).
+                expect("changing str to tasks struct failed");
+
+            let mut write_to_file = BufWriter::new(open_deadline_tasks_file);
+            serde_json::to_writer_pretty(&mut write_to_file, &fresh_deadline_tasks)
+                .with_context(|| {
+                    format!(
+                        "failed to write fresh deadline tasks to new deadline_tasks json file in:
                 {}",
-                CHARTODO_PATH
-            )
-        })
-        .expect("failed to parse deadline_tasks.json as struct");
+                        CHARTODO_PATH
+                    )
+                })
+                .expect("failed to write fresh deadline tasks to deadline_tasks json file");
+
+            fresh_deadline_tasks
+        }
+    };
 
     deadline_tasks
 }
@@ -163,4 +207,151 @@ pub fn write_changes_to_new_deadline_tasks(mut deadline_tasks: Tasks) {
             )
         })
         .expect("failed to write changes to deadline_tasks.json");
+}
+
+// cargo test deadline_helpers_unit_tests -- --test-threads=1
+#[cfg(test)]
+mod deadline_helpers_unit_tests {
+    use super::*;
+
+    fn deadline_tasks_copy_path() -> PathBuf {
+        // get the path for deadline_tasks_copy.json, which will be used to hold the original contents
+        // of deadline_tasks.json while it's getting modified
+        let mut deadline_tasks_copy_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        deadline_tasks_copy_path.push("chartodo/deadline_tasks_copy.json");
+
+        deadline_tasks_copy_path
+    }
+
+    #[test]
+    fn deadline_tasks_copy_path_is_correct() {
+        // funny that i'm testing a helper fn inside a mod that's supposed to test fns outside of it
+        let linux_path = "/.local/share/chartodo/deadline_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/deadline_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/deadline_tasks_copy.json";
+        let mut got_deadline_tasks_copy_path: bool = false;
+        let deadline_tasks_copy_path = deadline_tasks_copy_path();
+        let deadline_tasks_copy_path = deadline_tasks_copy_path.to_str().unwrap();
+
+        if deadline_tasks_copy_path.contains(linux_path) {
+            got_deadline_tasks_copy_path = true;
+        } else if deadline_tasks_copy_path.contains(windows_path) {
+            got_deadline_tasks_copy_path = true;
+        } else if deadline_tasks_copy_path.contains(mac_path) {
+            got_deadline_tasks_copy_path = true;
+        }
+
+        assert!(got_deadline_tasks_copy_path);
+    }
+
+    #[test]
+    fn path_to_deadline_tasks_is_correct() {
+        let linux_path = "/.local/share/chartodo/deadline_tasks.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/deadline_tasks.json";
+        let mac_path = "/Library/Application Support/chartodo/deadline_tasks.json";
+        let mut got_deadline_tasks_path: bool = false;
+        let deadline_path = path_to_deadline_tasks();
+        let deadline_path = deadline_path.to_str().unwrap();
+
+        if deadline_path.contains(linux_path) {
+            got_deadline_tasks_path = true;
+        } else if deadline_path.contains(windows_path) {
+            got_deadline_tasks_path = true;
+        } else if deadline_path.contains(mac_path) {
+            got_deadline_tasks_path = true;
+        }
+
+        assert!(got_deadline_tasks_path);
+    }
+
+    #[test]
+    fn aaaa_deadline_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(deadline_tasks_copy_path())
+            .context("failed to create deadline_tasks_copy.json")
+            .expect("failed to create a copy during unit test");
+
+        std::fs::copy(path_to_deadline_tasks(), deadline_tasks_copy_path())
+            .context("failed to copy deadline_tasks.json to deadline_tasks_copy.json")
+            .expect("failed to copy original file to copy file during unit test");
+    }
+
+    #[test]
+    fn opening_deadline_tasks_is_correct() {
+        // write new struct to file rust
+        let fresh_deadline_tasks = r#"
+        {
+            "todo": [
+                {
+                    "task": "breathe-once-before-2099",
+                    "date": "2099-01-01",
+                    "time": "00:00",
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                }
+            ],
+            "done": []
+        }
+        "#;
+
+        let open_deadline_tasks_file = File::create(path_to_deadline_tasks())
+            .with_context(|| {
+                format!(
+                    "couldn't open deadline_tasks.json in the following directories:
+                    {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("couldn't open deadline_tasks.json file");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                    "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+                ).
+            expect("changing str to tasks struct failed");
+
+        let mut write_to_file = BufWriter::new(open_deadline_tasks_file);
+        serde_json::to_writer_pretty(&mut write_to_file, &fresh_deadline_tasks)
+            .with_context(|| {
+                format!(
+                    "failed to write fresh deadline tasks to new deadline_tasks json file in:
+            {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("failed to write fresh deadline tasks to deadline_tasks json file");
+
+        // after writing struct to file, read it and check that it spits out the same struct
+        let test_struct = open_deadline_tasks_and_return_tasks_struct();
+
+        assert_eq!(test_struct, fresh_deadline_tasks);
+    }
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, rename the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_deadline_tasks())
+            .context("failed delete modified deadline_tasks.json after running tests")
+            .expect("failed to delete deadline_tasks.json after deadline_helpers unit tests");
+
+        std::fs::rename(deadline_tasks_copy_path(), path_to_deadline_tasks())
+            .context("failed to rename deadline_tasks_copy to deadline_tasks")
+            .expect("failed to rename deadline_tasks_copy to deadline_tasks after tests were done");
+    }
 }
