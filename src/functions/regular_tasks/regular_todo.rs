@@ -10,37 +10,39 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) -> bool {
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
-    // filter for viable items only
-    let mut add_todos = vec![];
+    // add todos
+    // note that I could compare the len of regular_tasks before and after this operation,
+    // but checking using bool is I think simpler and more performant
+    let mut tasks_added = false;
     add_todo.iter().for_each(|item| {
-        if item.len() <= 100 {
-            add_todos.push(item.to_string());
+        // check if the task is under max allowed len (100)
+        if item.as_str().len() <= 100 {
+            // a task was added. could I just skip the if and do tasks_added = true and would it matter?
+            // note that I don't think it would change much and this might be better
+            if !tasks_added {
+                tasks_added = true;
+            }
+
+            let new_task = Task {
+                task: item.to_string(),
+                date: None,
+                time: None,
+                repeat_number: None,
+                repeat_unit: None,
+                repeat_done: None,
+                repeat_original_date: None,
+                repeat_original_time: None,
+            };
+            regular_tasks.todo.push(new_task);
         }
     });
-    drop(add_todo);
 
-    // check if all args were invalid and notify user
-    if add_todos.is_empty() {
+    if !tasks_added {
         writeln!(writer, "ERROR: All of the regular task items you wanted to add exceeded the max character len of 100. This error is just to notify you that none were added. The max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.").expect("writeln failed");
 
         // error = true
         return true;
     }
-
-    // add todos
-    add_todos.iter().for_each(|item| {
-        let item = Task {
-            task: item.to_string(),
-            date: None,
-            time: None,
-            repeat_number: None,
-            repeat_unit: None,
-            repeat_done: None,
-            repeat_original_date: None,
-            repeat_original_time: None,
-        };
-        regular_tasks.todo.push(item);
-    });
 
     // write changes to file
     write_changes_to_new_regular_tasks(regular_tasks);

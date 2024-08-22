@@ -148,11 +148,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "deadline-add" | "dl-a" => {
-            deadline_tasks_add(
+            let error_status = deadline_tasks_add(
                 args.item_identifier
                     .context("didn't provide a deadline add argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-addonlydate" | "dl-aod" => {

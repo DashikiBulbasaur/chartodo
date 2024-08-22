@@ -10,7 +10,7 @@ use std::io::Write;
 
 // chartodo dl-and new-item 00:00 > len = 2
 
-pub fn deadline_tasks_add(add: Vec<String>) {
+pub fn deadline_tasks_add(add: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -21,7 +21,10 @@ pub fn deadline_tasks_add(add: Vec<String>) {
     // check if we have the right # of args
     // note/potential todo: i'd like to remove division here but idk what else to do lol
     if add.len() % 3 != 0 {
-        return writeln!(writer, "You don't have the right amount of arguments when adding a deadline task. Proper example: chartodo dl-a new-item 2099-01-01 00:00. Another: chartodo dl-a new-item 2099-01-01 00:00 another-item 2199-01-01 23:59. After the command dl-a, there should be 3, 6, 9, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task. You should have 3, 6, 9, etc. (i.e., divisible by 3) arguments. Proper example: chartodo dl-a new-item 2099-01-01 00:00. Another: chartodo dl-a new-item 2099-01-01 00:00 another-item 2199-01-01 23:59.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check how many sets of arguments there are
@@ -49,23 +52,38 @@ pub fn deadline_tasks_add(add: Vec<String>) {
             repeat_original_time: None,
         };
 
-        // check time. if correct, change format and add to struct
-        let time: NaiveTime = match add.get(counter * 3 - 1).unwrap().parse() {
-            Ok(yes) => yes,
-            Err(_) => return writeln!(writer, "Your specified time in argument set {} was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter).expect("writeln failed"),
+        // check time. if correct, add to struct
+        // note that, for micro-optimization purposes, i'm choosing to access the index multiple times instead of assigning
+        // it to a variable. con: this has less readability
+        match NaiveTime::parse_from_str(add.get(counter * 3 - 1).unwrap().as_str(), "%H:%M") {
+            Ok(time) => time,
+            Err(_) => {
+                writeln!(writer, "ERROR: Your specified time for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter, add.get(counter * 3 - 1).unwrap().as_str()).expect("writeln failed");
+
+                // error = true
+                return true;
+            }
         };
-        deadline_task.time = Some(format!("{}", time.format("%H:%M")));
+        deadline_task.time = Some(add.get(counter * 3 - 1).unwrap().to_string());
 
         // check date and add to struct
-        let date: NaiveDate = match add.get(counter * 3 - 2).unwrap().parse() {
-            Ok(yes) => yes,
-            Err(_) => return writeln!(writer, "Your specified date in argument set {} was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter).expect("writeln failed"),
-        };
-        deadline_task.date = Some(date.to_string());
+        match NaiveDate::parse_from_str(add.get(counter * 3 - 2).unwrap().as_str(), "%Y-%m-%d") {
+            Ok(date) => date,
+            Err(_) => {
+                writeln!(writer, "ERROR: Your specified date for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter, add.get(counter * 3 - 2).unwrap().as_str()).expect("writeln failed");
 
-        // check task is not over 40 chars. add to struct
-        if add.get(counter * 3 - 3).unwrap().len() > 40 {
-            return writeln!(writer, "Your specified deadline task in argument set {} was over 40 characters long, which is not allowed.", counter).expect("writeln failed");
+                // error = true
+                return true;
+            }
+        };
+        deadline_task.date = Some(add.get(counter * 3 - 2).unwrap().to_string());
+
+        // check task is not over 100 chars. add to struct
+        if add.get(counter * 3 - 3).unwrap().len() > 100 {
+            writeln!(writer, "The new deadline task you wanted to add in argument set {}, '{}',  was over 100 characters long, which is not allowed.", counter, add.get(counter * 3 - 3).unwrap().as_str()).expect("writeln failed");
+
+            // error = true
+            return true;
         };
         deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string();
 
@@ -82,6 +100,9 @@ pub fn deadline_tasks_add(add: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
 pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) {
@@ -799,12 +820,14 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) {
     // time isn't proper
     match NaiveTime::parse_from_str(edit_date_time.last().unwrap().as_str(), "%H:%M") {
         Ok(_) => (),
-        Err(_) => return writeln!(
+        Err(_) => {
+            return writeln!(
             writer,
             "ERROR: You didn't provide a proper time in a 24-hour format. Proper example: 13:28.
             NOTE: nothing changed on the list below."
         )
-        .expect("writeln failed"),
+            .expect("writeln failed")
+        }
     }
 
     // edit todo item
