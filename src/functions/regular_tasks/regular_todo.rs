@@ -51,7 +51,7 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) -> bool {
     false
 }
 
-pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) -> bool {
+pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -72,36 +72,33 @@ pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) -> bool {
     }
 
     // filter for viable items
-    let mut todos_to_dones: Vec<usize> = vec![];
-    todo_to_done.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= regular_tasks.todo.len()
+    for i in (0..todo_to_done.len()).rev() {
+        if todo_to_done.get(i).unwrap().parse::<usize>().is_err()
+            || todo_to_done.get(i).unwrap().is_empty() // this will never trigger smh
+            || todo_to_done.get(i).unwrap().parse::<usize>().unwrap() == 0
+            || todo_to_done.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.todo.len()
         {
-            todos_to_dones.push(item.parse().unwrap());
+            todo_to_done.swap_remove(i);
         }
-    });
-    drop(todo_to_done);
+    }
 
     // check if none of the args were valid
-    if todos_to_dones.is_empty() {
+    if todo_to_done.is_empty() {
         writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
 
         // error = true
         return true;
     }
 
-    // reverse sort the positions
-    todos_to_dones.sort();
-    todos_to_dones.reverse();
-    todos_to_dones.dedup();
+    // sort and dedup
+    todo_to_done.sort();
+    todo_to_done.dedup();
 
     // check if the user basically specified the entire list
-    if todos_to_dones.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
+    if todo_to_done.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "ERROR: you've specified marking the entire regular todo list as done. You should do chartodo doneall."
+            "WARNING: you've specified marking the entire regular todo list as done. You should do chartodo doneall."
         )
         .expect("writeln failed");
 
@@ -110,16 +107,23 @@ pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) -> bool {
     }
 
     // if changing todos to done means the done list overflows, clear done list
-    if todos_to_dones.len() + regular_tasks.done.len() > 30 {
+    if todo_to_done.len() + regular_tasks.done.len() > 30 {
         regular_tasks.done.clear();
     }
 
-    // change todos to dones one by one
-    todos_to_dones.iter().for_each(|position| {
+    // change todos to dones one by one. no idea if the parse slows down the process significantly
+    // rev is done so that removing by position doesn't become invalid
+    todo_to_done.iter().rev().for_each(|position| {
+        regular_tasks.done.push(
+            regular_tasks
+                .todo
+                .get(position.parse::<usize>().unwrap() - 1)
+                .unwrap()
+                .to_owned(),
+        );
         regular_tasks
-            .done
-            .push(regular_tasks.todo.get(*position - 1).unwrap().to_owned());
-        regular_tasks.todo.remove(*position - 1);
+            .todo
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
 
     // write changes to file
@@ -129,7 +133,7 @@ pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) -> bool {
     false
 }
 
-pub fn regular_tasks_remove_todo(todo_to_remove: Vec<String>) -> bool {
+pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -150,36 +154,33 @@ pub fn regular_tasks_remove_todo(todo_to_remove: Vec<String>) -> bool {
     }
 
     // filter for viable items
-    let mut todos_to_remove: Vec<usize> = vec![];
-    todo_to_remove.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= regular_tasks.todo.len()
+    for i in (0..todo_to_remove.len()).rev() {
+        if todo_to_remove.get(i).unwrap().parse::<usize>().is_err()
+            || todo_to_remove.get(i).unwrap().is_empty() // this will never trigger smh
+            || todo_to_remove.get(i).unwrap().parse::<usize>().unwrap() == 0
+            || todo_to_remove.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.todo.len()
         {
-            todos_to_remove.push(item.parse().unwrap());
+            todo_to_remove.swap_remove(i);
         }
-    });
-    drop(todo_to_remove);
+    }
 
     // check if all args were invalid
-    if todos_to_remove.is_empty() {
+    if todo_to_remove.is_empty() {
         writeln!(writer, "ERROR: none of the positions you gave were valid -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
 
         // error = true
         return true;
     }
 
-    // reverse sort
-    todos_to_remove.sort();
-    todos_to_remove.reverse();
-    todos_to_remove.dedup();
+    // sort and dedup
+    todo_to_remove.sort();
+    todo_to_remove.dedup();
 
     // check if user wants to remove all of the items
-    if todos_to_remove.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
+    if todo_to_remove.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "ERROR: You specified removing the entire regular todo list. You should instead do chartodo cleartodo."
+            "WARNING: You specified removing the entire regular todo list. You should instead do chartodo cleartodo."
         )
         .expect("writeln failed");
 
@@ -188,8 +189,10 @@ pub fn regular_tasks_remove_todo(todo_to_remove: Vec<String>) -> bool {
     }
 
     // remove each item one by one
-    todos_to_remove.iter().for_each(|position| {
-        regular_tasks.todo.remove(*position - 1);
+    todo_to_remove.iter().rev().for_each(|position| {
+        regular_tasks
+            .todo
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
 
     // write changes to file

@@ -1,7 +1,7 @@
 use super::regular_helpers::*;
 use std::io::Write;
 
-pub fn regular_tasks_remove_done(done_remove: Vec<String>) -> bool {
+pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -22,42 +22,41 @@ pub fn regular_tasks_remove_done(done_remove: Vec<String>) -> bool {
     }
 
     // filter for viable items
-    let mut dones_to_remove: Vec<usize> = vec![];
-    done_remove.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= regular_tasks.done.len()
+    for i in (0..done_to_remove.len()).rev() {
+        if done_to_remove.get(i).unwrap().parse::<usize>().is_err()
+            || done_to_remove.get(i).unwrap().is_empty() // this will never trigger smh
+            || done_to_remove.get(i).unwrap().parse::<usize>().unwrap() == 0
+            || done_to_remove.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.todo.len()
         {
-            dones_to_remove.push(item.parse().unwrap());
+            done_to_remove.swap_remove(i);
         }
-    });
-    drop(done_remove);
+    }
 
     // check if all args were invalid
-    if dones_to_remove.is_empty() {
+    if done_to_remove.is_empty() {
         writeln!(writer, "ERROR: None of the positions you gave were valid -- they were all either negatize, zero, or exceeded the regular done list's length.").expect("writeln failed");
 
         // error = true
         return true;
     }
 
-    // reverse sort
-    dones_to_remove.sort();
-    dones_to_remove.reverse();
-    dones_to_remove.dedup();
+    // sort and dedup
+    done_to_remove.sort();
+    done_to_remove.dedup();
 
     // check if user wants to remove all of the items
-    if dones_to_remove.len() >= regular_tasks.done.len() && regular_tasks.done.len() > 10 {
-        writeln!(writer, "ERROR: You've specified removing the entire regular done list. You should do chartodo cleardone.").expect("writeln failed");
+    if done_to_remove.len() >= regular_tasks.done.len() && regular_tasks.done.len() > 5 {
+        writeln!(writer, "WARNING: You've specified removing the entire regular done list. You should do chartodo cleardone.").expect("writeln failed");
 
         // error = true
         return true;
     }
 
     // remove each item one by one
-    dones_to_remove.iter().for_each(|position| {
-        regular_tasks.done.remove(*position - 1);
+    done_to_remove.iter().rev().for_each(|position| {
+        regular_tasks
+            .done
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
 
     // write changes to file
@@ -67,7 +66,7 @@ pub fn regular_tasks_remove_done(done_remove: Vec<String>) -> bool {
     false
 }
 
-pub fn regular_tasks_not_done(done_to_todo: Vec<String>) -> bool {
+pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -84,36 +83,33 @@ pub fn regular_tasks_not_done(done_to_todo: Vec<String>) -> bool {
     }
 
     // filter for viable items
-    let mut dones_to_todos: Vec<usize> = vec![];
-    done_to_todo.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= regular_tasks.done.len()
+    for i in (0..done_to_todo.len()).rev() {
+        if done_to_todo.get(i).unwrap().parse::<usize>().is_err()
+            || done_to_todo.get(i).unwrap().is_empty() // this will never trigger smh
+            || done_to_todo.get(i).unwrap().parse::<usize>().unwrap() == 0
+            || done_to_todo.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.todo.len()
         {
-            dones_to_todos.push(item.parse().unwrap());
+            done_to_todo.swap_remove(i);
         }
-    });
-    drop(done_to_todo);
+    }
 
     // check if all args were invalid
-    if dones_to_todos.is_empty() {
+    if done_to_todo.is_empty() {
         writeln!(writer, "ERROR: None of the positions you gave were valid -- they were all either negative, zero, or exceeded the regular done list's length.").expect("writeln failed");
 
         // error = true
         return true;
     }
 
-    // reverse sort
-    dones_to_todos.sort();
-    dones_to_todos.reverse();
-    dones_to_todos.dedup();
+    // sort and dedup
+    done_to_todo.sort();
+    done_to_todo.dedup();
 
     // check if user wants to remove all done items to todo
-    if dones_to_todos.len() >= regular_tasks.done.len() && regular_tasks.done.len() > 10 {
+    if done_to_todo.len() >= regular_tasks.done.len() && regular_tasks.done.len() > 5 {
         writeln!(
             writer,
-            "ERROR: you've specified reversing the entire regular done list back to todo. You should do chartodo notdoneall."
+            "WARNING: you've specified reversing the entire regular done list back to todo. You should do chartodo notdoneall."
         )
         .expect("writeln failed");
 
@@ -122,11 +118,17 @@ pub fn regular_tasks_not_done(done_to_todo: Vec<String>) -> bool {
     }
 
     // reverse dones one by one
-    dones_to_todos.iter().for_each(|position| {
+    done_to_todo.iter().rev().for_each(|position| {
+        regular_tasks.todo.push(
+            regular_tasks
+                .done
+                .get(position.parse::<usize>().unwrap() - 1)
+                .unwrap()
+                .clone(),
+        );
         regular_tasks
-            .todo
-            .push(regular_tasks.done.get(*position - 1).unwrap().clone());
-        regular_tasks.done.remove(*position - 1);
+            .done
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
 
     // write changes to file
