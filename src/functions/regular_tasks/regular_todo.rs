@@ -98,7 +98,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     if todo_to_done.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "WARNING: you've specified marking the entire regular todo list as done. You should do chartodo doneall."
+            "WARNING: you've specified marking the entire regular todo list as done. You should do chartodo doneall. regular_tasks len: {}. content of regular tasks todo list: {}", regular_tasks.todo.len(), regular_tasks.todo.get(0).unwrap().task
         )
         .expect("writeln failed");
 
@@ -358,4 +358,330 @@ pub fn regular_tasks_edit_todo(position_and_new: Vec<String>) -> bool {
 
     // error = false
     false
+}
+
+// cargo test regular_todo_unit_tests -- --test-threads=1
+#[cfg(test)]
+mod regular_todo_unit_tests {
+    use super::*;
+    use anyhow::Context;
+    use std::{fs::File, io::BufWriter, path::PathBuf, thread, time::Duration};
+
+    // these are taken from regular_helpers
+    fn path_to_regular_tasks() -> PathBuf {
+        // get the data dir XDG spec and return it with path to regular_tasks.json
+        let mut regular_tasks_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        regular_tasks_path.push("chartodo/regular_tasks.json");
+
+        regular_tasks_path
+    }
+
+    fn regular_tasks_copy_path() -> PathBuf {
+        // get the path for regular_tasks_copy.json, which will be used to hold the original contents
+        // of regular_tasks.json while it's getting modified
+        let mut regular_tasks_copy_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        regular_tasks_copy_path.push("chartodo/regular_tasks_copy.json");
+
+        regular_tasks_copy_path
+    }
+
+    // these have been tested in other fns, these are just included here as a sanity check
+    #[test]
+    fn regular_tasks_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/regular_tasks.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks.json";
+        let mut got_regular_tasks_path: bool = false;
+        let regular_path = path_to_regular_tasks();
+        let regular_path = regular_path.to_str().unwrap();
+
+        if regular_path.contains(linux_path) {
+            got_regular_tasks_path = true;
+        } else if regular_path.contains(windows_path) {
+            got_regular_tasks_path = true;
+        } else if regular_path.contains(mac_path) {
+            got_regular_tasks_path = true;
+        }
+
+        assert!(got_regular_tasks_path);
+    }
+
+    #[test]
+    fn regular_tasks_copy_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/regular_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks_copy.json";
+        let mut got_regular_tasks_copy_path: bool = false;
+        let regular_tasks_copy_path = regular_tasks_copy_path();
+        let regular_tasks_copy_path = regular_tasks_copy_path.to_str().unwrap();
+
+        if regular_tasks_copy_path.contains(linux_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(windows_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(mac_path) {
+            got_regular_tasks_copy_path = true;
+        }
+
+        assert!(got_regular_tasks_copy_path);
+    }
+
+    // note that i've thought about testing whether or not the copy file was correct
+    // it'd be a bit redundant, but it's something I could do as an extra sanity check
+    #[test]
+    fn aaaa_regular_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(regular_tasks_copy_path())
+            .context("failed to create regular_tasks_copy.json")
+            .expect("failed to create a copy during unit test");
+
+        std::fs::copy(path_to_regular_tasks(), regular_tasks_copy_path())
+            .context("failed to copy regular_tasks.json to regular_tasks_copy.json")
+            .expect("failed to copy original file to copy file during unit test");
+    }
+
+    // note that I won't test for successful cases, aka error false, since they print to terminal and modify files as a result of user input,
+    // and those can be largely captured by integration tests
+    // it's easy to bool check unsuccessful cases since i don't have to also check for modified files afterwards
+    // anything that could be checked for correct printing, for cases successful and unsuccessful, can also be done by integration testing
+
+    // successful cases, like unsuccessful cases, can also be bool tested, but i don't wanna do that
+    // i'm too lazy
+    // i could also check for correct printing for unsuccessful cases here. maybe, maybe not
+    #[test]
+    fn adding_regular_tasks_todo_is_correct() {
+        // this is 101 characters long
+        let arguments: Vec<String> = vec![String::from("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")];
+        let error_should_be_true = regular_tasks_add_todo(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    // needed for some paths
+    const CHARTODO_PATH: &str = "linux: $HOME/.local/share/chartodo/
+        windows: C:/Users/your_user/AppData/Local/chartodo/
+        mac: /Users/your_user/Library/Application Support/chartodo/";
+    #[test]
+    fn regular_tasks_todo_to_done_no_valid_arguments() {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this is the todo list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+            "#;
+
+        let open_regular_tasks_file = File::create(path_to_regular_tasks())
+            .with_context(|| {
+                format!(
+                    "couldn't open regular_tasks.json in the following directories:
+                        {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("couldn't open regular_tasks.json file");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+                context(
+                        "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                    ).
+                expect("changing str to tasks struct failed");
+
+        let mut write_to_file = BufWriter::new(open_regular_tasks_file);
+        serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
+            .with_context(|| {
+                format!(
+                    "failed to write fresh regular tasks to new regular_tasks json file in:
+                {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("failed to write fresh regular tasks to regular_tasks json file");
+
+        // check that invalid arguments are in fact invalid
+        let arguments = vec![String::from("-1"), String::from("0"), String::from("2")];
+        let error_should_be_true = regular_tasks_change_todo_to_done(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn regular_tasks_todo_to_done_should_do_doneall() {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+        {
+            "todo": [
+                {
+                    "task": "poopy",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                },
+                {
+                    "task": "1this is the todo list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                },
+                {
+                    "task": "2this is the todo list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                },
+                {
+                    "task": "3this is the todo list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                },
+                {
+                    "task": "4this is the todo list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                },
+                {
+                    "task": "5this is the todo list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                }
+            ],
+            "done": [
+                {
+                    "task": "this is the done list",
+                    "date": null,
+                    "time": null,
+                    "repeat_number": null,
+                    "repeat_unit": null,
+                    "repeat_done": null,
+                    "repeat_original_date": null,
+                    "repeat_original_time": null
+                }
+            ]
+        }
+        "#;
+
+        let open_regular_tasks_file = File::create(path_to_regular_tasks())
+            .with_context(|| {
+                format!(
+                    "couldn't open regular_tasks.json in the following directories:
+                    {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("couldn't open regular_tasks.json file");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+            context(
+                    "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+                ).
+            expect("changing str to tasks struct failed");
+
+        let mut write_to_file = BufWriter::new(open_regular_tasks_file);
+        serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
+            .with_context(|| {
+                format!(
+                    "failed to write fresh regular tasks to new regular_tasks json file in:
+            {}",
+                    CHARTODO_PATH
+                )
+            })
+            .expect("failed to write fresh regular tasks to regular_tasks json file");
+
+        thread::sleep(Duration::from_millis(3000));
+
+        // check that user should in fact do chartodo doneall
+        let arguments = vec![
+            String::from("1"),
+            String::from("2"),
+            String::from("3"),
+            String::from("4"),
+            String::from("5"),
+            String::from("6"),
+            String::from("7"),
+        ];
+        let error_should_be_true = regular_tasks_change_todo_to_done(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, remove the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_regular_tasks())
+            .context("failed delete modified regular_tasks.json after running tests")
+            .expect("failed to delete regular_tasks.json after regular_helpers unit tests");
+
+        std::fs::rename(regular_tasks_copy_path(), path_to_regular_tasks())
+            .context("failed to rename regular_tasks_copy to regular_tasks")
+            .expect("failed to rename regular_tasks_copy to regular_tasks after tests were done");
+    }
 }

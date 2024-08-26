@@ -509,7 +509,7 @@ mod regular_helpers_unit_tests {
     #[test]
     fn zzzz_rename_copy_to_original() {
         // name is zzzz so it's done last
-        // now that tests are done, rename the modified original and rename copy to original
+        // now that tests are done, remove the modified original and rename copy to original
 
         std::fs::remove_file(path_to_regular_tasks())
             .context("failed delete modified regular_tasks.json after running tests")
