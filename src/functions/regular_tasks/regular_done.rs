@@ -197,3 +197,116 @@ pub fn regular_tasks_reverse_all_dones() -> bool {
     // error = false
     false
 }
+
+// cargo test regular_done_unit_tests -- --test-threads=1
+#[cfg(test)]
+mod regular_done_unit_tests {
+    use super::*;
+    use anyhow::Context;
+    use std::path::PathBuf;
+
+    // these are taken from regular_helpers
+    fn path_to_regular_tasks() -> PathBuf {
+        // get the data dir XDG spec and return it with path to regular_tasks.json
+        let mut regular_tasks_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        regular_tasks_path.push("chartodo/regular_tasks.json");
+
+        regular_tasks_path
+    }
+
+    fn regular_tasks_copy_path() -> PathBuf {
+        // get the path for regular_tasks_copy.json, which will be used to hold the original contents
+        // of regular_tasks.json while it's getting modified
+        let mut regular_tasks_copy_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        regular_tasks_copy_path.push("chartodo/regular_tasks_copy.json");
+
+        regular_tasks_copy_path
+    }
+
+    // these have been tested in other fns, these are just included here as a sanity check
+    #[test]
+    fn regular_tasks_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/regular_tasks.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks.json";
+        let mut got_regular_tasks_path: bool = false;
+        let regular_path = path_to_regular_tasks();
+        let regular_path = regular_path.to_str().unwrap();
+
+        if regular_path.contains(linux_path) {
+            got_regular_tasks_path = true;
+        } else if regular_path.contains(windows_path) {
+            got_regular_tasks_path = true;
+        } else if regular_path.contains(mac_path) {
+            got_regular_tasks_path = true;
+        }
+
+        assert!(got_regular_tasks_path);
+    }
+
+    #[test]
+    fn regular_tasks_copy_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/regular_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks_copy.json";
+        let mut got_regular_tasks_copy_path: bool = false;
+        let regular_tasks_copy_path = regular_tasks_copy_path();
+        let regular_tasks_copy_path = regular_tasks_copy_path.to_str().unwrap();
+
+        if regular_tasks_copy_path.contains(linux_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(windows_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(mac_path) {
+            got_regular_tasks_copy_path = true;
+        }
+
+        assert!(got_regular_tasks_copy_path);
+    }
+
+    #[test]
+    fn aaaa_regular_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(regular_tasks_copy_path())
+            .context("failed to create regular_tasks_copy.json")
+            .expect("failed to create a copy during unit test");
+
+        std::fs::copy(path_to_regular_tasks(), regular_tasks_copy_path())
+            .context("failed to copy regular_tasks.json to regular_tasks_copy.json")
+            .expect("failed to copy original file to copy file during unit test");
+    }
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, remove the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_regular_tasks())
+            .context("failed delete modified regular_tasks.json after running tests")
+            .expect("failed to delete regular_tasks.json after regular_helpers unit tests");
+
+        std::fs::rename(regular_tasks_copy_path(), path_to_regular_tasks())
+            .context("failed to rename regular_tasks_copy to regular_tasks")
+            .expect("failed to rename regular_tasks_copy to regular_tasks after tests were done");
+    }
+}
