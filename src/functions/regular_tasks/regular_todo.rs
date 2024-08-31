@@ -583,7 +583,6 @@ mod regular_todo_unit_tests {
                         "repeat_original_date": null,
                         "repeat_original_time": null
                     },
-
                     {
                         "task": "poopy3",
                         "date": null,
@@ -594,7 +593,6 @@ mod regular_todo_unit_tests {
                         "repeat_original_date": null,
                         "repeat_original_time": null
                     },
-                
                     {
                         "task": "poopy4",
                         "date": null,
@@ -605,7 +603,6 @@ mod regular_todo_unit_tests {
                         "repeat_original_date": null,
                         "repeat_original_time": null
                     },
-                
                     {
                         "task": "poopy5",
                         "date": null,
