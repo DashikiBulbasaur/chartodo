@@ -275,11 +275,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-add" | "rp-a" => {
-            repeating_tasks_add(
+            let error_status = repeating_tasks_add(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-add")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-addstart" | "rp-as" => {

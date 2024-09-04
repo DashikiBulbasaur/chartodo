@@ -34,7 +34,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
 
     // check if all args were invalid
     if done_to_remove.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you gave were valid -- they were all either negatize, zero, or exceeded the regular done list's length. content of regular done: {}", regular_tasks.done.get(0).unwrap().task).expect("writeln failed");
+        writeln!(writer, "ERROR: None of the positions you gave were valid -- they were all either negatize, zero, or exceeded the regular done list's length").expect("writeln failed");
 
         // error = true
         return true;

@@ -11,37 +11,29 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // add todos
-    // note that I could compare the len of regular_tasks before and after this operation,
-    // but checking using bool is I think simpler and more performant
-    let mut tasks_added = false;
-    add_todo.iter().for_each(|item| {
-        // check if the task is under max allowed len (100)
-        if item.as_str().len() <= 100 {
-            // a task was added. could I just skip the if and do tasks_added = true and would it matter?
-            // note that I don't think it would change much and this might be better
-            if !tasks_added {
-                tasks_added = true;
-            }
+    let mut index: usize = 0;
+    // i can't do an iter for each loop since i can't return from inside a closure
+    while index < add_todo.len() {
+        if add_todo.get(index).unwrap().len() > 100 {
+            writeln!(writer, "ERROR: task '{}' was {} characters long, which is over the task max-character-len of 100. A max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.", add_todo.get(index).unwrap(), add_todo.get(index).unwrap().len()).expect("writeln failed");
 
-            let new_task = Task {
-                task: item.to_string(),
-                date: None,
-                time: None,
-                repeat_number: None,
-                repeat_unit: None,
-                repeat_done: None,
-                repeat_original_date: None,
-                repeat_original_time: None,
-            };
-            regular_tasks.todo.push(new_task);
+            // error = true
+            return true;
         }
-    });
 
-    if !tasks_added {
-        writeln!(writer, "ERROR: All of the regular task items you wanted to add exceeded the max character len of 100. This error is just to notify you that none were added. The max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.").expect("writeln failed");
+        let new_task = Task {
+            task: add_todo.get(index).unwrap().to_string(),
+            date: None,
+            time: None,
+            repeat_number: None,
+            repeat_unit: None,
+            repeat_done: None,
+            repeat_original_date: None,
+            repeat_original_time: None,
+        };
+        regular_tasks.todo.push(new_task);
 
-        // error = true
-        return true;
+        index += 1;
     }
 
     // write changes to file
@@ -72,6 +64,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     }
 
     // filter for viable items
+    // rev cuz i want the indices to be viable after swap removing
     for i in (0..todo_to_done.len()).rev() {
         if todo_to_done.get(i).unwrap().parse::<usize>().is_err()
             || todo_to_done.get(i).unwrap().is_empty() // this will never trigger smh
@@ -471,6 +464,15 @@ mod regular_todo_unit_tests {
     fn adding_regular_tasks_todo_is_correct() {
         // this is 101 characters long
         let arguments: Vec<String> = vec![String::from("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")];
+        let error_should_be_true = regular_tasks_add_todo(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn regular_tasks_adding_fails_correctly() {
+        // this is 101 characters long
+        let arguments: Vec<String> = vec![String::from("a"), String::from("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), String::from("aa")];
         let error_should_be_true = regular_tasks_add_todo(arguments);
 
         assert!(error_should_be_true);

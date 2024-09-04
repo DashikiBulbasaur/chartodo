@@ -27,13 +27,12 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
         return true;
     }
 
-    // check how many sets of arguments there are
-    let mut counter = add.len() / 3;
-
+    // the logic for this is that the arguments will be divisible by three if the user did them correctly,
+    // thus the arguments will have sets of threes.
+    // knowing this, just know how many sets there are and you can access each part of the set using indices
+    let mut counter: usize = 1;
     // loop thru the deadline args and parse for correctness
-    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_deadlines: Vec<Task> = vec![];
-    while counter > 0 {
+    while counter <= add.len() / 3 {
         // note for interviews: my first instinct was to keep accessing last elem and delete as i go
 
         // time: get counter * 3 - 1
@@ -55,26 +54,22 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
         // check time. if correct, add to struct
         // note that, for micro-optimization purposes, i'm choosing to access the index multiple times instead of assigning
         // it to a variable. con: this has less readability
-        match NaiveTime::parse_from_str(add.get(counter * 3 - 1).unwrap().as_str(), "%H:%M") {
-            Ok(time) => time,
-            Err(_) => {
-                writeln!(writer, "ERROR: Your specified time for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter, add.get(counter * 3 - 1).unwrap().as_str()).expect("writeln failed");
+        if NaiveTime::parse_from_str(add.get(counter * 3 - 1).unwrap().as_str(), "%H:%M").is_err() {
+            writeln!(writer, "ERROR: Your specified time for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter, add.get(counter * 3 - 1).unwrap().as_str()).expect("writeln failed");
 
-                // error = true
-                return true;
-            }
-        };
+            // error = true
+            return true;
+        }
         deadline_task.time = Some(add.get(counter * 3 - 1).unwrap().to_string());
 
         // check date and add to struct
-        match NaiveDate::parse_from_str(add.get(counter * 3 - 2).unwrap().as_str(), "%Y-%m-%d") {
-            Ok(date) => date,
-            Err(_) => {
-                writeln!(writer, "ERROR: Your specified date for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter, add.get(counter * 3 - 2).unwrap().as_str()).expect("writeln failed");
+        if NaiveDate::parse_from_str(add.get(counter * 3 - 2).unwrap().as_str(), "%Y-%m-%d")
+            .is_err()
+        {
+            writeln!(writer, "ERROR: Your specified date for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter, add.get(counter * 3 - 2).unwrap().as_str()).expect("writeln failed");
 
-                // error = true
-                return true;
-            }
+            // error = true
+            return true;
         };
         deadline_task.date = Some(add.get(counter * 3 - 2).unwrap().to_string());
 
@@ -87,16 +82,11 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
         };
         deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string();
 
-        // push new correct Task to a vec
-        new_deadlines.push(deadline_task);
+        // push new correct Task to deadline tasks
+        deadline_tasks.todo.push(deadline_task);
 
-        counter -= 1;
+        counter += 1;
     }
-
-    // one by one, add new deadline tasks
-    new_deadlines
-        .iter()
-        .for_each(|task| deadline_tasks.todo.push(task.to_owned()));
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);

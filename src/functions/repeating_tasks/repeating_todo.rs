@@ -5,7 +5,7 @@ use std::io::Write;
 
 // chartodo rp-a rp_task_1 3 days rp_task_2 4 days => len % 3
 
-pub fn repeating_tasks_add(add: Vec<String>) {
+pub fn repeating_tasks_add(add: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -16,16 +16,14 @@ pub fn repeating_tasks_add(add: Vec<String>) {
     // check if we have the right # of args
     // note/potential todo: i'd like to remove division here but idk what else to do lol
     if add.len() % 3 != 0 {
-        return writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task. Proper example: chartodo rp-a new-item 3 days. Another: chartodo rp-a new-item 3 days another-item 4 years. After the command rp-a, there should be 3, 6, 9, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task. Proper example: chartodo rp-a new-item 3 days. Another: chartodo rp-a new-item 3 days another-item 4 years. After the command rp-a, there should be 3, 6, 9, etc. arguments.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check how many sets of arguments there are
     let mut counter = add.len() / 3;
-
-    // check if adding to repeating would overflow it past 15
-    if counter + repeating_tasks.todo.len() > 15 {
-        return writeln!(writer, "You're trying to add too many repeating tasks, as it would exceed the repeating todo list's max len of 15. Try removing at least {} items.", 15 - repeating_tasks.todo.len()).expect("writeln failed");
-    }
 
     // loop thru the deadline args and parse for correctness
     // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
@@ -39,22 +37,36 @@ pub fn repeating_tasks_add(add: Vec<String>) {
 
         // check if the unit is proper
         match add.get(counter * 3 - 1).unwrap().as_str() {
-            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week" | "months" | "month" | "years" | "year" => (),
-            _ => return writeln!(writer, "ERROR: You didn't provide a proper time unit. It has to be one of the following: minutes, hours, days, weeks, months, years.
-                NOTE: nothing on the list below changed.").expect("writeln failed")
+            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
+            | "months" | "month" | "years" | "year" => (),
+            _ => {
+                writeln!(writer, "ERROR: You didn't provide a proper time unit. It has to be one of the following: minutes, hours, days, weeks, months, years.
+                NOTE: nothing on the list below changed.").expect("writeln failed");
+
+                // error = true
+                return true;
+            }
         }
 
         // check if the interval is proper. has to be u32
         let interval: u32 = match add.get(counter * 3 - 2).unwrap().parse() {
             Ok(number) => number,
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper interval for your repeating task. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-a gym 2 days.
-                NOTE: nothing on the list below changed.").expect("writeln failed"),
+            Err(_) => {
+                writeln!(writer, "ERROR: You didn't provide a proper interval for your repeating task. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-a gym 2 days.
+                NOTE: nothing on the list below changed.").expect("writeln failed");
+
+                // error = true
+                return true;
+            }
         };
 
         // check if interval is 0
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().unwrap() == 0 {
-            return writeln!(writer, "ERROR: You can't have an interval of 0, otherwise why are you even making a new repeating task?
+            writeln!(writer, "ERROR: You can't have an interval of 0, otherwise why are you even making a new repeating task?
                 NOTE: nothing on the list below changed.").expect("writeln failed");
+
+            // error = true
+            return true;
         }
 
         // create new Task struct
@@ -69,10 +81,13 @@ pub fn repeating_tasks_add(add: Vec<String>) {
             repeat_original_time: None,
         };
 
-        // check task is not over 40 chars. add to struct
-        if add.get(counter * 3 - 3).unwrap().len() > 40 {
-            return writeln!(writer, "ERROR: Your specified repeating task in argument set {} was over 40 characters long, which is not allowed.
+        // check task is not over 100 chars. add to struct
+        if add.get(counter * 3 - 3).unwrap().len() > 100 {
+            writeln!(writer, "ERROR: Your specified repeating task in argument set {} was over 40 characters long, which is not allowed.
                 NOTE: nothing on the list below changed.", counter).expect("writeln failed");
+
+            // error = true
+            return true;
         };
         repeating_task.task = add.get(counter * 3 - 3).unwrap().to_string();
 
@@ -103,6 +118,9 @@ pub fn repeating_tasks_add(add: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
 fn add_to_local_now(interval: u32, unit: String) -> (String, String, String, String) {
