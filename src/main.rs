@@ -159,27 +159,36 @@ fn main() -> Result<()> {
             Ok(())
         }
         "deadline-addonlydate" | "dl-aod" => {
-            deadline_tasks_add_no_time(
+            let error_status = deadline_tasks_add_no_time(
                 args.item_identifier
                     .context("didn't provide a deadline-addonlydate argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-addonlytime" | "dl-aot" => {
-            deadline_tasks_add_no_date(
+            let error_status = deadline_tasks_add_no_date(
                 args.item_identifier
                     .context("didn't provide a deadline-addonlytime argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-done" | "dl-d" => {
-            deadline_tasks_done(
+            let error_status = deadline_tasks_done(
                 args.item_identifier
                     .context("didn't provide a deadline-done argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-rmtodo" | "dl-rmt" => {

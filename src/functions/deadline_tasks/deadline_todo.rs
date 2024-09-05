@@ -34,6 +34,7 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
     // loop thru the deadline args and parse for correctness
     while counter <= add.len() / 3 {
         // note for interviews: my first instinct was to keep accessing last elem and delete as i go
+        // this also used to access from reverse
 
         // time: get counter * 3 - 1
         // date: get counter * 3 - 2
@@ -54,33 +55,37 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
         // check time. if correct, add to struct
         // note that, for micro-optimization purposes, i'm choosing to access the index multiple times instead of assigning
         // it to a variable. con: this has less readability
-        if NaiveTime::parse_from_str(add.get(counter * 3 - 1).unwrap().as_str(), "%H:%M").is_err() {
-            writeln!(writer, "ERROR: Your specified time for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter, add.get(counter * 3 - 1).unwrap().as_str()).expect("writeln failed");
+        match NaiveTime::parse_from_str(add.get(counter * 3 - 1).unwrap().as_str(), "%H:%M") {
+            Ok(_) => deadline_task.time = Some(add.get(counter * 3 - 1).unwrap().to_string()),
+            Err(_) => {
+                writeln!(writer, "ERROR: Your specified time for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter, add.get(counter * 3 - 1).unwrap().as_str()).expect("writeln failed");
 
-            // error = true
-            return true;
+                // error = true
+                return true;
+            }
         }
-        deadline_task.time = Some(add.get(counter * 3 - 1).unwrap().to_string());
 
         // check date and add to struct
-        if NaiveDate::parse_from_str(add.get(counter * 3 - 2).unwrap().as_str(), "%Y-%m-%d")
-            .is_err()
-        {
-            writeln!(writer, "ERROR: Your specified date for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter, add.get(counter * 3 - 2).unwrap().as_str()).expect("writeln failed");
+        match NaiveDate::parse_from_str(add.get(counter * 3 - 2).unwrap().as_str(), "%Y-%m-%d") {
+            Ok(_) => deadline_task.date = Some(add.get(counter * 3 - 2).unwrap().to_string()),
+            Err(_) => {
+                writeln!(writer, "ERROR: Your specified date for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter, add.get(counter * 3 - 2).unwrap().as_str()).expect("writeln failed");
 
-            // error = true
-            return true;
-        };
-        deadline_task.date = Some(add.get(counter * 3 - 2).unwrap().to_string());
+                // error = true
+                return true;
+            }
+        }
 
         // check task is not over 100 chars. add to struct
-        if add.get(counter * 3 - 3).unwrap().len() > 100 {
-            writeln!(writer, "The new deadline task you wanted to add in argument set {}, '{}',  was over 100 characters long, which is not allowed.", counter, add.get(counter * 3 - 3).unwrap().as_str()).expect("writeln failed");
+        match add.get(counter * 3 - 3).unwrap().len() < 100 {
+            true => deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string(),
+            false => {
+                writeln!(writer, "ERROR: The new deadline task you wanted to add in argument set {}, '{}',  was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.", counter, add.get(counter * 3 - 3).unwrap().as_str()).expect("writeln failed");
 
-            // error = true
-            return true;
-        };
-        deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string();
+                // error = true
+                return true;
+            }
+        }
 
         // push new correct Task to deadline tasks
         deadline_tasks.todo.push(deadline_task);
@@ -95,7 +100,7 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
     false
 }
 
-pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) {
+pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -105,16 +110,15 @@ pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) {
 
     // check if right # of arguments
     if add_no_time.len() % 2 != 0 {
-        return writeln!(writer, "You don't have the right amount of arguments when adding a deadline task w/ no time. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01. After the command dl-ant, there should be 2, 4, 6, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task w/ no time. You should have 2, 4, 6, etc. (i.e., divisible by 2) arguments. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // check how many sets of arguments there are
-    let mut counter = add_no_time.len() / 2;
-
+    let mut counter: usize = 1;
     // loop thru the deadline args and parse for correctness
-    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_deadlines: Vec<Task> = vec![];
-    while counter > 0 {
+    while counter <= add_no_time.len() / 2 {
         // note for interviews: my first instinct was to keep accessing last elem and delete as i go
 
         // date: get counter * 2 - 1
@@ -133,39 +137,49 @@ pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) {
         };
 
         // check date and add to struct
-        let date: NaiveDate = match add_no_time.get(counter * 2 - 1).unwrap().parse() {
-            Ok(yes) => yes,
-            Err(_) => return writeln!(writer, "Your specified date in argument set {} was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter).expect("writeln failed"),
-        };
-        deadline_task.date = Some(date.to_string());
+        match NaiveDate::parse_from_str(
+            add_no_time.get(counter * 2 - 1).unwrap().as_str(),
+            "%Y-%m-%d",
+        ) {
+            Ok(_) => {
+                deadline_task.date = Some(add_no_time.get(counter * 2 - 1).unwrap().to_string())
+            }
+            Err(_) => {
+                writeln!(writer, "ERROR: Your specified date in argument set {}, '{}', was invalid. Please provide a correct time in a year-month-day format, e.g. 2099-12-12.", counter, add_no_time.get(counter * 2 - 1).unwrap()).expect("writeln failed");
 
-        // check task is not over 40 chars. add to struct
-        if add_no_time.get(counter * 2 - 2).unwrap().len() > 40 {
-            return writeln!(writer, "Your specified deadline task in argument set {} was over 40 characters long, which is not allowed.", counter).expect("writeln failed");
-        };
-        deadline_task.task = add_no_time.get(counter * 2 - 2).unwrap().to_string();
+                // error = true
+                return true;
+            }
+        }
+
+        // check task is not over 100 chars. add to struct
+        match add_no_time.get(counter * 2 - 2).unwrap().len() < 100 {
+            true => deadline_task.task = add_no_time.get(counter * 2 - 2).unwrap().to_string(),
+            false => {
+                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.", counter, add_no_time.get(counter * 2 - 2).unwrap()).expect("writeln failed");
+
+                // error = true
+                return true;
+            }
+        }
 
         // default time: 00:00
         deadline_task.time = Some("00:00".to_string());
 
         // push new correct Task to a vec
-        new_deadlines.push(deadline_task);
+        deadline_tasks.todo.push(deadline_task);
 
-        counter -= 1;
+        counter += 1;
     }
-    drop(add_no_time);
-
-    // one by one, add new deadline tasks
-    new_deadlines
-        .iter()
-        .for_each(|task| deadline_tasks.todo.push(task.to_owned()));
-    drop(new_deadlines);
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
-pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) {
+pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -175,16 +189,15 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) {
 
     // check if right # of arguments
     if add_no_date.len() % 2 != 0 {
-        return writeln!(writer, "You don't have the right amount of arguments when adding a deadline task w/ no time. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01. After the command dl-ant, there should be 2, 4, 6, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "You don't have the right amount of arguments when adding a deadline task w/ no time. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01. After the command dl-ant, there should be 2, 4, 6, etc. arguments.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // check how many sets of arguments there are
-    let mut counter = add_no_date.len() / 2;
-
+    let mut counter: usize = 1;
     // loop thru the deadline args and parse for correctness
-    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_deadlines: Vec<Task> = vec![];
-    while counter > 0 {
+    while counter <= add_no_date.len() / 2 {
         // note for interviews: my first instinct was to keep accessing last elem and delete as i go
 
         // time: get counter * 2 - 1
@@ -202,40 +215,48 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) {
             repeat_original_time: None,
         };
 
-        // check time. if correct, change format and add to struct
-        let time: NaiveTime = match add_no_date.get(counter * 2 - 1).unwrap().parse() {
-            Ok(yes) => yes,
-            Err(_) => return writeln!(writer, "Your specified time in argument set {} was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter).expect("writeln failed"),
-        };
-        deadline_task.time = Some(format!("{}", time.format("%H:%M")));
+        // check that time is proper
+        match NaiveTime::parse_from_str(add_no_date.get(counter * 2 - 1).unwrap().as_str(), "%H:%M")
+        {
+            Ok(_) => {
+                deadline_task.time = Some(add_no_date.get(counter * 2 - 1).unwrap().to_string())
+            }
+            Err(_) => {
+                writeln!(writer, "ERROR: Your specified time for a new deadline task in argument set {}, '{}', was invalid. Please provide a correct time in a 24-hour format, e.g. 20:05.", counter, add_no_date.get(counter * 2 - 1).unwrap()).expect("writeln failed");
 
-        // check task is not over 40 chars. add to struct
-        if add_no_date.get(counter * 2 - 2).unwrap().len() > 40 {
-            return writeln!(writer, "Your specified deadline task in argument set {} was over 40 characters long, which is not allowed.", counter).expect("writeln failed");
-        };
-        deadline_task.task = add_no_date.get(counter * 2 - 2).unwrap().to_string();
+                // error = true
+                return true;
+            }
+        }
+
+        // check that task isn't over 100 chars
+        match add_no_date.get(counter * 2 - 2).unwrap().len() < 100 {
+            true => deadline_task.task = add_no_date.get(counter * 2 - 2).unwrap().to_string(),
+            false => {
+                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed.", counter, add_no_date.get(counter * 2 - 2).unwrap()).expect("writeln failed");
+
+                // error = true
+                return true;
+            }
+        }
 
         // default day: Local::now
         deadline_task.date = Some(Local::now().date_naive().to_string());
 
         // push new correct Task to a vec
-        new_deadlines.push(deadline_task);
+        deadline_tasks.todo.push(deadline_task);
 
-        counter -= 1;
+        counter += 1;
     }
-    drop(add_no_date);
-
-    // one by one, add new deadline tasks
-    new_deadlines
-        .iter()
-        .for_each(|task| deadline_tasks.todo.push(task.to_owned()));
-    drop(new_deadlines);
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
-pub fn deadline_tasks_done(done: Vec<String>) {
+pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -245,55 +266,75 @@ pub fn deadline_tasks_done(done: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
             "The deadline todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // filter for viable positions
-    let mut dones: Vec<usize> = vec![];
-    done.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= deadline_tasks.todo.len()
+    for i in (0..done.len()).rev() {
+        if done.get(i).unwrap().parse::<usize>().is_err()
+            || done.get(i).unwrap().is_empty() // will never trigger
+            || done.get(i).unwrap().parse::<usize>().unwrap() == 0
+            || done.get(i).unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len()
         {
-            dones.push(item.parse().unwrap());
+            done.swap_remove(i);
         }
-    });
-    drop(done);
+    }
 
-    // reverse sort the positions
-    dones.sort();
-    dones.reverse();
-    dones.dedup();
+    // check if none of the args were valid
+    if done.is_empty() {
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
+
+        // error = true
+        return true;
+    }
+
+    // sort and dedup
+    done.sort();
+    done.dedup();
 
     // check if the user basically specified the entire list
-    if dones.len() >= deadline_tasks.todo.len() {
-        return writeln!(
+    if done.len() >= deadline_tasks.todo.len() && deadline_tasks.todo.len() > 5 {
+        writeln!(
             writer,
             "You've specified the entire list. Might as well do chartodo deadline-doneall"
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // if changing todos to done means the done list overflows, clear done list
-    if dones.len() + deadline_tasks.done.len() > 10 {
+    if done.len() + deadline_tasks.done.len() > 10 {
         deadline_tasks.done.clear();
     }
 
     // change todos to dones one by one
-    dones.iter().for_each(|position| {
+    done.iter().rev().for_each(|position| {
+        deadline_tasks.done.push(
+            deadline_tasks
+                .todo
+                .get(position.parse::<usize>().unwrap() - 1)
+                .unwrap()
+                .to_owned(),
+        );
         deadline_tasks
-            .done
-            .push(deadline_tasks.todo.get(*position - 1).unwrap().to_owned());
-        deadline_tasks.todo.remove(*position - 1);
+            .todo
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
 pub fn deadline_tasks_rmtodo(rmtodo: Vec<String>) {
