@@ -80,7 +80,7 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
         match add.get(counter * 3 - 3).unwrap().len() < 100 {
             true => deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string(),
             false => {
-                writeln!(writer, "ERROR: The new deadline task you wanted to add in argument set {}, '{}',  was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.", counter, add.get(counter * 3 - 3).unwrap().as_str()).expect("writeln failed");
+                writeln!(writer, "ERROR: The new deadline task you wanted to add in argument set {}, '{}',  was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", counter, add.get(counter * 3 - 3).unwrap().as_str()).expect("writeln failed");
 
                 // error = true
                 return true;
@@ -156,7 +156,7 @@ pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) -> bool {
         match add_no_time.get(counter * 2 - 2).unwrap().len() < 100 {
             true => deadline_task.task = add_no_time.get(counter * 2 - 2).unwrap().to_string(),
             false => {
-                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.", counter, add_no_time.get(counter * 2 - 2).unwrap()).expect("writeln failed");
+                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", counter, add_no_time.get(counter * 2 - 2).unwrap()).expect("writeln failed");
 
                 // error = true
                 return true;
@@ -189,7 +189,7 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
 
     // check if right # of arguments
     if add_no_date.len() % 2 != 0 {
-        writeln!(writer, "You don't have the right amount of arguments when adding a deadline task w/ no time. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01. After the command dl-ant, there should be 2, 4, 6, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task w/ no time. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01. After the command dl-ant, there should be 2, 4, 6, etc. arguments.").expect("writeln failed");
 
         // error = true
         return true;
@@ -233,7 +233,7 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
         match add_no_date.get(counter * 2 - 2).unwrap().len() < 100 {
             true => deadline_task.task = add_no_date.get(counter * 2 - 2).unwrap().to_string(),
             false => {
-                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed.", counter, add_no_date.get(counter * 2 - 2).unwrap()).expect("writeln failed");
+                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", counter, add_no_date.get(counter * 2 - 2).unwrap()).expect("writeln failed");
 
                 // error = true
                 return true;
@@ -268,7 +268,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     if deadline_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "The deadline todo list is currently empty. Try adding items to it first."
+            "ERROR: The deadline todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
 
@@ -303,7 +303,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     if done.len() >= deadline_tasks.todo.len() && deadline_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "You've specified the entire list. Might as well do chartodo deadline-doneall"
+            "WARNING: You've specified the entire list. Might as well do chartodo deadline-doneall"
         )
         .expect("writeln failed");
 
@@ -337,7 +337,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     false
 }
 
-pub fn deadline_tasks_rmtodo(rmtodo: Vec<String>) {
+pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -347,51 +347,66 @@ pub fn deadline_tasks_rmtodo(rmtodo: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The deadline todo list is currently empty. Try adding items to it first."
+            "ERROR: The deadline todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // filter for viable positions
-    let mut rmtodos: Vec<usize> = vec![];
-    rmtodo.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= deadline_tasks.todo.len()
+    for i in (0..rmtodo.len()).rev() {
+        if rmtodo.get(i).unwrap().parse::<usize>().is_err()
+            || rmtodo.get(i).unwrap().is_empty() // will never trigger
+            || rmtodo.get(i).unwrap().parse::<usize>().unwrap() == 0
+            || rmtodo.get(i).unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len()
         {
-            rmtodos.push(item.parse().unwrap());
+            rmtodo.swap_remove(i);
         }
-    });
-    drop(rmtodo);
+    }
+
+    // check if none of the args were valid
+    if rmtodo.is_empty() {
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
+
+        // error = true
+        return true;
+    }
 
     // reverse sort
-    rmtodos.sort();
-    rmtodos.reverse();
-    rmtodos.dedup();
+    rmtodo.sort();
+    rmtodo.dedup();
 
     // check if user wants to remove all of the items
-    if rmtodos.len() >= deadline_tasks.todo.len() {
-        return writeln!(
+    if rmtodo.len() >= deadline_tasks.todo.len() && deadline_tasks.todo.len() > 5 {
+        writeln!(
             writer,
-            "You might as well do deadline-cleartodo since you want to remove all of the items."
+            "WARNING: You might as well do deadline-cleartodo since you want to remove all of the items."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // remove each item one by one
-    rmtodos.iter().for_each(|position| {
-        deadline_tasks.todo.remove(*position - 1);
+    rmtodo.iter().rev().for_each(|position| {
+        deadline_tasks
+            .todo
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
-    drop(rmtodos);
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
-pub fn deadline_tasks_clear_todo() {
+pub fn deadline_tasks_clear_todo() -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -401,7 +416,10 @@ pub fn deadline_tasks_clear_todo() {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(writer, "The deadline todo list is currently empty. Try adding items to it first before removing any.").expect("writeln failed");
+        writeln!(writer, "ERROR: The deadline todo list is currently empty. Try adding items to it first before removing any.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear todo list
@@ -409,9 +427,12 @@ pub fn deadline_tasks_clear_todo() {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
-pub fn deadline_tasks_done_all() {
+pub fn deadline_tasks_done_all() -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -421,11 +442,14 @@ pub fn deadline_tasks_done_all() {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
             "The deadline todo list is currently empty, so you can't change any todos to done."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear done list if it will overflow
@@ -442,10 +466,13 @@ pub fn deadline_tasks_done_all() {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
 // TODO: I can technically give this and all edit commands argument chaining. I think why I haven't yet is just my own discretion
-pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) {
+pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -455,18 +482,26 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The deadline todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
+
+    // chartodo dl-ea 1 new_item 2150-01-01 00:01
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if position_task_date_time.len() != 4 {
-        return writeln!(writer, "You must specify the deadline todo's position and all the parameters that will be edited. A proper example would be: chartodo deadline-editall 4 new-item 2150-01-01 00:00.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position and all the parameters that will be edited. A proper example would be: chartodo deadline-editall 4 new-item 2150-01-01 00:00.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
@@ -476,12 +511,16 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) {
         .parse::<usize>()
         .is_err()
     {
-        return writeln!(
+        writeln!(
             writer,
-            "You must provide a viable position. Try something between 1 and {}",
+            "ERROR: '{}' isn't a valid position. Try something between 1 and {}.",
+            position_task_date_time.first().unwrap(),
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
@@ -492,11 +531,14 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) {
         .unwrap()
         == 0
     {
-        return writeln!(
+        writeln!(
             writer,
-            "Positions can't be zero. They have to be 1 and above."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
@@ -507,49 +549,45 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) {
         .unwrap()
         > deadline_tasks.todo.len()
     {
-        return writeln!(
+        writeln!(
             writer,
-            "Your position exceed's the todo list's length. Try something between 1 and {}",
-            deadline_tasks.todo.len()
+            "ERROR: Your position, '{}', exceed's the todo list's length. Try something between 1 and {}", position_task_date_time.first().unwrap(), deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // new item can't be more than 40 chars
-    if position_task_date_time.get(1).unwrap().len() > 40 {
-        return writeln!(
+    // new item can't be more than 100 chars
+    if position_task_date_time.get(1).unwrap().len() > 100 {
+        writeln!(
             writer,
-            "Editing a todo item to be more than 40 characters is not allowed"
+            "ERROR: '{}' is more than 100 characters long. Editing a todo item to be more than 100 characters is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long tasks. You can open an issue on github and request the max-character-len to be increased.", position_task_date_time.get(1).unwrap()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // date isn't proper
-    if position_task_date_time
-        .get(2)
-        .unwrap()
-        .parse::<NaiveDate>()
+    if NaiveDate::parse_from_str(position_task_date_time.get(2).unwrap().as_str(), "%Y-%m-%d")
         .is_err()
     {
-        return writeln!(
-            writer,
-            "The date provided isn't proper. It must be in a yy-mm-dd format."
-        )
-        .expect("writeln failed");
+        writeln!(writer, "ERROR: The date provided, '{}', isn't proper. It must be in a yy-mm-dd format, e.g., 2001-01-01", position_task_date_time.get(2).unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // time isn't proper
-    if position_task_date_time
-        .last()
-        .unwrap()
-        .parse::<NaiveTime>()
-        .is_err()
+    if NaiveTime::parse_from_str(position_task_date_time.last().unwrap().as_str(), "%H:%M").is_err()
     {
-        return writeln!(
-            writer,
-            "The time provided isn't proper. It must be in a 24-hour format, e.g., 23:08"
-        )
-        .expect("writeln failed");
+        writeln!(writer, "ERROR: The time provided, '{}', isn't proper. It must be in a 24-hour format, e.g., 23:08", position_task_date_time.last().unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // edit todo item
@@ -563,12 +601,15 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
 // note that I refuse to do all the combinations for editing a deadline task, and will do the same for repeating tasks
 // the only combinations i'm going to do are a) editing all the params, and b) editing only one param
 
-pub fn deadline_tasks_edit_task(position_task: Vec<String>) {
+pub fn deadline_tasks_edit_task(position_task: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -578,54 +619,69 @@ pub fn deadline_tasks_edit_task(position_task: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The deadline todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if position_task.len() != 2 {
-        return writeln!(writer, "You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-eta 4 new-item.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-eta 4 new-item.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if position_task.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "You must provide a viable position. Try something between 1 and {}",
+            "ERROR: '{}' isn't a valid position. Try something between 1 and {}.",
+            position_task.first().unwrap(),
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if position_task.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "Positions can't be zero. They have to be 1 and above."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if position_task.first().unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "Your position exceed's the todo list's length. Try something between 1 and {}",
-            deadline_tasks.todo.len()
+            "ERROR: Your position, '{}', exceed's the todo list's length. Try something between 1 and {}.", position_task.first().unwrap(), deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // new item can't be more than 40 chars
-    if position_task.last().unwrap().len() > 40 {
-        return writeln!(
+    // new item can't be more than 100 chars
+    if position_task.last().unwrap().len() > 100 {
+        writeln!(
             writer,
-            "Editing a todo item to be more than 40 characters is not allowed"
+            "ERROR: '{}' was more than 100 characters long. Editing a todo item to be more than 100 characters is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long tasks. You can open an issue on github and request the max-character-len to be increased.", position_task.last().unwrap()
         )
         .expect("writeln failed");
     }
@@ -637,9 +693,12 @@ pub fn deadline_tasks_edit_task(position_task: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
-pub fn deadline_tasks_edit_date(position_date: Vec<String>) {
+pub fn deadline_tasks_edit_date(position_date: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -649,56 +708,77 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The deadline todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if position_date.len() != 2 {
-        return writeln!(writer, "You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-ed 4 2150-01-01.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-ed 4 2150-01-01.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if position_date.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "You must provide a viable position. Try something between 1 and {}",
+            "ERROR: '{}' isn't a valid position. Try something between 1 and {}.",
+            position_date.first().unwrap(),
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if position_date.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "Positions can't be zero. They have to be 1 and above."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if position_date.first().unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "Your position exceed's the todo list's length. Try something between 1 and {}",
+            "Your position, '{}', exceed's the todo list's length. Try something between 1 and {}",
+            position_date.first().unwrap(),
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // date isn't proper
     if position_date.last().unwrap().parse::<NaiveDate>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "The date provided isn't proper. It must be in a yy-mm-dd format."
+            "The date provided, '{}', isn't proper. It must be in a yy-mm-dd format.",
+            position_date.last().unwrap()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // edit todo item
@@ -708,6 +788,9 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
 pub fn deadline_tasks_edit_time(position_time: Vec<String>) {

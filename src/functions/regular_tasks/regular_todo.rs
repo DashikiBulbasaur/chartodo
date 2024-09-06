@@ -15,7 +15,7 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) -> bool {
     // i can't do an iter for each loop since i can't return from inside a closure
     while index < add_todo.len() {
         if add_todo.get(index).unwrap().len() > 100 {
-            writeln!(writer, "ERROR: task '{}' was {} characters long, which is over the task max-character-len of 100. A max-character-len is imposed so that users don't accidentally create infinite-length items. You can open an issue on github and request the max-character-len to be increased.", add_todo.get(index).unwrap(), add_todo.get(index).unwrap().len()).expect("writeln failed");
+            writeln!(writer, "ERROR: task '{}' was {} characters long, which is over the task max-character-len of 100. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", add_todo.get(index).unwrap(), add_todo.get(index).unwrap().len()).expect("writeln failed");
 
             // error = true
             return true;
@@ -333,7 +333,7 @@ pub fn regular_tasks_edit_todo(position_and_new: Vec<String>) -> bool {
 
     // new regular task len must be <= 100
     if position_and_new.last().unwrap().len() > 100 {
-        writeln!(writer, "ERROR: Editing a regular task to be longer than 100 characters is not allowed. This is to impose a standard so that users can't accidentally create infinite-length tasks. You can open an issue on github and request for the max-character-len to be increased.").expect("writeln failed");
+        writeln!(writer, "ERROR: Editing a regular task to be longer than 100 characters is not allowed. This is to impose a standard so that users can't accidentally create extremely-long tasks. You can open an issue on github and request for the max-character-len to be increased.").expect("writeln failed");
 
         // error = true
         return true;

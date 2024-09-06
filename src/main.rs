@@ -192,45 +192,63 @@ fn main() -> Result<()> {
             Ok(())
         }
         "deadline-rmtodo" | "dl-rmt" => {
-            deadline_tasks_rmtodo(
+            let error_status = deadline_tasks_rmtodo(
                 args.item_identifier
                     .context("didn't provide a deadline-rmtodo argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-cleartodo" | "dl-ct" if args.item_identifier.is_none() => {
-            deadline_tasks_clear_todo();
-            list();
+            let error_status = deadline_tasks_clear_todo();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-doneall" | "dl-da" if args.item_identifier.is_none() => {
-            deadline_tasks_done_all();
-            list();
+            let error_status = deadline_tasks_done_all();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-editall" | "dl-ea" => {
-            deadline_tasks_edit_all(
+            let error_status = deadline_tasks_edit_all(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-editall")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-edittask" | "dl-eta" => {
-            deadline_tasks_edit_task(
+            let error_status = deadline_tasks_edit_task(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-edittask")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-editdate" | "dl-ed" => {
-            deadline_tasks_edit_date(
+            let error_status = deadline_tasks_edit_date(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-editdate")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-edittime" | "dl-eti" => {
