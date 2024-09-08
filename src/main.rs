@@ -252,11 +252,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "deadline-edittime" | "dl-eti" => {
-            deadline_tasks_edit_time(
+            let error_status = deadline_tasks_edit_time(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-edittime")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-clearboth" | "dl-cb" if args.item_identifier.is_none() => {
@@ -268,37 +271,52 @@ fn main() -> Result<()> {
             Ok(())
         }
         "deadline-rmdone" | "dl-rmd" => {
-            deadline_tasks_rmdone(
+            let error_status = deadline_tasks_rmdone(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-rmdone")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-notdone" | "dl-nd" => {
-            deadline_tasks_not_done(
+            let error_status = deadline_tasks_not_done(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-notdone")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-cleardone" | "dl-cd" if args.item_identifier.is_none() => {
-            deadline_tasks_clear_done();
-            list();
+            let error_status = deadline_tasks_clear_done();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-notdoneall" | "dl-nda" if args.item_identifier.is_none() => {
-            deadline_tasks_notdoneall();
-            list();
+            let error_status = deadline_tasks_notdoneall();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-editdatetime" | "dl-edt" => {
-            deadline_tasks_edit_datetime(
+            let error_status = deadline_tasks_edit_datetime(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-editdatetime")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-add" | "rp-a" => {

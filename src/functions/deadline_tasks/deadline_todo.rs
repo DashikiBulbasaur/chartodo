@@ -769,10 +769,10 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) -> bool {
     }
 
     // date isn't proper
-    if position_date.last().unwrap().parse::<NaiveDate>().is_err() {
+    if NaiveDate::parse_from_str(position_date.last().unwrap().as_str(), "%Y-%m-%d").is_err() {
         writeln!(
             writer,
-            "The date provided, '{}', isn't proper. It must be in a yy-mm-dd format.",
+            "The date provided, '{}', isn't proper. It must be in a yy-mm-dd format, e.g., 2021-12-24.",
             position_date.last().unwrap()
         )
         .expect("writeln failed");
@@ -793,7 +793,7 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) -> bool {
     false
 }
 
-pub fn deadline_tasks_edit_time(position_time: Vec<String>) {
+pub fn deadline_tasks_edit_time(position_time: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -803,56 +803,74 @@ pub fn deadline_tasks_edit_time(position_time: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The deadline todo list is currently empty, so there are no todos that can be edited."
+            "ERROr: The deadline todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if position_time.len() != 2 {
-        return writeln!(writer, "You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-eti 4 23:59.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-eti 4 23:59.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if position_time.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "You must provide a viable position. Try something between 1 and {}",
+            "ERROR: '{}' isn't a valid position. Try something between 1 and {}.",
+            position_time.first().unwrap(),
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if position_time.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "Positions can't be zero. They have to be 1 and above."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if position_time.first().unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "Your position exceeds the todo list's length. Try something between 1 and {}",
-            deadline_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the todo list's length. Try something between 1 and {}", position_time.first().unwrap(), deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // time isn't proper
-    if position_time.last().unwrap().parse::<NaiveTime>().is_err() {
-        return writeln!(
+    if NaiveTime::parse_from_str(position_time.last().unwrap().as_str(), "%H:%M").is_err() {
+        writeln!(
             writer,
-            "The time provided isn't proper. It must be in a 24-hour format, e.g., 23:08"
+            "ERROR: The time provided, '{}', isn't proper. It must be in a 24-hour format, e.g., 23:08", position_time.last().unwrap()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // edit todo item
@@ -862,9 +880,12 @@ pub fn deadline_tasks_edit_time(position_time: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
 
-pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) {
+pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -874,11 +895,14 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) {
 
     // check if todo list is empty
     if deadline_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The deadline todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // chartodo rp-edt 1 2001-01-01 00:00
@@ -887,61 +911,75 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) {
 
     // check if we have the right number of arguments
     if edit_date_time.len() != 3 {
-        return writeln!(writer, "ERROR: You must specify the deadline todo's position and what to edit the datetime to. A proper example would be: chartodo deadline-editdatetime 4 2150-01-01 00:00.
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position and what to edit the datetime to. A proper example would be: chartodo deadline-editdatetime 4 2150-01-01 00:00.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_date_time.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: '{}' isn't a valid position. Try something between 1 and {}.",
+            edit_date_time.first().unwrap(),
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_date_time.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: Positions can't be zero. They have to be between 1 and {}.",
             deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if edit_date_time.first().unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            deadline_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the todo list's length. Try something between 1 and {}.", edit_date_time.first().unwrap(), deadline_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // date isn't proper
-    match NaiveDate::parse_from_str(edit_date_time.get(1).unwrap().as_str(), "%Y-%m-%d") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper date in a year-month-day format. Proper example: 2100-12-24.
-            NOTE: nothing changed on the list below.").expect("writeln failed")
+    if NaiveDate::parse_from_str(edit_date_time.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
+        writeln!(
+            writer,
+            "ERROR: '{}' isn't a proper date in a yy-mm-dd format, e.g., 2100-12-24.",
+            edit_date_time.get(1).unwrap()
+        )
+        .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // time isn't proper
-    match NaiveTime::parse_from_str(edit_date_time.last().unwrap().as_str(), "%H:%M") {
-        Ok(_) => (),
-        Err(_) => {
-            return writeln!(
+    if NaiveTime::parse_from_str(edit_date_time.last().unwrap().as_str(), "%H:%M").is_err() {
+        writeln!(
             writer,
-            "ERROR: You didn't provide a proper time in a 24-hour format. Proper example: 13:28.
-            NOTE: nothing changed on the list below."
+            "ERROR: '{}' isn't a proper time in a 24-hour format, e.g., 13:28",
+            edit_date_time.last().unwrap()
         )
-            .expect("writeln failed")
-        }
+        .expect("writeln failed");
+
+        // erorr = true
+        return true;
     }
 
     // edit todo item
@@ -953,4 +991,7 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_deadline_tasks(deadline_tasks);
+
+    // error = false
+    false
 }
