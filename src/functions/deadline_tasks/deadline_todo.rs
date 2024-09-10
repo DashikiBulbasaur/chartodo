@@ -76,16 +76,8 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
             }
         }
 
-        // check task is not over 100 chars. add to struct
-        match add.get(counter * 3 - 3).unwrap().len() < 100 {
-            true => deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string(),
-            false => {
-                writeln!(writer, "ERROR: The new deadline task you wanted to add in argument set {}, '{}',  was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", counter, add.get(counter * 3 - 3).unwrap().as_str()).expect("writeln failed");
-
-                // error = true
-                return true;
-            }
-        }
+        // add task
+        deadline_task.task = add.get(counter * 3 - 3).unwrap().to_string();
 
         // push new correct Task to deadline tasks
         deadline_tasks.todo.push(deadline_task);
@@ -152,16 +144,8 @@ pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) -> bool {
             }
         }
 
-        // check task is not over 100 chars. add to struct
-        match add_no_time.get(counter * 2 - 2).unwrap().len() < 100 {
-            true => deadline_task.task = add_no_time.get(counter * 2 - 2).unwrap().to_string(),
-            false => {
-                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", counter, add_no_time.get(counter * 2 - 2).unwrap()).expect("writeln failed");
-
-                // error = true
-                return true;
-            }
-        }
+        // add task
+        deadline_task.task = add_no_time.get(counter * 2 - 2).unwrap().to_string();
 
         // default time: 00:00
         deadline_task.time = Some("00:00".to_string());
@@ -229,16 +213,8 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
             }
         }
 
-        // check that task isn't over 100 chars
-        match add_no_date.get(counter * 2 - 2).unwrap().len() < 100 {
-            true => deadline_task.task = add_no_date.get(counter * 2 - 2).unwrap().to_string(),
-            false => {
-                writeln!(writer, "ERROR: Your specified deadline task in argument set {}, '{}', was over 100 characters long, which is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long items. You can open an issue on github and request the max-character-len to be increased.", counter, add_no_date.get(counter * 2 - 2).unwrap()).expect("writeln failed");
-
-                // error = true
-                return true;
-            }
-        }
+        // add task
+        deadline_task.task = add_no_date.get(counter * 2 - 2).unwrap().to_string();
 
         // default day: Local::now
         deadline_task.date = Some(Local::now().date_naive().to_string());
@@ -559,18 +535,6 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) -> bool {
         return true;
     }
 
-    // new item can't be more than 100 chars
-    if position_task_date_time.get(1).unwrap().len() > 100 {
-        writeln!(
-            writer,
-            "ERROR: '{}' is more than 100 characters long. Editing a todo item to be more than 100 characters is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long tasks. You can open an issue on github and request the max-character-len to be increased.", position_task_date_time.get(1).unwrap()
-        )
-        .expect("writeln failed");
-
-        // error = true
-        return true;
-    }
-
     // date isn't proper
     if NaiveDate::parse_from_str(position_task_date_time.get(2).unwrap().as_str(), "%Y-%m-%d")
         .is_err()
@@ -675,15 +639,6 @@ pub fn deadline_tasks_edit_task(position_task: Vec<String>) -> bool {
 
         // error = true
         return true;
-    }
-
-    // new item can't be more than 100 chars
-    if position_task.last().unwrap().len() > 100 {
-        writeln!(
-            writer,
-            "ERROR: '{}' was more than 100 characters long. Editing a todo item to be more than 100 characters is not allowed. A max-character-len is imposed so that users don't accidentally create extremely-long tasks. You can open an issue on github and request the max-character-len to be increased.", position_task.last().unwrap()
-        )
-        .expect("writeln failed");
     }
 
     // edit todo item

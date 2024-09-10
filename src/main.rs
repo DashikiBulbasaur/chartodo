@@ -36,14 +36,12 @@ fn main() -> Result<()> {
             Ok(())
         }
         "add" | "a" => {
-            let error_status = regular_tasks_add_todo(
+            regular_tasks_add_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            if !error_status {
-                list();
-            }
+            list();
 
             Ok(())
         }
