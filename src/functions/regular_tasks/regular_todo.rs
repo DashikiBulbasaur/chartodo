@@ -411,8 +411,6 @@ mod regular_todo_unit_tests {
         assert!(got_regular_tasks_copy_path);
     }
 
-    // note that i've thought about testing whether or not the copy file was correct
-    // it'd be a bit redundant, but it's something I could do as an extra sanity check
     #[test]
     fn aaaa_regular_tasks_clone_file() {
         // name is aaaa so it's done first
@@ -604,7 +602,6 @@ mod regular_todo_unit_tests {
                 ]
             }
         "#;
-
         let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
             context(
                 "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"

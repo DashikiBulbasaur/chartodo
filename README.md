@@ -222,10 +222,8 @@ Commands (argument chaining is available where it makes sense):
 ### Tips on usage
 
 1. Commands that take positions as arguments will ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
-2. Max character len for tasks is 100. A max-character-len is imposed so that users don't accidentally create super-long tasks. This can be increased upon request.
-3. Spaces in the program are used to differentiate separate arguments, so multi-word tasks can instead be separated by a character such as -, e.g., multi-word-task-item
-4. For the repeating tasks, the maximum interval for the repeating time is 4294967295, e.g., 4294967295 days.
-5. When marking any todo (regular, deadline, repeating) task as done and it would exceed the done list's current set max len of 30, the done list automatically deletes everything it has. This is so users don't have to worry about the done list being too long. This can be changed upon request.
+2. Spaces in the program are used to differentiate separate arguments, so multi-word tasks can instead be separated by a character such as -, e.g., multi-word-task-item
+3. For the repeating tasks, the maximum interval for the repeating time is 4294967295, e.g., 4294967295 days.
 
 ## Milestones
 

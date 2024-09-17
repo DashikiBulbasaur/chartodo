@@ -265,7 +265,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
 
     // check if none of the args were valid
     if done.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the deadline todo list's length.").expect("writeln failed");
 
         // error = true
         return true;
@@ -285,11 +285,6 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
 
         // error = true
         return true;
-    }
-
-    // if changing todos to done means the done list overflows, clear done list
-    if done.len() + deadline_tasks.done.len() > 10 {
-        deadline_tasks.done.clear();
     }
 
     // change todos to dones one by one
@@ -346,7 +341,7 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 
     // check if none of the args were valid
     if rmtodo.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the deadline todo list's length.").expect("writeln failed");
 
         // error = true
         return true;
@@ -426,11 +421,6 @@ pub fn deadline_tasks_done_all() -> bool {
 
         // error = true
         return true;
-    }
-
-    // clear done list if it will overflow
-    if deadline_tasks.todo.len() + deadline_tasks.done.len() > 10 {
-        deadline_tasks.done.clear();
     }
 
     // push all todos to done
@@ -949,4 +939,483 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) -> bool {
 
     // error = false
     false
+}
+
+// cargo test deadline_todo_unit_tests -- --test-threads=1
+#[cfg(test)]
+mod deadline_todo_unit_tests {
+    use super::*;
+    use anyhow::Context;
+    use std::path::PathBuf;
+
+    // these are taken from deadline_helpers
+    fn path_to_deadline_tasks() -> PathBuf {
+        // get the data dir XDG spec and return it with path to deadline_tasks.json
+        let mut deadline_tasks_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        deadline_tasks_path.push("chartodo/deadline_tasks.json");
+
+        deadline_tasks_path
+    }
+
+    fn deadline_tasks_copy_path() -> PathBuf {
+        // get the path for deadline_tasks_copy.json, which will be used to hold the original contents
+        // of deadline_tasks.json while it's getting modified
+        let mut deadline_tasks_copy_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        deadline_tasks_copy_path.push("chartodo/deadline_tasks_copy.json");
+
+        deadline_tasks_copy_path
+    }
+
+    // these have been tested in other fns, these are just included here as a sanity check
+    #[test]
+    fn deadline_tasks_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/deadline_tasks.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/deadline_tasks.json";
+        let mac_path = "/Library/Application Support/chartodo/deadline_tasks.json";
+        let mut got_deadline_tasks_path: bool = false;
+        let deadline_path = path_to_deadline_tasks();
+        let deadline_path = deadline_path.to_str().unwrap();
+
+        if deadline_path.contains(linux_path) {
+            got_deadline_tasks_path = true;
+        } else if deadline_path.contains(windows_path) {
+            got_deadline_tasks_path = true;
+        } else if deadline_path.contains(mac_path) {
+            got_deadline_tasks_path = true;
+        }
+
+        assert!(got_deadline_tasks_path);
+    }
+
+    #[test]
+    fn deadline_tasks_copy_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/deadline_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/deadline_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/deadline_tasks_copy.json";
+        let mut got_deadline_tasks_copy_path: bool = false;
+        let deadline_tasks_copy_path = deadline_tasks_copy_path();
+        let deadline_tasks_copy_path = deadline_tasks_copy_path.to_str().unwrap();
+
+        if deadline_tasks_copy_path.contains(linux_path) {
+            got_deadline_tasks_copy_path = true;
+        } else if deadline_tasks_copy_path.contains(windows_path) {
+            got_deadline_tasks_copy_path = true;
+        } else if deadline_tasks_copy_path.contains(mac_path) {
+            got_deadline_tasks_copy_path = true;
+        }
+
+        assert!(got_deadline_tasks_copy_path);
+    }
+
+    #[test]
+    fn aaaa_deadline_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(deadline_tasks_copy_path())
+            .context("failed to create deadline_tasks_copy.json")
+            .expect("failed to create a copy during unit test");
+
+        std::fs::copy(path_to_deadline_tasks(), deadline_tasks_copy_path())
+            .context("failed to copy deadline_tasks.json to deadline_tasks_copy.json")
+            .expect("failed to copy original file to copy file during unit test");
+    }
+
+    #[test]
+    fn deadline_tasks_add_incorrect_num_of_args() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("00:00"),
+            String::from("another"),
+            String::from("2025-01-01"),
+        ];
+        let error_should_be_true = deadline_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_add_time_incorrect() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("00:00"),
+            String::from("another"),
+            String::from("2025-01-01"),
+            String::from("25:08"),
+        ];
+        let error_should_be_true = deadline_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_add_date_incorrect() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("00:00"),
+            String::from("another"),
+            String::from("2025-14-12"),
+            String::from("00:08"),
+        ];
+        let error_should_be_true = deadline_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_add_is_correct() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("00:00"),
+        ];
+        let error_should_be_false = deadline_tasks_add(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_add_multiple_args_is_correct() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("00:00"),
+            String::from("hi"),
+            String::from("2025-01-01"),
+            String::from("13:00"),
+        ];
+        let error_should_be_false = deadline_tasks_add(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "13:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_time_incorrect_num_of_args() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("00:00"),
+            String::from("another"),
+            String::from("2025-01-01"),
+        ];
+        let error_should_be_true = deadline_tasks_add_no_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_time_date_incorrect() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("another"),
+            String::from("2025-14-12"),
+        ];
+        let error_should_be_true = deadline_tasks_add_no_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_time_is_correct() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+        ];
+        let error_should_be_false = deadline_tasks_add_no_time(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_time_multiple_args_is_correct() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("2024-01-01"),
+            String::from("hi"),
+            String::from("2025-01-01"),
+        ];
+        let error_should_be_false = deadline_tasks_add_no_time(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_date_incorrect_num_of_args() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("13:00"),
+            String::from("00:00"),
+            String::from("another"),
+            String::from("2025-01-01"),
+        ];
+        let error_should_be_true = deadline_tasks_add_no_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_date_time_incorrect() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("00:00"),
+            String::from("another"),
+            String::from("13:61"),
+        ];
+        let error_should_be_true = deadline_tasks_add_no_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    // idk how to test the file success of add_no_date since that function's result is contingent on what date the fn is called
+    // ig for now i can test whether it was successful or not, and just not check the contents
+    #[test]
+    fn deadline_tasks_add_no_date_is_correct() {
+        // perform actions on file
+        let arguments: Vec<String> =
+            vec![String::from("this-is-the-todo-list"), String::from("13:00")];
+        let error_should_be_false = deadline_tasks_add_no_date(arguments);
+
+        assert!(!error_should_be_false);
+    }
+
+    #[test]
+    fn deadline_tasks_add_no_date_multiple_args_is_correct() {
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("13:00"),
+            String::from("hi"),
+            String::from("14:28"),
+        ];
+        let error_should_be_false = deadline_tasks_add_no_date(arguments);
+
+        assert!(!error_should_be_false);
+    }
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, remove the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_deadline_tasks())
+            .context("failed delete modified deadline_tasks.json after running tests")
+            .expect("failed to delete deadline_tasks.json after deadline_helpers unit tests");
+
+        std::fs::rename(deadline_tasks_copy_path(), path_to_deadline_tasks())
+            .context("failed to rename deadline_tasks_copy to deadline_tasks")
+            .expect("failed to rename deadline_tasks_copy to deadline_tasks after tests were done");
+    }
 }
