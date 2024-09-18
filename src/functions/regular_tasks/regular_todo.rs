@@ -860,7 +860,12 @@ mod regular_todo_unit_tests {
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // perform actions. an invalid arg is included for testing
-        let arguments = vec![String::from("1"), String::from("4"), String::from("2")];
+        let arguments = vec![
+            String::from("1"),
+            String::from("4"),
+            String::from("2"),
+            String::from("1"),
+        ];
         let error_should_be_false = regular_tasks_change_todo_to_done(arguments);
         let read_test_file = open_regular_tasks_and_return_tasks_struct();
 
@@ -1241,7 +1246,12 @@ mod regular_todo_unit_tests {
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // perform actions. an invalid arg + one is left in on purpose
-        let arguments = vec![String::from("3"), String::from("1"), String::from("-1")];
+        let arguments = vec![
+            String::from("3"),
+            String::from("1"),
+            String::from("-1"),
+            String::from("3"),
+        ];
         let error_should_be_false = regular_tasks_remove_todo(arguments);
         let read_test_file = open_regular_tasks_and_return_tasks_struct();
 
