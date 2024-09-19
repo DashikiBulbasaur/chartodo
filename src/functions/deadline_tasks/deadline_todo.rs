@@ -2183,6 +2183,1375 @@ mod deadline_todo_unit_tests {
     }
 
     #[test]
+    fn deadline_tasks_editall_todo_is_empty() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("don't matter")];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_invalid_num_of_args() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("don't matter"),
+            String::from("don't matter"),
+            String::from("don't matter"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_position_not_a_num() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("a"),
+            String::from("hello"),
+            String::from("2099-01-01"),
+            String::from("00:00"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_position_is_zero() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("0"),
+            String::from("hello"),
+            String::from("2099-01-01"),
+            String::from("00:00"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_position_isnt_in_range() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("2"),
+            String::from("hello"),
+            String::from("2099-01-01"),
+            String::from("00:00"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_invalid_date() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("1"),
+            String::from("hello"),
+            String::from("2099-21-01"),
+            String::from("00:00"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_invalid_time() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("1"),
+            String::from("hello"),
+            String::from("2099-01-01"),
+            String::from("25:00"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_all(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editall_is_correct() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("1"),
+            String::from("hi"),
+            String::from("2099-01-01"),
+            String::from("13:00"),
+        ];
+        let error_should_be_false = deadline_tasks_edit_all(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hi",
+                        "date": "2099-01-01",
+                        "time": "13:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_edittask_todo_is_empty() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("don't matter")];
+        let error_should_be_true = deadline_tasks_edit_task(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittask_invalid_num_of_args() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("don't matter"),
+            String::from("don't matter"),
+            String::from("don't matter"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_task(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittask_position_not_a_num() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("a"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_task(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittask_position_is_zero() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("0"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_task(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittask_position_isnt_in_range() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("2"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_task(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittask_is_correct() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("1"), String::from("hi")];
+        let error_should_be_false = deadline_tasks_edit_task(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_todo_is_empty() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("don't matter")];
+        let error_should_be_true = deadline_tasks_edit_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_invalid_num_of_args() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("don't matter"),
+            String::from("don't matter"),
+            String::from("don't matter"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_position_not_a_num() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("a"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_position_is_zero() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("0"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_position_isnt_in_range() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("2"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_invalid_date() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("1"), String::from("2099-21-01")];
+        let error_should_be_true = deadline_tasks_edit_date(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdate_is_correct() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("1"), String::from("2099-01-01")];
+        let error_should_be_false = deadline_tasks_edit_date(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2099-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_todo_is_empty() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("don't matter")];
+        let error_should_be_true = deadline_tasks_edit_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_invalid_num_of_args() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("don't matter"),
+            String::from("don't matter"),
+            String::from("don't matter"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_position_not_a_num() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("a"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_position_is_zero() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("0"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_position_isnt_in_range() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("2"), String::from("hi")];
+        let error_should_be_true = deadline_tasks_edit_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_invalid_time() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("1"), String::from("25:01")];
+        let error_should_be_true = deadline_tasks_edit_time(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_edittime_is_correct() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("1"), String::from("23:00")];
+        let error_should_be_false = deadline_tasks_edit_time(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "23:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_todo_is_empty() {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("don't matter")];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_invalid_num_of_args() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![String::from("don't matter"), String::from("don't matter")];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_position_not_a_num() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("a"),
+            String::from("2029-01-01"),
+            String::from("01:01"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_position_is_zero() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("0"),
+            String::from("2029-01-01"),
+            String::from("01:01"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_position_isnt_in_range() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("2"),
+            String::from("2029-01-01"),
+            String::from("01:01"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_invalid_date() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("1"),
+            String::from("2099-21-01"),
+            String::from("doesn't matter"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_invalid_time() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("1"),
+            String::from("2029-01-01"),
+            String::from("25:01"),
+        ];
+        let error_should_be_true = deadline_tasks_edit_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn deadline_tasks_editdatetime_is_correct() {
+        // write fresh to deadline tasks so content is known. can't be empty
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // perform actions
+        let arguments = vec![
+            String::from("1"),
+            String::from("2029-01-01"),
+            String::from("01:01"),
+        ];
+        let error_should_be_false = deadline_tasks_edit_datetime(arguments);
+        let read_test_file = open_deadline_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hello",
+                        "date": "2029-01-01",
+                        "time": "01:01",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, deadline_tasks);
+    }
+
+    #[test]
     fn zzzz_rename_copy_to_original() {
         // name is zzzz so it's done last
         // now that tests are done, remove the modified original and rename copy to original
