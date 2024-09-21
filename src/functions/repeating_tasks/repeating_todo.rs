@@ -521,7 +521,7 @@ fn subract_from_given_ending_datetime(
     (date, time, repeat_original_date, repeat_original_time)
 }
 
-pub fn repeating_tasks_done(done: Vec<String>) {
+pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -531,68 +531,82 @@ pub fn repeating_tasks_done(done: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
             "ERROR: The repeating todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // filter for viable positions
-    let mut dones: Vec<usize> = vec![];
-    done.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+    for i in (0..done.len()).rev() {
+        if done.get(i).unwrap().parse::<usize>().is_err()
+        || done.get(i).unwrap().is_empty() // this will never trigger smh
+        || done.get(i).unwrap().parse::<usize>().unwrap() == 0
+        || done.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
         {
-            dones.push(item.parse().unwrap());
+            done.swap_remove(i);
         }
-    });
-    drop(done);
-
-    // reverse sort the positions
-    dones.sort();
-    dones.reverse();
-    dones.dedup();
-
-    // check if the user basically specified the entire list
-    if dones.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return writeln!(
-            writer,
-            "ERROR: You've specified the entire repeating todo list that's relatively long. Might as well do chartodo repeating-doneall
-            NOTE: nothing on the list below has changed"
-        )
-        .expect("writeln failed");
     }
 
-    // if changing todos to done means the done list overflows, clear done list
-    if dones.len() + repeating_tasks.done.len() > 10 {
-        repeating_tasks.done.clear();
+    // no valid arguments
+    if done.is_empty() {
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.").expect("writeln failed");
+
+        // error = true
+        return true;
+    }
+
+    // sort and dedup
+    done.sort();
+    done.dedup();
+
+    // check if the user basically specified the entire list
+    if done.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
+        writeln!(
+            writer,
+            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-doneall"
+        )
+        .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // before pushing to done, change each repeat_done field in each specified todo to true
-    dones.iter().for_each(|position| {
+    done.iter().for_each(|position| {
         repeating_tasks
             .todo
-            .get_mut(*position - 1)
+            .get_mut(position.parse::<usize>().unwrap() - 1)
             .unwrap()
             .repeat_done = Some(true);
     });
 
     // change todos to dones one by one
-    dones.iter().for_each(|position| {
+    done.iter().rev().for_each(|position| {
+        repeating_tasks.done.push(
+            repeating_tasks
+                .todo
+                .get(position.parse::<usize>().unwrap() - 1)
+                .unwrap()
+                .to_owned(),
+        );
         repeating_tasks
-            .done
-            .push(repeating_tasks.todo.get(*position - 1).unwrap().to_owned());
-        repeating_tasks.todo.remove(*position - 1);
+            .todo
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_reset_original_datetime_to_now(reset: Vec<String>) {
+pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -602,55 +616,64 @@ pub fn repeating_tasks_reset_original_datetime_to_now(reset: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // filter for viable positions
-    let mut resets: Vec<usize> = vec![];
-    reset.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+    for i in (0..reset.len()).rev() {
+        if reset.get(i).unwrap().parse::<usize>().is_err()
+        || reset.get(i).unwrap().is_empty() // this will never trigger smh
+        || reset.get(i).unwrap().parse::<usize>().unwrap() == 0
+        || reset.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
         {
-            resets.push(item.parse().unwrap());
+            reset.swap_remove(i);
         }
-    });
-    drop(reset);
+    }
 
-    // reverse sort the positions
-    resets.sort();
-    resets.reverse();
-    resets.dedup();
+    // no valid args
+    if reset.is_empty() {
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.").expect("writeln failed");
+
+        // error = true
+        return true;
+    }
+
+    // sort and dedup
+    reset.sort();
+    reset.dedup();
 
     // check if the user basically specified the entire list
-    if resets.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return writeln!(
+    if reset.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
+        writeln!(
             writer,
-            "ERROR: You've specified the entire repeating todo list that's relatively long. Might as well do chartodo repeating-resetall
-            NOTE: nothing on the list below has changed"
+            "ERROR: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall"
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // reset each original datetime to local::now and make new due datetimes
-    resets.iter().for_each(|position| {
+    reset.iter().for_each(|position| {
         // create new original + due datetimes
         let (date, time, repeat_original_date, repeat_original_time) = add_to_local_now(
             repeating_tasks
                 .todo
-                .get(*position - 1)
+                .get(position.parse::<usize>().unwrap() - 1)
                 .unwrap()
                 .repeat_number
                 .unwrap(),
             repeating_tasks
                 .todo
-                .get(*position - 1)
+                .get(position.parse::<usize>().unwrap() - 1)
                 .unwrap()
                 .repeat_unit
                 .as_ref()
@@ -661,23 +684,34 @@ pub fn repeating_tasks_reset_original_datetime_to_now(reset: Vec<String>) {
         // set the new datetimes
         repeating_tasks
             .todo
-            .get_mut(*position - 1)
+            .get_mut(position.parse::<usize>().unwrap() - 1)
             .unwrap()
             .repeat_original_date = Some(repeat_original_date);
         repeating_tasks
             .todo
-            .get_mut(*position - 1)
+            .get_mut(position.parse::<usize>().unwrap() - 1)
             .unwrap()
             .repeat_original_time = Some(repeat_original_time);
-        repeating_tasks.todo.get_mut(*position - 1).unwrap().date = Some(date);
-        repeating_tasks.todo.get_mut(*position - 1).unwrap().time = Some(time);
+        repeating_tasks
+            .todo
+            .get_mut(position.parse::<usize>().unwrap() - 1)
+            .unwrap()
+            .date = Some(date);
+        repeating_tasks
+            .todo
+            .get_mut(position.parse::<usize>().unwrap() - 1)
+            .unwrap()
+            .time = Some(time);
     });
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_rmtodo(rmtodo: Vec<String>) {
+pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -687,53 +721,66 @@ pub fn repeating_tasks_rmtodo(rmtodo: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.
-            NOTE: nothing has changed on the list below."
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // filter for viable positions
-    let mut rmtodos: Vec<usize> = vec![];
-    rmtodo.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+    for i in (0..rmtodo.len()).rev() {
+        if rmtodo.get(i).unwrap().parse::<usize>().is_err()
+        || rmtodo.get(i).unwrap().is_empty() // this will never trigger smh
+        || rmtodo.get(i).unwrap().parse::<usize>().unwrap() == 0
+        || rmtodo.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
         {
-            rmtodos.push(item.parse().unwrap());
+            rmtodo.swap_remove(i);
         }
-    });
-    drop(rmtodo);
+    }
 
-    // reverse sort
-    rmtodos.sort();
-    rmtodos.reverse();
-    rmtodos.dedup();
+    // no valid args
+    if rmtodo.is_empty() {
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.").expect("writeln failed");
+
+        // error = true
+        return true;
+    }
+
+    // sort and dedup
+    rmtodo.sort();
+    rmtodo.dedup();
 
     // check if user wants to remove all of the items
-    if rmtodos.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return writeln!(
+    if rmtodo.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
+        writeln!(
             writer,
-            "ERROR: You might as well do repeating-cleartodo since you want to remove all of the items from a relatively long list.
-            NOTE: nothing has changed on the list below."
+            "WARNING: You've specified the entire repeating todo list, one that's relatively long. You should do repeating-cleartodo"
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // remove each item one by one
-    rmtodos.iter().for_each(|position| {
-        repeating_tasks.todo.remove(*position - 1);
+    rmtodo.iter().rev().for_each(|position| {
+        repeating_tasks
+            .todo
+            .remove(position.parse::<usize>().unwrap() - 1);
     });
-    drop(rmtodos);
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_doneall() {
+pub fn repeating_tasks_doneall() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -743,16 +790,14 @@ pub fn repeating_tasks_doneall() {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "The repeating todo list is currently empty, so you can't change any todos to done."
+            "ERROR: The repeating todo list is currently empty, so you can't change any todos to done."
         )
         .expect("writeln failed");
-    }
 
-    // clear done list if it will overflow
-    if repeating_tasks.todo.len() + repeating_tasks.done.len() > 10 {
-        repeating_tasks.done.clear();
+        // error = treu
+        return true;
     }
 
     // before pushing, change each repeat_done field to true
@@ -769,9 +814,12 @@ pub fn repeating_tasks_doneall() {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_clear_todo() {
+pub fn repeating_tasks_clear_todo() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -781,8 +829,10 @@ pub fn repeating_tasks_clear_todo() {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(writer, "ERROR: The repeating todo list is currently empty. Try adding items to it first before removing any.
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: The repeating todo list is currently empty. Try adding items to it first before removing any.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // clear todo list
@@ -790,9 +840,12 @@ pub fn repeating_tasks_clear_todo() {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_show_start(start: Vec<String>) -> String {
+pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
 
@@ -802,47 +855,54 @@ pub fn repeating_tasks_show_start(start: Vec<String>) -> String {
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
         return String::from(
-            "error: the repeating todo list is currently empty. try adding items to it first.",
+            "ERROR: the repeating todo list is currently empty. try adding items to it first.",
         );
     }
 
     // filter for viable positions
-    let mut starts: Vec<usize> = vec![];
-    start.iter().for_each(|item| {
-        if item.parse::<usize>().is_ok()
-        && !item.is_empty() // this will never trigger smh
-        && item.parse::<usize>().unwrap() != 0
-        && item.parse::<usize>().unwrap() <= repeating_tasks.todo.len()
+    for i in (0..start.len()).rev() {
+        if start.get(i).unwrap().parse::<usize>().is_err()
+        || start.get(i).unwrap().is_empty() // this will never trigger smh
+        || start.get(i).unwrap().parse::<usize>().unwrap() == 0
+        || start.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
         {
-            starts.push(item.parse().unwrap());
+            start.swap_remove(i);
         }
-    });
-    drop(start);
+    }
 
-    // sort and dedup (sort first cuz dedup is faster if it's sorted, and sort makes it nicer)
-    starts.sort();
-    starts.dedup();
+    // no valid args
+    if start.is_empty() {
+        return String::from("ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.");
+    }
+
+    // sort and dedup
+    start.sort();
+    start.dedup();
 
     // check if user wants to show starts for all of the items
-    if starts.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
+    if start.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
         return String::from("ERROR: you might as well do repeating-startall since you want to show the starting datetimes for all of the repeating tasks.");
     }
 
     let mut show_starts = String::from("");
-    starts.iter().for_each(|position| {
+    start.iter().for_each(|position| {
         let task_and_start = format!(
             "task: {}\n\tstart: {} {}\n",
-            repeating_tasks.todo.get(*position - 1).unwrap().task,
             repeating_tasks
                 .todo
-                .get(*position - 1)
+                .get(position.parse::<usize>().unwrap() - 1)
+                .unwrap()
+                .task,
+            repeating_tasks
+                .todo
+                .get(position.parse::<usize>().unwrap() - 1)
                 .unwrap()
                 .repeat_original_date
                 .as_ref()
                 .unwrap(),
             repeating_tasks
                 .todo
-                .get(*position - 1)
+                .get(position.parse::<usize>().unwrap() - 1)
                 .unwrap()
                 .repeat_original_time
                 .as_ref()
@@ -855,7 +915,7 @@ pub fn repeating_tasks_show_start(start: Vec<String>) -> String {
     show_starts.to_string()
 }
 
-pub fn repeating_tasks_edit_all(edit_all: Vec<String>) {
+pub fn repeating_tasks_resetall() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -865,12 +925,85 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
+    }
+
+    // reset each original datetime to local::now and make new due datetimes
+    repeating_tasks.todo.iter_mut().for_each(|task| {
+        // create new original + due datetimes
+        let (date, time, repeat_original_date, repeat_original_time) = add_to_local_now(
+            task.repeat_number.unwrap(),
+            task.repeat_unit.as_ref().unwrap().to_string(),
+        );
+
+        // set the new datetimes
+        task.repeat_original_date = Some(repeat_original_date);
+        task.repeat_original_time = Some(repeat_original_time);
+        task.date = Some(date);
+        task.time = Some(time);
+    });
+
+    // write changes to file
+    write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
+}
+
+pub fn repeating_tasks_showstartall() -> String {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+
+    // open file and parse
+    let repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        return String::from(
+            "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+        );
+    }
+
+    let mut show_starts = String::from("");
+    repeating_tasks.todo.iter().for_each(|task| {
+        let task_and_start = format!(
+            "task: {}\n\tstart: {} {}\n",
+            task.task,
+            task.repeat_original_date.as_ref().unwrap(),
+            task.repeat_original_time.as_ref().unwrap()
+        );
+        show_starts.push_str(task_and_start.as_str());
+    });
+    let show_starts = show_starts.trim_end();
+
+    show_starts.to_string()
+}
+
+pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
+    // housekeeping
+    repeating_tasks_create_dir_and_file_if_needed();
+    let writer = &mut std::io::stdout();
+
+    // open file and parse
+    let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
+
+    // check if todo list is empty
+    if repeating_tasks.todo.is_empty() {
+        writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+        )
+        .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // chartodo rp-ea 1 task 3 days start/end 2000-01-01 00:00. note that the user has to specify if the datetime is the start or end
@@ -879,90 +1012,101 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) {
 
     // check if we have the right number of arguments
     if edit_all.len() != 7 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited. A proper example would be: chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00. If you wanted to edit the starting date instead, replace 'end' with 'start', e.g., chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited. A proper example would be: chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00. If you wanted to edit the starting date instead, replace 'end' with 'start', e.g., chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_all.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            edit_all.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_all.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "Positions can't be zero. They have to be 1 and above."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if edit_all.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: The position you provided, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
+            edit_all.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
-    }
 
-    // new item can't be more than 40 chars
-    if edit_all.get(1).unwrap().len() > 40 {
-        return writeln!(
-            writer,
-            "ERROR: Editing a todo item to be more than 40 characters is not allowed.
-            NOTE: nothing changed on the list below."
-        )
-        .expect("writeln failed");
+        // error = true
+        return true;
     }
 
     // interval isn't proper
     if edit_all.get(2).unwrap().parse::<u32>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The interval provided isn't proper. It must be in the (inclusive) range of 1 - 4294967295.
-            NOTE: nothing changed on the list below."
+            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_all.get(2).unwrap()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if interval is 0
     if edit_all.get(2).unwrap().parse::<u32>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?
-            NOTE: nothing changed on the list below."
+            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?"
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // unit of time isn't proper
     match edit_all.get(3).unwrap().as_str() {
-        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month" | "months" | "year" | "years" => (),
-        _ => return writeln!(writer, "ERROR: didn't provide a proper time unit for the interval. Proper examples: minutes, hours, days, weeks, months or years.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month"
+        | "months" | "year" | "years" => (),
+        _ => {
+            writeln!(writer, "ERROR: The time unit you provided, '{}', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.", edit_all.get(3).unwrap()).expect("writeln failed");
+
+            // error = treu
+            return true;
+        }
     }
 
     // date isn't proper
-    match NaiveDate::parse_from_str(edit_all.get(5).unwrap().as_str(), "%Y-%m-%d") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper date. Must be in the following format: Year-Month-Day, e.g., 2000-01-01.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    if NaiveDate::parse_from_str(edit_all.get(5).unwrap().as_str(), "%Y-%m-%d").is_err() {
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_all.get(5).unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // time isn't proper
-    match NaiveTime::parse_from_str(edit_all.last().unwrap().as_str(), "%H:%M") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper time. Must be in the following 24-hour format: H:M, e.g., 13:08.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    if NaiveTime::parse_from_str(edit_all.last().unwrap().as_str(), "%H:%M").is_err() {
+        writeln!(writer, "ERROR: The time you provided, '{}', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.", edit_all.last().unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if it's start or end and do the proper operation
@@ -987,8 +1131,10 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) {
                 )
         }
         _ => {
-           return writeln!(writer, "ERROR: you must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else.
-               NOTE: nothing changed on the list below.").expect("writeln failed")
+            writeln!(writer, "ERROR: you must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else.").expect("writeln failed");
+
+            // error = treu
+            return true;
         }
     }
 
@@ -1020,9 +1166,12 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_edit_task(edit_task: Vec<String>) {
+pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -1032,64 +1181,65 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // chartodo rp-ea 1 new-task
+    // chartodo rp-eta 1 new-task
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if edit_task.len() != 2 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and all the new task to change it to. A proper example would be: chartodo rp-eta 4 new-item.
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and all the new task to change it to. A proper example would be: chartodo rp-eta 4 new-item.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_task.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            edit_task.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_task.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be 1 and above.
-            NOTE: nothing changed on the list below."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if edit_task.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceed's the repeating todo list's length. Try something between 1 and {}.",
+            edit_task.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
-    }
 
-    // new item can't be more than 40 chars
-    if edit_task.last().unwrap().len() > 40 {
-        return writeln!(
-            writer,
-            "ERROR: Editing a todo item to be more than 40 characters is not allowed.
-            NOTE: nothing changed on the list below."
-        )
-        .expect("writeln failed");
+        // error = true
+        return true;
     }
 
     // get the todo and edit task
@@ -1099,9 +1249,12 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) {
+pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -1111,74 +1264,89 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // chartodo rp-ea 1 3
+    // chartodo rp-ei 1 3
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if edit_interval.len() != 2 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited. A proper example would be: chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00. If you wanted to edit the starting date instead, replace 'end' with 'start', e.g., chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited. A proper example would be: chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00. If you wanted to edit the starting date instead, replace 'end' with 'start', e.g., chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_interval.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            edit_interval.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_interval.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be 1 and above.
-            NOTE: nothing changed on the list below."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if edit_interval.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
+            edit_interval.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // interval isn't proper
     if edit_interval.last().unwrap().parse::<u32>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The interval provided isn't proper. It must be in the (inclusive) range of 1 - 4294967295.
-            NOTE: nothing changed on the list below."
+            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the (inclusive) range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval.last().unwrap()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if interval is 0
     if edit_interval.last().unwrap().parse::<u32>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?
-            NOTE: nothing changed on the list below."
+            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?"
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // get the updated datetimes
@@ -1232,9 +1400,12 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) {
+pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -1244,61 +1415,77 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // chartodo rp-ea 1 weeks
+    // chartodo rp-eu 1 weeks
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if edit_unit.len() != 2 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval time unit to. A proper example would be: chartodo rp-ea 4 weeks. That would change repeating task #4's time unit to 'weeks'.
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval time unit to. A proper example would be: chartodo rp-ea 4 weeks. That would change repeating task #4's time unit to 'weeks'.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_unit.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            edit_unit.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_unit.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be 1 and above.
-            NOTE: nothing changed on the list below."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if edit_unit.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
+            edit_unit.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // unit of time isn't proper
     match edit_unit.last().unwrap().as_str() {
-        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month" | "months" | "year" | "years" => (),
-        _ => return writeln!(writer, "ERROR: didn't provide a proper time unit for the interval. Proper examples: minutes, hours, days, weeks, months or years.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month"
+        | "months" | "year" | "years" => (),
+        _ => {
+            writeln!(writer, "ERROR: didn't provide a proper time unit for the interval. Proper examples: minutes, hours, days, weeks, months or years.").expect("writeln failed");
+
+            // error = true
+            return true;
+        }
     }
 
     // get the updated datetimes
@@ -1347,9 +1534,12 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
+pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -1359,22 +1549,26 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // chartodo rp-ea 1 3 days
+    // chartodo rp-eiu 1 3 days
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if edit_interval_unit.len() != 3 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to. A proper example would be: chartodo rp-ea 4 3 days.
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to. A proper example would be: chartodo rp-ea 4 3 days.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
@@ -1384,13 +1578,16 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
         .parse::<usize>()
         .is_err()
     {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', wasn't valid. Try something between 1 and {}.",
+            edit_interval_unit.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
@@ -1401,12 +1598,14 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
         .unwrap()
         == 0
     {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be 1 and above.
-            NOTE: nothing changed on the list below."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
@@ -1417,40 +1616,51 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
         .unwrap()
         > repeating_tasks.todo.len()
     {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
+            edit_interval_unit.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // interval isn't proper
     if edit_interval_unit.get(1).unwrap().parse::<u32>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The interval provided isn't proper. It must be in the (inclusive) range of 1 - 4294967295.
-            NOTE: nothing changed on the list below."
+            "ERROR: The interval you provided, '{}', isn't proper. It must be in the (inclusive) range of 1 - 4294967295, (i.e., it has to be u32).", edit_interval_unit.get(1).unwrap()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if interval is 0
     if edit_interval_unit.get(1).unwrap().parse::<u32>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?
-            NOTE: nothing changed on the list below."
+            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?"
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // unit of time isn't proper
     match edit_interval_unit.last().unwrap().as_str() {
-        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month" | "months" | "year" | "years" => (),
-        _ => return writeln!(writer, "ERROR: didn't provide a proper time unit for the interval. Proper examples: minutes, hours, days, weeks, months or years.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+        "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month"
+        | "months" | "year" | "years" => (),
+        _ => {
+            writeln!(writer, "ERROR: didn't provide a proper time unit for the interval. Proper examples: minutes, hours, days, weeks, months or years.").expect("writeln failed");
+
+            // error = treu
+            return true;
+        }
     }
 
     // get the updated datetimes
@@ -1504,9 +1714,12 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_edit_start(edit_start: Vec<String>) {
+pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -1516,12 +1729,14 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // chartodo rp-es 1 2100-01-01 00:00
@@ -1530,54 +1745,65 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) {
 
     // check if we have the right number of arguments
     if edit_start.len() != 3 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to. A proper example would be: chartodo rp-es 4 2100-12-24 13:08
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to. A proper example would be: chartodo rp-es 4 2100-12-24 13:08").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_start.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            edit_start.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_start.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be 1 and above.
-            NOTE: nothing changed on the list below."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // position not in range of todo list len
     if edit_start.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
+            edit_start.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // date isn't proper
-    match NaiveDate::parse_from_str(edit_start.get(1).unwrap().as_str(), "%Y-%m-%d") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper date. Must be in the following format: Year-Month-Day, e.g., 2000-01-01.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    if NaiveDate::parse_from_str(edit_start.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_start.get(1).unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // time isn't proper
-    match NaiveTime::parse_from_str(edit_start.last().unwrap().as_str(), "%H:%M") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper time. Must be in the following 24-hour format: H:M, e.g., 13:08.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    if NaiveTime::parse_from_str(edit_start.last().unwrap().as_str(), "%H:%M").is_err() {
+        writeln!(writer, "ERROR: The time you provided, '{}', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.", edit_start.last().unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // get the updated datetimes based on the given starting datetime
@@ -1617,9 +1843,12 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
-pub fn repeating_tasks_edit_end(edit_end: Vec<String>) {
+pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -1629,67 +1858,81 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.
-            NOTE: nothing changed on the list below."
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // chartodo rp-ea 1 2100-12-24 13:08
+    // chartodo rp-ee 1 2100-12-24 13:08
 
     // the following ifs are the multitude of errors i have to check for
 
     // check if we have the right number of arguments
     if edit_end.len() != 3 {
-        return writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to. A proper example would be: chartodo rp-ee 4 2100-12-14 13:08
-            NOTE: nothing changed on the list below.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to. A proper example would be: chartodo rp-ee 4 2100-12-14 13:08").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check if position is a valid number
     if edit_end.first().unwrap().parse::<usize>().is_err() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: You must provide a viable position. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
+            "ERROR: The position you provided, '{}', wasn't valid. Try something between 1 and {}.",
+            edit_end.first().unwrap(),
             repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // positions can't be zero
     if edit_end.first().unwrap().parse::<usize>().unwrap() == 0 {
-        return writeln!(
+        writeln!(
             writer,
-            "Positions can't be zero. They have to be 1 and above."
+            "ERROR: Positions can't be zero. They have to be 1 and above."
         )
         .expect("writeln failed");
+
+        // error = treu
+        return true;
     }
 
     // position not in range of todo list len
     if edit_end.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
-        return writeln!(
+        writeln!(
             writer,
-            "ERROR: Your position exceed's the repeating todo list's length. Try something between 1 and {}.
-            NOTE: nothing changed on the list below.",
-            repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
+            edit_end.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
+
+        // error = treu
+        return true;
     }
 
     // date isn't proper
-    match NaiveDate::parse_from_str(edit_end.get(1).unwrap().as_str(), "%Y-%m-%d") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper date. Must be in the following format: Year-Month-Day, e.g., 2000-01-01.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    if NaiveDate::parse_from_str(edit_end.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_end.get(1).unwrap()).expect("writeln failed");
+
+        // error = treu
+        return true;
     }
 
     // time isn't proper
-    match NaiveTime::parse_from_str(edit_end.last().unwrap().as_str(), "%H:%M") {
-        Ok(_) => (),
-        Err(_) => return writeln!(writer, "ERROR: didn't provide a proper time. Must be in the following 24-hour format: H:M, e.g., 13:08.
-            NOTE: nothing changed on the list below.").expect("writeln failed"),
+    if NaiveTime::parse_from_str(edit_end.last().unwrap().as_str(), "%H:%M").is_err() {
+        writeln!(writer, "ERROR: The time you provided, '{}', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.", edit_end.last().unwrap()).expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // get the updated datetimes from the given ending datetime
@@ -1730,4 +1973,7 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) {
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }

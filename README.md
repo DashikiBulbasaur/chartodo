@@ -143,7 +143,7 @@ Commands (argument chaining is available where it makes sense):
     REPEATING:
         repeating-add | rp-a
             add a repeating task. the task starts from your current date and time
-            note that for the repeating time interval, only the following units are allowed:
+            note that for the repeating time interval, only the following time units are allowed:
                 minutes, hours, days, weeks, months, years
             example: chartodo rp-a gym 2 days
             example: chartood rp-a gym 2 days mow 1 week
@@ -196,6 +196,12 @@ Commands (argument chaining is available where it makes sense):
             show the starting datetime of one or more repeating tasks
             example: chartodo rp-s 1
             example: chartodo rp-s 1 2 3 4 5
+        repeating-resetall | repeating-doneresetall | rp-ra | rp-dra
+            resets the starting datetime of all repeating tasks to your current date and time
+            example: chartodo rp-ra | chartodo rp-dra
+        repeating-startall | rp-sa
+            show the starting datetime of all repeating tasks
+            example: chartodo rp-sa 
         repeating-editall | rp-ea
             edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
             example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01

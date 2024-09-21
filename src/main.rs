@@ -351,19 +351,25 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-done" | "rp-d" => {
-            repeating_tasks_done(
+            let error_status = repeating_tasks_done(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-done")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-reset" | "repeating-donereset" | "rp-r" | "rp-dr" => {
-            repeating_tasks_reset_original_datetime_to_now(
+            let error_status = repeating_tasks_reset_original_datetime_to_now(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-reset")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-notdone" | "rp-nd" => {
@@ -375,11 +381,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-rmtodo" | "rp-rmt" => {
-            repeating_tasks_rmtodo(
+            let error_status = repeating_tasks_rmtodo(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-rmtodo")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-rmdone" | "rp-rmd" => {
@@ -391,8 +400,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-doneall" | "rp-da" if args.item_identifier.is_none() => {
-            repeating_tasks_doneall();
-            list();
+            let error_status = repeating_tasks_doneall();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-notdoneall" | "rp-nda" if args.item_identifier.is_none() => {
@@ -401,8 +413,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-cleartodo" | "rp-ct" if args.item_identifier.is_none() => {
-            repeating_tasks_clear_todo();
-            list();
+            let error_status = repeating_tasks_clear_todo();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-cleardone" | "rp-cd" if args.item_identifier.is_none() => {
@@ -427,61 +442,96 @@ fn main() -> Result<()> {
             writeln!(writer, "{}", show_starts).expect("writeln failed");
             Ok(())
         }
+        "repeating-resetall" | "rp-ra" | "repeating-doneresetall" | "rp-dra" => {
+            let error_status = repeating_tasks_resetall();
+            if !error_status {
+                list();
+            }
+
+            Ok(())
+        }
+        "repeating-startall" | "rp-sa" => {
+            let show_starts = repeating_tasks_showstartall();
+            let writer = &mut std::io::stdout();
+            writeln!(writer, "{}", show_starts).expect("writeln failed");
+            Ok(())
+        }
         "repeating-editall" | "rp-ea" => {
-            repeating_tasks_edit_all(
+            let error_status = repeating_tasks_edit_all(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editall")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-edittask" | "rp-eta" => {
-            repeating_tasks_edit_task(
+            let error_status = repeating_tasks_edit_task(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-edittask")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editinterval" | "rp-ei" => {
-            repeating_tasks_edit_interval(
+            let error_status = repeating_tasks_edit_interval(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editinterval")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editintervalunit" | "rp-eiu" => {
-            repeating_tasks_edit_interval_unit(
+            let error_status = repeating_tasks_edit_interval_unit(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editintervalunit")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         // note: I don't like unit, it's too vague. but time unit is also too long
         "repeating-editunit" | "rp-eu" => {
-            repeating_tasks_edit_time_unit(
+            let error_status = repeating_tasks_edit_time_unit(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editunit")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editstart" | "rp-es" => {
-            repeating_tasks_edit_start(
+            let error_status = repeating_tasks_edit_start(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editstart")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editend" | "rp-ee" => {
-            repeating_tasks_edit_end(
+            let error_status = repeating_tasks_edit_end(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editend")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "clearall" | "ca" if args.item_identifier.is_none() => {
@@ -644,7 +694,7 @@ fn help() {
     REPEATING:
         repeating-add | rp-a
             add a repeating task. the task starts from your current date and time
-            note that for the repeating time interval, only the following units are allowed:
+            note that for the repeating time interval, only the following time units are allowed:
                 seconds, minutes, hours, days, weeks, months, years
             example: chartodo rp-a gym 2 days
             example: chartood rp-a gym 2 days mow 1 week
@@ -697,6 +747,12 @@ fn help() {
             show the starting datetime of one or more repeating tasks
             example: chartodo rp-s 1
             example: chartodo rp-s 1 2 3 4 5
+        repeating-resetall | repeating-doneresetall | rp-ra | rp-dra
+            resets the starting datetime of all repeating tasks to your current date and time
+            example: chartodo rp-ra | chartodo rp-dra
+        repeating-startall | rp-sa
+            show the starting datetime of all repeating tasks
+            example: chartodo rp-sa 
         repeating-editall | rp-ea
             edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
             example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01
