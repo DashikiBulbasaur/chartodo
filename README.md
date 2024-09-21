@@ -24,6 +24,9 @@ Then, to run, either
 ## Usage
 ```sh-session
 Commands (argument chaining is available where it makes sense):
+    Note that for commands that take positions, the general format is always the following:
+        chartodo ~command ~position(s)
+        e.g., chartodo rmtodo 1, or chartodo rmtodo 5 1 2 12 3
 
     help | h
         show help
@@ -42,7 +45,7 @@ Commands (argument chaining is available where it makes sense):
             example: chartodo add new-item
             example: chartodo add 1st-item 2nd-item 3rd-item
         done | d
-            change a todo item to done, using a numbered position to specify which one
+            change a todo item to done, using a numbered position to specify which one(s)
             example: chartodo done 3
             example: chartodo d 5 1 3 2
         notdone | nd

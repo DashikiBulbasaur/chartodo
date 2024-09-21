@@ -329,19 +329,25 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-addstart" | "rp-as" => {
-            repeating_tasks_add_start_datetime(
+            let error_status = repeating_tasks_add_start_datetime(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-addstart")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-addend" | "rp-ae" => {
-            repeating_tasks_add_end(
+            let error_status = repeating_tasks_add_end(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-addend")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-done" | "rp-d" => {
@@ -519,6 +525,10 @@ fn help() {
         "
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
+    Note that for commands that take positions, the general format is always the following:
+        chartodo ~command ~position(s)
+        e.g., chartodo rmtodo 1, or chartodo rmtodo 5 1 2 12 3
+
     help | h
         show help
         example: chartodo help
@@ -544,7 +554,7 @@ fn help() {
             example: chartodo nd 3
             example: chartodo notdone 3 2 1 5
         rmtodo | rmt
-            remove a todo item from the list, using a numbered position to specify which one
+            remove a todo item from the list, using a numbered position to specify which one(s)
             example: chartodo rmt 4
             example: chartodo rmt 4 3 2
         rmdone | rmd

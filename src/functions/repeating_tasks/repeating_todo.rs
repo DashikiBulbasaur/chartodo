@@ -22,13 +22,9 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
         return true;
     }
 
-    // check how many sets of arguments there are
-    let mut counter = add.len() / 3;
-
-    // loop thru the deadline args and parse for correctness
-    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_repeatings: Vec<Task> = vec![];
-    while counter > 0 {
+    let mut counter: usize = 1;
+    // loop thru the args and parse for correctness
+    while counter <= add.len() / 3 {
         // note for interviews: my first instinct was to keep accessing last elem and delete as i go
 
         // unit: get counter * 3 - 1
@@ -40,8 +36,8 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
             "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
             | "months" | "month" | "years" | "year" => (),
             _ => {
-                writeln!(writer, "ERROR: You didn't provide a proper time unit. It has to be one of the following: minutes, hours, days, weeks, months, years.
-                NOTE: nothing on the list below changed.").expect("writeln failed");
+                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.
+                NOTE: nothing on the list below changed.", add.get(counter * 3 - 1).unwrap(), counter).expect("writeln failed");
 
                 // error = true
                 return true;
@@ -49,21 +45,16 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
         }
 
         // check if the interval is proper. has to be u32
-        let interval: u32 = match add.get(counter * 3 - 2).unwrap().parse() {
-            Ok(number) => number,
-            Err(_) => {
-                writeln!(writer, "ERROR: You didn't provide a proper interval for your repeating task. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-a gym 2 days.
-                NOTE: nothing on the list below changed.").expect("writeln failed");
+        if add.get(counter * 3 - 2).unwrap().parse::<u32>().is_err() {
+            writeln!(writer, "Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
 
-                // error = true
-                return true;
-            }
-        };
+            // error = true
+            return true;
+        }
 
         // check if interval is 0
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().unwrap() == 0 {
-            writeln!(writer, "ERROR: You can't have an interval of 0, otherwise why are you even making a new repeating task?
-                NOTE: nothing on the list below changed.").expect("writeln failed");
+            writeln!(writer, "ERROR: You had an interval of 0 in argument set '{}'. You can't have an interval of 0, otherwise why are you even making a new repeating task?", add.get(counter * 3 - 2).unwrap()).expect("writeln failed");
 
             // error = true
             return true;
@@ -81,23 +72,19 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
             repeat_original_time: None,
         };
 
-        // check task is not over 100 chars. add to struct
-        if add.get(counter * 3 - 3).unwrap().len() > 100 {
-            writeln!(writer, "ERROR: Your specified repeating task in argument set {} was over 40 characters long, which is not allowed.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
-
-            // error = true
-            return true;
-        };
+        // add task to struct
         repeating_task.task = add.get(counter * 3 - 3).unwrap().to_string();
 
         // set interval and unit
-        repeating_task.repeat_number = Some(interval);
+        repeating_task.repeat_number =
+            Some(add.get(counter * 3 - 2).unwrap().parse::<u32>().unwrap());
         repeating_task.repeat_unit = Some(add.get(counter * 3 - 1).unwrap().to_owned());
 
         // get the date, time, repeat_original_date, and repeat_original_time
-        let (date, time, repeat_original_date, repeat_original_time) =
-            add_to_local_now(interval, add.get(counter * 3 - 1).unwrap().to_owned());
+        let (date, time, repeat_original_date, repeat_original_time) = add_to_local_now(
+            add.get(counter * 3 - 2).unwrap().parse::<u32>().unwrap(),
+            add.get(counter * 3 - 1).unwrap().to_owned(),
+        );
 
         // set the remaining fields
         repeating_task.date = Some(date);
@@ -105,16 +92,11 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
         repeating_task.repeat_original_date = Some(repeat_original_date);
         repeating_task.repeat_original_time = Some(repeat_original_time);
 
-        // push new correct Task to a vec
-        new_repeatings.push(repeating_task);
+        // push new correct Task
+        repeating_tasks.todo.push(repeating_task);
 
-        counter -= 1;
+        counter += 1;
     }
-
-    // one by one, add new repeating tasks
-    new_repeatings
-        .iter()
-        .for_each(|task| repeating_tasks.todo.push(task.to_owned()));
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
@@ -167,7 +149,7 @@ fn add_to_local_now(interval: u32, unit: String) -> (String, String, String, Str
 // reasoning: idk i forgot. if i can't come up with/remember the reason for thinking this, this is off the table
 // reason: users might want to keep the interval + unit the same but edit the starting/ending datetime of the task
 
-pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
+pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -179,23 +161,15 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
 
     // check if we have the right # of args
     if start.len() % 5 != 0 {
-        return writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime. Proper example: chartodo rp-as new-item 3 days 2099-01-01 00:00. Another: chartodo rp-a new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-a, there should be 5, 10, 12, etc. arguments.
-            NOTE: nothing on the list below changed.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime. Proper example: chartodo rp-as new-item 3 days 2099-01-01 00:00. Another: chartodo rp-a new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-a, there should be 5, 10, 15, etc. (i.e., divisible by 5) arguments.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
-    // check how many sets of arguments there are
-    let mut counter = start.len() / 5;
-
-    // check if adding to repeating would overflow it past 15
-    if counter + repeating_tasks.todo.len() > 15 {
-        return writeln!(writer, "You're trying to add too many repeating tasks, as it would exceed the repeating todo list's max len of 15. Try removing at least {} items.
-            NOTE: nothing changed on the list below.", 15 - repeating_tasks.todo.len()).expect("writeln failed");
-    }
-
-    // loop thru the deadline args and parse for correctness
-    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_repeating_starts: Vec<Task> = vec![];
-    while counter > 0 {
+    let mut counter: usize = 1;
+    // loop thru the args and parse for correctness
+    while counter <= start.len() / 5 {
         // chartodo repeating-addstart task 3 days 2022-01-01 00:00 task2 3 days 2023-01-01 00:00 => len % 5
 
         // start_time: get counter * 5 - 1
@@ -205,37 +179,50 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
         // task: get counter * 5 - 5
 
         // check if the starting time is proper
-        match NaiveTime::parse_from_str(start.get(counter * 5 - 1).unwrap().as_str(), "%H:%M") {
-            Ok(_) => (),
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper starting time in argument set {}. Provide a correct starting time in a 24-hour format, e.g., 23:04.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
-        };
+        if NaiveTime::parse_from_str(start.get(counter * 5 - 1).unwrap().as_str(), "%H:%M").is_err()
+        {
+            writeln!(writer, "ERROR: Your provided starting time, '{}', in argument set '{}', wasn't proper. Please provide a correct starting time in a 24-hour format, e.g., 23:04.", start.get(counter * 5 - 1).unwrap(), counter).expect("writeln failed");
+
+            // error = true
+            return true;
+        }
 
         // check if starting date is proper
-        match NaiveDate::parse_from_str(start.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d") {
-            Ok(_) => (),
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper starting date in argument set {}. Provide a correct starting date in a year-month-day format, e.g., 2024-05-12.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
-        };
+        if NaiveDate::parse_from_str(start.get(counter * 5 - 4).unwrap().as_str(), "%Y-%m-%d")
+            .is_err()
+        {
+            writeln!(writer, "ERROR: Your provided starting date, '{}', in argument set '{}', wasn't proper. Please provide a correct starting date in a year-month-day format, e.g., 2024-05-12.", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+
+            // error = true
+            return true;
+        }
 
         // check if unit time is proper
         match start.get(counter * 5 - 3).unwrap().as_str() {
-            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week" | "months" | "month" | "years" | "year" => (),
-            _ => return writeln!(writer, "ERROR: You didn't provide a proper time unit in argument set {}. It has to be one of the following: minutes, hours, days, weeks, months, years.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
+            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
+            | "months" | "month" | "years" | "year" => (),
+            _ => {
+                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.", start.get(counter * 5 - 3).unwrap(), counter).expect("writeln failed");
+
+                // error = true
+                return true;
+            }
         }
 
         // check if the interval is proper
-        let interval: u32 = match start.get(counter * 5 - 4).unwrap().parse() {
-            Ok(number) => number,
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper interval in argument set {}. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-a gym 2 days.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed"),
-        };
+        if start.get(counter * 5 - 4).unwrap().parse::<u32>().is_err() {
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+
+            // error = true
+            return true;
+        }
 
         // check if interval is 0
         if start.get(counter * 5 - 4).unwrap().parse::<u32>().unwrap() == 0 {
-            return writeln!(writer, "ERROR: You provided an interval of 0 in argument set {}. You can't have an interval of 0, otherwise why are you even making a new repeating task?
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
+            writeln!(writer, "ERROR: You provided an interval of 0 in argument set '{}'. You can't have an interval of 0, otherwise why are you even making a new repeating task?", counter).expect("writeln failed");
+
+            // error = true
+            return true;
         }
 
         // create new Task struct
@@ -250,15 +237,12 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
             repeat_original_time: None,
         };
 
-        // check task is not over 40 chars. add to struct
-        if start.get(counter * 5 - 5).unwrap().len() > 40 {
-            return writeln!(writer, "ERROR: Your specified repeating task in argument set {} was over 40 characters long, which is not allowed.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
-        };
+        // add task to struct
         repeating_task_start.task = start.get(counter * 5 - 5).unwrap().to_string();
 
         // set interval and unit
-        repeating_task_start.repeat_number = Some(interval);
+        repeating_task_start.repeat_number =
+            Some(start.get(counter * 5 - 4).unwrap().parse::<u32>().unwrap());
         repeating_task_start.repeat_unit = Some(start.get(counter * 5 - 3).unwrap().to_owned());
 
         // get the date, time, repeat_original_date, and repeat_original_time
@@ -266,7 +250,7 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
             add_to_given_starting_datetime(
                 start.get(counter * 5 - 2).unwrap().to_string(),
                 start.get(counter * 5 - 1).unwrap().to_string(),
-                interval,
+                start.get(counter * 5 - 4).unwrap().parse::<u32>().unwrap(),
                 start.get(counter * 5 - 3).unwrap().to_owned(),
             );
 
@@ -276,19 +260,17 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) {
         repeating_task_start.repeat_original_date = Some(repeat_original_date);
         repeating_task_start.repeat_original_time = Some(repeat_original_time);
 
-        // push new correct Task to a vec
-        new_repeating_starts.push(repeating_task_start);
+        // push new correct Task
+        repeating_tasks.todo.push(repeating_task_start);
 
-        counter -= 1;
+        counter += 1;
     }
-
-    // one by one, add new repeating tasks with starts
-    new_repeating_starts
-        .iter()
-        .for_each(|task| repeating_tasks.todo.push(task.to_owned()));
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
 fn add_to_given_starting_datetime(
@@ -342,7 +324,7 @@ fn add_to_given_starting_datetime(
     (date, time, repeat_original_date, repeat_original_time)
 }
 
-pub fn repeating_tasks_add_end(add_end: Vec<String>) {
+pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -354,30 +336,16 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
 
     // check if we have the right # of args
     if add_end.len() % 5 != 0 {
-        return writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime. Proper example: chartodo rp-ae new-item 3 days 2099-01-01 00:00. Another: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-ae, there should be 5, 10, 12, etc. arguments.
-            NOTE: nothing on the list below changed.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime. Proper example: chartodo rp-ae new-item 3 days 2099-01-01 00:00. Another: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-ae, there should be 5, 10, 15, etc. (i.e., divisible by 5) arguments.").expect("writeln failed");
+
+        // error = true
+        return true;
     }
 
     // check how many sets of arguments there are
-    let mut counter = add_end.len() / 5;
-
-    // check if the user wants to add over 15 items
-    if counter > 15 {
-        return writeln!(writer, "ERROR: You want to add over 15 repeating tasks. Regardless of how many repeating tasks there currently are in the todo list, 15 is the maximum length for the todo list and you cannot add more than 15.
-            NOTE: nothing changed on the list below.").expect("writeln failed");
-    }
-
-    // check if adding to repeating would overflow it past 15
-    // note that this only triggers if the user only wants to add less than 15
-    if counter + repeating_tasks.todo.len() > 15 {
-        return writeln!(writer, "You're trying to add too many repeating tasks, as it would exceed the repeating todo list's max len of 15. Try removing at least {} items.
-            NOTE: nothing changed on the list below.", (repeating_tasks.todo.len() + counter) - 15).expect("writeln failed");
-    }
-
-    // loop thru the deadline args and parse for correctness
-    // i'm looping from back to front, and that's the order that the new deadline tasks are gonna be added
-    let mut new_repeating_ends: Vec<Task> = vec![];
-    while counter > 0 {
+    let mut counter: usize = 1;
+    // loop thru the args and parse for correctness
+    while counter <= add_end.len() / 5 {
         // chartodo repeating-addend task 3 days 2030-01-01 00:00 task2 4 months 2031-01-01 00:00 => len % 5
 
         // end_time: get counter * 5 - 1
@@ -387,37 +355,62 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
         // task: get counter * 5 - 5
 
         // check if the starting time is proper
-        match NaiveTime::parse_from_str(add_end.get(counter * 5 - 1).unwrap().as_str(), "%H:%M") {
-            Ok(_) => (),
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper ending time in argument set {}. Provide a correct ending time in a 24-hour format, e.g., 23:04.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
+        if NaiveTime::parse_from_str(add_end.get(counter * 5 - 1).unwrap().as_str(), "%H:%M")
+            .is_err()
+        {
+            writeln!(writer, "ERROR: Your provided ending time, '{}', in argument set '{}', wasn't proper. Please provide a correct ending time in a 24-hour format, e.g., 23:04.", add_end.get(counter * 5 - 1).unwrap(), counter).expect("writeln failed");
+
+            // error = true
+            return true;
         }
 
         // check if starting date is proper
-        match NaiveDate::parse_from_str(add_end.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d") {
-            Ok(end_date) => end_date,
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper ending date in argument set {}. Provide a correct ending date in a year-month-day format, e.g., 2024-05-12.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
-        };
+        if NaiveDate::parse_from_str(add_end.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d")
+            .is_err()
+        {
+            writeln!(writer, "ERROR: Your provided ending date, '{}', in argument set '{}', wasn't proper. Please provide a correct ending date in a year-month-day format, e.g., 2024-05-12.", add_end.get(counter * 5 - 2).unwrap(), counter).expect("writeln failed");
+
+            // error = true
+            return true;
+        }
 
         // check if unit time is proper
         match add_end.get(counter * 5 - 3).unwrap().as_str() {
-            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week" | "months" | "month" | "years" | "year" => (),
-            _ => return writeln!(writer, "ERROR: You didn't provide a proper time unit in argument set {}. It has to be one of the following: minutes, hours, days, weeks, months, years.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed")
+            "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
+            | "months" | "month" | "years" | "year" => (),
+            _ => {
+                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.", add_end.get(counter * 5 - 3).unwrap(), counter).expect("writeln failed");
+
+                // error = true
+                return true;
+            }
         }
 
         // check if the interval is proper
-        let interval: u32 = match add_end.get(counter * 5 - 4).unwrap().parse() {
-            Ok(number) => number,
-            Err(_) => return writeln!(writer, "ERROR: You didn't provide a proper interval in argument set {}. It can't be negative and can't be above 4294967295. Proper example: chartodo rp-ae gym 2 days 2000-01-01.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed"),
-        };
+        if add_end
+            .get(counter * 5 - 4)
+            .unwrap()
+            .parse::<u32>()
+            .is_err()
+        {
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01.", add_end.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+
+            // error = true
+            return true;
+        }
 
         // check if interval is 0
-        if interval == 0 {
-            return writeln!(writer, "ERROR: You provided an interval of 0 in argument set {}. You can't have an interval of 0, otherwise why are you even making a new repeating task?
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
+        if add_end
+            .get(counter * 5 - 4)
+            .unwrap()
+            .parse::<u32>()
+            .unwrap()
+            == 0
+        {
+            writeln!(writer, "ERROR: You provided an interval of 0 in argument set {}. You can't have an interval of 0, otherwise why are you even making a new repeating task?", counter).expect("writeln failed");
+
+            // error = true
+            return true;
         }
 
         // create new Task struct
@@ -432,15 +425,17 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
             repeat_original_time: None,
         };
 
-        // check task is not over 40 chars. add to struct
-        if add_end.get(counter * 5 - 5).unwrap().len() > 40 {
-            return writeln!(writer, "ERROR: Your specified repeating task in argument set {} was over 40 characters long, which is not allowed.
-                NOTE: nothing on the list below changed.", counter).expect("writeln failed");
-        };
+        // add task to struct
         repeating_task_end.task = add_end.get(counter * 5 - 5).unwrap().to_string();
 
         // set interval and unit
-        repeating_task_end.repeat_number = Some(interval);
+        repeating_task_end.repeat_number = Some(
+            add_end
+                .get(counter * 5 - 4)
+                .unwrap()
+                .parse::<u32>()
+                .unwrap(),
+        );
         repeating_task_end.repeat_unit = Some(add_end.get(counter * 5 - 3).unwrap().to_owned());
 
         // get the date, time, repeat_original_date, and repeat_original_time
@@ -448,7 +443,11 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
             subract_from_given_ending_datetime(
                 add_end.get(counter * 5 - 2).unwrap().to_string(),
                 add_end.get(counter * 5 - 1).unwrap().to_string(),
-                interval,
+                add_end
+                    .get(counter * 5 - 4)
+                    .unwrap()
+                    .parse::<u32>()
+                    .unwrap(),
                 add_end.get(counter * 5 - 3).unwrap().to_owned(),
             );
 
@@ -458,19 +457,17 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) {
         repeating_task_end.repeat_original_date = Some(repeat_original_date);
         repeating_task_end.repeat_original_time = Some(repeat_original_time);
 
-        // push new correct Task to a vec
-        new_repeating_ends.push(repeating_task_end);
+        // push new correct Task
+        repeating_tasks.todo.push(repeating_task_end);
 
-        counter -= 1;
+        counter += 1;
     }
-
-    // one by one, add new repeating tasks with starts
-    new_repeating_ends
-        .iter()
-        .for_each(|task| repeating_tasks.todo.push(task.to_owned()));
 
     // write changes to file
     write_changes_to_new_repeating_tasks(repeating_tasks);
+
+    // error = false
+    false
 }
 
 fn subract_from_given_ending_datetime(
