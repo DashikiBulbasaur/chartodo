@@ -36,14 +36,15 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
             "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
             | "months" | "month" | "years" | "year" => (),
             _ => {
-                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.
-                NOTE: nothing on the list below changed.", add.get(counter * 3 - 1).unwrap(), counter).expect("writeln failed");
+                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.", add.get(counter * 3 - 1).unwrap(), counter).expect("writeln failed");
 
                 // error = true
                 return true;
             }
         }
 
+        // does this u32 thing even make sense? it's just a micro-optimization, not making it usize, so it makes the program slightly faster
+        // ah well. usize has a max too. u32 is fine and big enough (pause)
         // check if the interval is proper. has to be u32
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().is_err() {
             writeln!(writer, "Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
@@ -54,7 +55,7 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
 
         // check if interval is 0
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().unwrap() == 0 {
-            writeln!(writer, "ERROR: You had an interval of 0 in argument set '{}'. You can't have an interval of 0, otherwise why are you even making a new repeating task?", add.get(counter * 3 - 2).unwrap()).expect("writeln failed");
+            writeln!(writer, "ERROR: You had an interval of 0 in argument set '{}'. You can't have an interval of 0, otherwise why are you even making a new repeating task?", counter).expect("writeln failed");
 
             // error = true
             return true;
@@ -188,10 +189,10 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
         }
 
         // check if starting date is proper
-        if NaiveDate::parse_from_str(start.get(counter * 5 - 4).unwrap().as_str(), "%Y-%m-%d")
+        if NaiveDate::parse_from_str(start.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d")
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided starting date, '{}', in argument set '{}', wasn't proper. Please provide a correct starting date in a year-month-day format, e.g., 2024-05-12.", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided starting date, '{}', in argument set '{}', wasn't proper. Please provide a correct starting date in a year-month-day format, e.g., 2024-05-13.", start.get(counter * 5 - 2).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
@@ -1976,4 +1977,533 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // error = false
     false
+}
+
+// note that it's starting to dawn on me that this style of design + testing is too restrictive and not flexible enough
+// however, since this is an open source software that I want other people to use, I need it to be robust and reliable
+// and for it to be both those things, i need to test it, even if the method is stupid (at least for now)
+
+// note that I want it to be more flexible in the future
+
+// cargo test repeating_todo_unit_tests -- --test-threads=1
+#[cfg(test)]
+mod repeating_todo_unit_tests {
+    use super::*;
+    use anyhow::Context;
+    use std::path::PathBuf;
+
+    // these are taken from repeating_helpers
+    fn path_to_repeating_tasks() -> PathBuf {
+        // get the data dir XDG spec and return it with path to repeating_tasks.json
+        let mut repeating_tasks_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        repeating_tasks_path.push("chartodo/repeating_tasks.json");
+
+        repeating_tasks_path
+    }
+
+    fn repeating_tasks_copy_path() -> PathBuf {
+        // get the path for repeating_tasks_copy.json, which will be used to hold the original contents
+        // of repeating_tasks.json while it's getting modified
+        let mut repeating_tasks_copy_path = dirs::data_dir()
+            .context(
+                "linux: couldn't get $HOME/.local/share/
+                    windows: couldn't get C:/Users/your_user/AppData/Local/
+                    mac: couldn't get /Users/your_user/Library/Application Support/
+
+                    those directories should exist for your OS. please double check that they do.",
+            )
+            .expect("something went wrong with fetching the user's data dirs");
+        repeating_tasks_copy_path.push("chartodo/repeating_tasks_copy.json");
+
+        repeating_tasks_copy_path
+    }
+
+    // these have been tested in other fns, these are just included here as a sanity check
+    #[test]
+    fn repeating_tasks_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/repeating_tasks.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/repeating_tasks.json";
+        let mac_path = "/Library/Application Support/chartodo/repeating_tasks.json";
+        let mut got_repeating_tasks_path: bool = false;
+        let repeating_path = path_to_repeating_tasks();
+        let repeating_path = repeating_path.to_str().unwrap();
+
+        if repeating_path.contains(linux_path) {
+            got_repeating_tasks_path = true;
+        } else if repeating_path.contains(windows_path) {
+            got_repeating_tasks_path = true;
+        } else if repeating_path.contains(mac_path) {
+            got_repeating_tasks_path = true;
+        }
+
+        assert!(got_repeating_tasks_path);
+    }
+
+    #[test]
+    fn repeating_tasks_copy_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/repeating_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/repeating_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/repeating_tasks_copy.json";
+        let mut got_repeating_tasks_copy_path: bool = false;
+        let repeating_tasks_copy_path = repeating_tasks_copy_path();
+        let repeating_tasks_copy_path = repeating_tasks_copy_path.to_str().unwrap();
+
+        if repeating_tasks_copy_path.contains(linux_path) {
+            got_repeating_tasks_copy_path = true;
+        } else if repeating_tasks_copy_path.contains(windows_path) {
+            got_repeating_tasks_copy_path = true;
+        } else if repeating_tasks_copy_path.contains(mac_path) {
+            got_repeating_tasks_copy_path = true;
+        }
+
+        assert!(got_repeating_tasks_copy_path);
+    }
+
+    #[test]
+    fn aaaa_repeating_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(repeating_tasks_copy_path())
+            .context("failed to create repeating_tasks_copy.json")
+            .expect("failed to create a copy during unit test");
+
+        std::fs::copy(path_to_repeating_tasks(), repeating_tasks_copy_path())
+            .context("failed to copy repeating_tasks.json to repeating_tasks_copy.json")
+            .expect("failed to copy original file to copy file during unit test");
+    }
+
+    #[test]
+    fn repeating_tasks_add_incorrect_num_of_args() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("another"),
+            String::from("2"),
+        ];
+        let error_should_be_true = repeating_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_time_unit_invalid() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("another"),
+            String::from("2"),
+            String::from("seconds"),
+        ];
+        let error_should_be_true = repeating_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_interval_not_u32() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("another"),
+            String::from("4294967296"), // one more than max of u32, 4294967295
+            String::from("days"),
+        ];
+        let error_should_be_true = repeating_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_interval_is_zero() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("another"),
+            String::from("0"),
+            String::from("days"),
+        ];
+        let error_should_be_true = repeating_tasks_add(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_is_correct() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+        ];
+        let error_should_be_false = repeating_tasks_add(arguments);
+        // impossible to test the contents since the result of the fn is dependent on the current day and time
+        // i can however test the content results of rp-as and rp-ae
+
+        assert!(!error_should_be_false);
+    }
+
+    #[test]
+    fn repeating_tasks_add_multiple_args_is_correct() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("hello"),
+            String::from("21"),
+            String::from("years"),
+        ];
+        let error_should_be_false = repeating_tasks_add(arguments);
+        // impossible to test the contents since the result of the fn is dependent on the current day and time
+        // i can however test the content results of rp-as and rp-ae
+
+        assert!(!error_should_be_false);
+    }
+
+    // note that it's impossible to test add_to_local_now since that fn's result is dependent on the current date and time
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_incorrect_num_of_args() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+        ];
+        let error_should_be_true = repeating_tasks_add_start_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_time_invalid() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("2021-01-01"),
+            String::from("25:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+            String::from("13:26"),
+        ];
+        let error_should_be_true = repeating_tasks_add_start_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_date_invalid() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("2021-13-01"),
+            String::from("00:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+            String::from("13:26"),
+        ];
+        let error_should_be_true = repeating_tasks_add_start_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    // note that I've thought about ignoring invalid args and just not adding them to the file and only adding the valid ones.
+    // would maybe be more convenient to the user, or maybe not
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_time_unit_invalid() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("second"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+            String::from("13:26"),
+        ];
+        let error_should_be_true = repeating_tasks_add_start_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_interval_not_u32() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("4294967296"),
+            String::from("minutes"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+            String::from("13:26"),
+        ];
+        let error_should_be_true = repeating_tasks_add_start_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_interval_is_zero() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("0"),
+            String::from("minutes"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+            String::from("13:26"),
+        ];
+        let error_should_be_true = repeating_tasks_add_start_datetime(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_is_correct() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("3"),
+            String::from("minutes"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+        ];
+        let error_should_be_false = repeating_tasks_add_start_datetime(arguments);
+        let read_test_file = open_repeating_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": "2021-01-01",
+                        "time": "00:03",
+                        "repeat_number": 3,
+                        "repeat_unit": "minutes",
+                        "repeat_done": false,
+                        "repeat_original_date": "2021-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, repeating_tasks);
+    }
+
+    #[test]
+    fn repeating_tasks_add_start_datetime_multiple_args_is_correct() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // perform actions on file
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("3"),
+            String::from("weeks"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+            String::from("hi"),
+            String::from("276"),
+            String::from("minutes"),
+            String::from("2099-12-05"),
+            String::from("13:26"),
+        ];
+        let error_should_be_false = repeating_tasks_add_start_datetime(arguments);
+        let read_test_file = open_repeating_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": "2021-01-22",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2021-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2099-12-05",
+                        "time": "18:02",
+                        "repeat_number": 276,
+                        "repeat_unit": "minutes",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-12-05",
+                        "repeat_original_time": "13:26"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, repeating_tasks);
+    }
+
+    #[test]
+    fn add_to_given_starting_datetime_is_correct() {
+        let (date, time, repeat_original_date, repeat_original_time) =
+            add_to_given_starting_datetime(
+                "2021-01-28".to_string(),
+                "13:13".to_string(),
+                5,
+                "months".to_string(),
+            );
+
+        assert_eq!(date, "2021-06-28".to_string());
+        assert_eq!(time, "13:13".to_string());
+        assert_eq!(repeat_original_date, "2021-01-28".to_string());
+        assert_eq!(repeat_original_time, "13:13".to_string());
+    }
+
+    #[test]
+    fn repeating_tasks_add_end_incorrect_num_of_args() {
+        // perform actions on file. multiple args so i'm more sure it catches errors
+        let arguments: Vec<String> = vec![
+            String::from("this-is-the-todo-list"),
+            String::from("1"),
+            String::from("day"),
+            String::from("2021-01-01"),
+            String::from("00:00"),
+            String::from("this-is-the-todo-list"),
+            String::from("2"),
+            String::from("days"),
+            String::from("2022-12-24"),
+        ];
+        let error_should_be_true = repeating_tasks_add_end(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, remove the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_repeating_tasks())
+            .context("failed delete modified repeating_tasks.json after running tests")
+            .expect("failed to delete repeating_tasks.json after repeating_helpers unit tests");
+
+        std::fs::rename(repeating_tasks_copy_path(), path_to_repeating_tasks())
+            .context("failed to rename repeating_tasks_copy to repeating_tasks")
+            .expect(
+                "failed to rename repeating_tasks_copy to repeating_tasks after tests were done",
+            );
+    }
 }
