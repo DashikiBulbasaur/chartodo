@@ -373,11 +373,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-notdone" | "rp-nd" => {
-            repeating_tasks_not_done(
+            let error_status = repeating_tasks_not_done(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-notdone")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-rmtodo" | "rp-rmt" => {
@@ -392,11 +395,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-rmdone" | "rp-rmd" => {
-            repeating_tasks_rmdone(
+            let error_status = repeating_tasks_rmdone(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-rmdone")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-doneall" | "rp-da" if args.item_identifier.is_none() => {
@@ -408,8 +414,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-notdoneall" | "rp-nda" if args.item_identifier.is_none() => {
-            repeating_tasks_not_done_all();
-            list();
+            let error_status = repeating_tasks_not_done_all();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-cleartodo" | "rp-ct" if args.item_identifier.is_none() => {
@@ -421,8 +430,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-cleardone" | "rp-cd" if args.item_identifier.is_none() => {
-            repeating_tasks_clear_done();
-            list();
+            let error_status = repeating_tasks_clear_done();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-clearboth" | "rp-cb" if args.item_identifier.is_none() => {
