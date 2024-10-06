@@ -23,8 +23,10 @@ struct Cli {
 fn main() -> Result<()> {
     let args = Cli::parse();
 
+    // since printing the list is separate from normal commands (due to how repeating tasks are handled), and since functions
+    // will print to the terminal if an user error occurs, to avoid printing both the list and error if an error occurs,
+    // we'll flag via bool for an error from a fn (if necessary) and won't print the list if it was tripped
     match args.command.as_str() {
-        // bug here where commands that don't take additional commands, e,g., help, list, doneall, etc., will still activate even if item_identifier isn't empty (which it should be in those cases). program works fine even w/ the bug but it annoyed me, hence the if conditions
         "help" | "h" if args.item_identifier.is_none() => {
             help();
             Ok(())
@@ -40,237 +42,334 @@ fn main() -> Result<()> {
                     .with_context(|| format!("Did not provide the todo item(s) to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
             list();
+
             Ok(())
         }
         "done" | "d" => {
-            regular_tasks_change_todo_to_done(
+            let error_status = regular_tasks_change_todo_to_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be changed to done. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "rmtodo" | "rmt" => {
-            regular_tasks_remove_todo(
+            let error_status = regular_tasks_remove_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item(s) to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "cleartodo" | "ct" if args.item_identifier.is_none() => {
-            regular_tasks_clear_todo();
-            list();
+            let error_status = regular_tasks_clear_todo();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "doneall" | "da" if args.item_identifier.is_none() => {
-            regular_tasks_change_all_todo_to_done();
-            list();
+            let error_status = regular_tasks_change_all_todo_to_done();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "cleardone" | "cd" if args.item_identifier.is_none() => {
-            regular_tasks_clear_done();
-            list();
+            let error_status = regular_tasks_clear_done();
+            if !error_status {
+                list()
+            }
+
             Ok(())
         }
         "clearboth" | "cb" if args.item_identifier.is_none() => {
-            clear_regular_tasks();
-            list();
+            let error_status = clear_regular_tasks();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "rmdone" | "rmd" => {
-            regular_tasks_remove_done(
+            let error_status = regular_tasks_remove_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "notdone" | "nd" => {
-            regular_tasks_not_done(
+            let error_status = regular_tasks_not_done(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "edit" | "e" => {
-            regular_tasks_edit_todo(
+            let error_status = regular_tasks_edit_todo(
                 args
                     .item_identifier
                     .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "notdoneall" | "nda" if args.item_identifier.is_none() => {
-            regular_tasks_reverse_all_dones();
-            list();
+            let error_status = regular_tasks_reverse_all_dones();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-add" | "dl-a" => {
-            deadline_tasks_add(
+            let error_status = deadline_tasks_add(
                 args.item_identifier
                     .context("didn't provide a deadline add argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-addonlydate" | "dl-aod" => {
-            deadline_tasks_add_no_time(
+            let error_status = deadline_tasks_add_no_time(
                 args.item_identifier
                     .context("didn't provide a deadline-addonlydate argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-addonlytime" | "dl-aot" => {
-            deadline_tasks_add_no_date(
+            let error_status = deadline_tasks_add_no_date(
                 args.item_identifier
                     .context("didn't provide a deadline-addonlytime argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-done" | "dl-d" => {
-            deadline_tasks_done(
+            let error_status = deadline_tasks_done(
                 args.item_identifier
                     .context("didn't provide a deadline-done argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-rmtodo" | "dl-rmt" => {
-            deadline_tasks_rmtodo(
+            let error_status = deadline_tasks_rmtodo(
                 args.item_identifier
                     .context("didn't provide a deadline-rmtodo argument")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-cleartodo" | "dl-ct" if args.item_identifier.is_none() => {
-            deadline_tasks_clear_todo();
-            list();
+            let error_status = deadline_tasks_clear_todo();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-doneall" | "dl-da" if args.item_identifier.is_none() => {
-            deadline_tasks_done_all();
-            list();
+            let error_status = deadline_tasks_done_all();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-editall" | "dl-ea" => {
-            deadline_tasks_edit_all(
+            let error_status = deadline_tasks_edit_all(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-editall")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-edittask" | "dl-eta" => {
-            deadline_tasks_edit_task(
+            let error_status = deadline_tasks_edit_task(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-edittask")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-editdate" | "dl-ed" => {
-            deadline_tasks_edit_date(
+            let error_status = deadline_tasks_edit_date(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-editdate")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-edittime" | "dl-eti" => {
-            deadline_tasks_edit_time(
+            let error_status = deadline_tasks_edit_time(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-edittime")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-clearboth" | "dl-cb" if args.item_identifier.is_none() => {
-            clear_deadline_tasks();
-            list();
+            let error_status = clear_deadline_tasks();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-rmdone" | "dl-rmd" => {
-            deadline_tasks_rmdone(
+            let error_status = deadline_tasks_rmdone(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-rmdone")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-notdone" | "dl-nd" => {
-            deadline_tasks_not_done(
+            let error_status = deadline_tasks_not_done(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-notdone")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-cleardone" | "dl-cd" if args.item_identifier.is_none() => {
-            deadline_tasks_clear_done();
-            list();
+            let error_status = deadline_tasks_clear_done();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-notdoneall" | "dl-nda" if args.item_identifier.is_none() => {
-            deadline_tasks_notdoneall();
-            list();
+            let error_status = deadline_tasks_notdoneall();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "deadline-editdatetime" | "dl-edt" => {
-            deadline_tasks_edit_datetime(
+            let error_status = deadline_tasks_edit_datetime(
                 args.item_identifier
                     .context("didn't provide arguments for deadline-editdatetime")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-add" | "rp-a" => {
-            repeating_tasks_add(
+            let error_status = repeating_tasks_add(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-add")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-addstart" | "rp-as" => {
-            repeating_tasks_add_start_datetime(
+            let error_status = repeating_tasks_add_start_datetime(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-addstart")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-addend" | "rp-ae" => {
-            repeating_tasks_add_end(
+            let error_status = repeating_tasks_add_end(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-addend")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-done" | "rp-d" => {
-            repeating_tasks_done(
+            let error_status = repeating_tasks_done(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-done")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-reset" | "repeating-donereset" | "rp-r" | "rp-dr" => {
-            repeating_tasks_reset_original_datetime_to_now(
+            let error_status = repeating_tasks_reset_original_datetime_to_now(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-reset")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-notdone" | "rp-nd" => {
@@ -282,11 +381,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-rmtodo" | "rp-rmt" => {
-            repeating_tasks_rmtodo(
+            let error_status = repeating_tasks_rmtodo(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-rmtodo")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-rmdone" | "rp-rmd" => {
@@ -298,8 +400,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-doneall" | "rp-da" if args.item_identifier.is_none() => {
-            repeating_tasks_doneall();
-            list();
+            let error_status = repeating_tasks_doneall();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-notdoneall" | "rp-nda" if args.item_identifier.is_none() => {
@@ -308,8 +413,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-cleartodo" | "rp-ct" if args.item_identifier.is_none() => {
-            repeating_tasks_clear_todo();
-            list();
+            let error_status = repeating_tasks_clear_todo();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-cleardone" | "rp-cd" if args.item_identifier.is_none() => {
@@ -318,8 +426,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-clearboth" | "rp-cb" if args.item_identifier.is_none() => {
-            clear_repeating_tasks();
-            list();
+            let error_status = clear_repeating_tasks();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-start" | "rp-s" => {
@@ -331,66 +442,104 @@ fn main() -> Result<()> {
             writeln!(writer, "{}", show_starts).expect("writeln failed");
             Ok(())
         }
+        "repeating-resetall" | "rp-ra" | "repeating-doneresetall" | "rp-dra" => {
+            let error_status = repeating_tasks_resetall();
+            if !error_status {
+                list();
+            }
+
+            Ok(())
+        }
+        "repeating-startall" | "rp-sa" => {
+            let show_starts = repeating_tasks_showstartall();
+            let writer = &mut std::io::stdout();
+            writeln!(writer, "{}", show_starts).expect("writeln failed");
+            Ok(())
+        }
         "repeating-editall" | "rp-ea" => {
-            repeating_tasks_edit_all(
+            let error_status = repeating_tasks_edit_all(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editall")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-edittask" | "rp-eta" => {
-            repeating_tasks_edit_task(
+            let error_status = repeating_tasks_edit_task(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-edittask")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editinterval" | "rp-ei" => {
-            repeating_tasks_edit_interval(
+            let error_status = repeating_tasks_edit_interval(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editinterval")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editintervalunit" | "rp-eiu" => {
-            repeating_tasks_edit_interval_unit(
+            let error_status = repeating_tasks_edit_interval_unit(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editintervalunit")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         // note: I don't like unit, it's too vague. but time unit is also too long
         "repeating-editunit" | "rp-eu" => {
-            repeating_tasks_edit_time_unit(
+            let error_status = repeating_tasks_edit_time_unit(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editunit")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editstart" | "rp-es" => {
-            repeating_tasks_edit_start(
+            let error_status = repeating_tasks_edit_start(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editstart")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "repeating-editend" | "rp-ee" => {
-            repeating_tasks_edit_end(
+            let error_status = repeating_tasks_edit_end(
                 args.item_identifier
                     .context("didn't provide arguments for repeating-editend")?,
             );
-            list();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "clearall" | "ca" if args.item_identifier.is_none() => {
-            clear_all_lists();
-            list();
+            let error_status = clear_all_lists();
+            if !error_status {
+                list();
+            }
+
             Ok(())
         }
         "" => {
@@ -426,6 +575,10 @@ fn help() {
         "
     CHARTODO is a simple command-line-interface (CLI) todo list application
 
+    Note that for commands that take positions, the general format is always the following:
+        chartodo ~command ~position(s)
+        e.g., chartodo rmtodo 1, or chartodo rmtodo 5 1 2 12 3
+
     help | h
         show help
         example: chartodo help
@@ -451,7 +604,7 @@ fn help() {
             example: chartodo nd 3
             example: chartodo notdone 3 2 1 5
         rmtodo | rmt
-            remove a todo item from the list, using a numbered position to specify which one
+            remove a todo item from the list, using a numbered position to specify which one(s)
             example: chartodo rmt 4
             example: chartodo rmt 4 3 2
         rmdone | rmd
@@ -541,7 +694,7 @@ fn help() {
     REPEATING:
         repeating-add | rp-a
             add a repeating task. the task starts from your current date and time
-            note that for the repeating time interval, only the following units are allowed:
+            note that for the repeating time interval, only the following time units are allowed:
                 seconds, minutes, hours, days, weeks, months, years
             example: chartodo rp-a gym 2 days
             example: chartood rp-a gym 2 days mow 1 week
@@ -594,6 +747,12 @@ fn help() {
             show the starting datetime of one or more repeating tasks
             example: chartodo rp-s 1
             example: chartodo rp-s 1 2 3 4 5
+        repeating-resetall | repeating-doneresetall | rp-ra | rp-dra
+            resets the starting datetime of all repeating tasks to your current date and time
+            example: chartodo rp-ra | chartodo rp-dra
+        repeating-startall | rp-sa
+            show the starting datetime of all repeating tasks
+            example: chartodo rp-sa 
         repeating-editall | rp-ea
             edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
             example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01

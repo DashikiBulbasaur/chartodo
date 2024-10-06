@@ -24,6 +24,9 @@ Then, to run, either
 ## Usage
 ```sh-session
 Commands (argument chaining is available where it makes sense):
+    Note that for commands that take positions, the general format is always the following:
+        chartodo ~command ~position(s)
+        e.g., chartodo rmtodo 1, or chartodo rmtodo 5 1 2 12 3
 
     help | h
         show help
@@ -42,7 +45,7 @@ Commands (argument chaining is available where it makes sense):
             example: chartodo add new-item
             example: chartodo add 1st-item 2nd-item 3rd-item
         done | d
-            change a todo item to done, using a numbered position to specify which one
+            change a todo item to done, using a numbered position to specify which one(s)
             example: chartodo done 3
             example: chartodo d 5 1 3 2
         notdone | nd
@@ -140,7 +143,7 @@ Commands (argument chaining is available where it makes sense):
     REPEATING:
         repeating-add | rp-a
             add a repeating task. the task starts from your current date and time
-            note that for the repeating time interval, only the following units are allowed:
+            note that for the repeating time interval, only the following time units are allowed:
                 minutes, hours, days, weeks, months, years
             example: chartodo rp-a gym 2 days
             example: chartood rp-a gym 2 days mow 1 week
@@ -193,6 +196,12 @@ Commands (argument chaining is available where it makes sense):
             show the starting datetime of one or more repeating tasks
             example: chartodo rp-s 1
             example: chartodo rp-s 1 2 3 4 5
+        repeating-resetall | repeating-doneresetall | rp-ra | rp-dra
+            resets the starting datetime of all repeating tasks to your current date and time
+            example: chartodo rp-ra | chartodo rp-dra
+        repeating-startall | rp-sa
+            show the starting datetime of all repeating tasks
+            example: chartodo rp-sa 
         repeating-editall | rp-ea
             edit all the parameters of a repeating task: task, interval, time unit, and starting/ending datetime
             example: chartodo rp-ea 1 new-repeating-task 3 days start 2000-01-01
@@ -222,11 +231,8 @@ Commands (argument chaining is available where it makes sense):
 ### Tips on usage
 
 1. Commands that take positions as arguments will ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
-2. Max character len for todo items is 15, and the max len for done lists is 10. This is arbitrary and can be increased upon a user's request.
-3. Max character len for tasks is 40. This isn't arbitrary as I don't want to encourage super-long tasks that wrap in the terminal. It can be increased upon request.
-4. Spaces in the program are used to differentiate separate arguments, so multi-word tasks can instead be separated by a character such as -, e.g., multi-word-task-item
-5. For the repeating tasks, the maximum interval for the repeating time is 4294967295, e.g., 4294967295 days.
-6. When marking any todo (regular, deadline, repeating) task as done and it would exceed the done list's current set max len, the done list automatically deletes everything it has. This is so users don't have to worry about the done list being too full when marking todos as done. This can be changed upon request.
+2. Spaces in the program are used to differentiate separate arguments, so multi-word tasks can instead be separated by a character such as -, e.g., multi-word-task-item
+3. For the repeating tasks, the maximum interval for the repeating time is 4294967295, e.g., 4294967295 days.
 
 ## Milestones
 
@@ -237,7 +243,8 @@ Commands (argument chaining is available where it makes sense):
 - [x] add repeating todo items
 - [ ] testing complete for launch
 - [ ] available on crates.io
-- [ ] switch to proper argument chaining (if possible), i.e., -a -d -rmt
+- [ ] launched
+- [ ] switch to proper argument chaining (if possible), i.e., chartodo -a ... -d ... -rmt ...
 - [ ] finish the advanced functionalities?
 ---
 Potential features:
