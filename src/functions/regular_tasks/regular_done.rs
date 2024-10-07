@@ -41,6 +41,10 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut done_to_remove: Vec<usize> = done_to_remove
+        .iter()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     done_to_remove.sort();
     done_to_remove.dedup();
 
@@ -54,9 +58,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
 
     // remove each item one by one
     done_to_remove.iter().rev().for_each(|position| {
-        regular_tasks
-            .done
-            .remove(position.parse::<usize>().unwrap() - 1);
+        regular_tasks.done.remove(position - 1);
     });
 
     // write changes to file
@@ -102,6 +104,10 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut done_to_todo: Vec<usize> = done_to_todo
+        .iter()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     done_to_todo.sort();
     done_to_todo.dedup();
 
@@ -119,16 +125,10 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
 
     // reverse dones one by one
     done_to_todo.iter().rev().for_each(|position| {
-        regular_tasks.todo.push(
-            regular_tasks
-                .done
-                .get(position.parse::<usize>().unwrap() - 1)
-                .unwrap()
-                .clone(),
-        );
         regular_tasks
-            .done
-            .remove(position.parse::<usize>().unwrap() - 1);
+            .todo
+            .push(regular_tasks.done.get(position - 1).unwrap().clone());
+        regular_tasks.done.remove(position - 1);
     });
 
     // write changes to file

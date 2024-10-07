@@ -272,6 +272,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut done: Vec<usize> = done.iter().map(|x| x.parse::<usize>().unwrap()).collect();
     done.sort();
     done.dedup();
 
@@ -289,16 +290,10 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
 
     // change todos to dones one by one
     done.iter().rev().for_each(|position| {
-        deadline_tasks.done.push(
-            deadline_tasks
-                .todo
-                .get(position.parse::<usize>().unwrap() - 1)
-                .unwrap()
-                .to_owned(),
-        );
         deadline_tasks
-            .todo
-            .remove(position.parse::<usize>().unwrap() - 1);
+            .done
+            .push(deadline_tasks.todo.get(position - 1).unwrap().to_owned());
+        deadline_tasks.todo.remove(position - 1);
     });
 
     // write changes to file
@@ -348,6 +343,7 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     }
 
     // reverse sort
+    let mut rmtodo: Vec<usize> = rmtodo.iter().map(|x| x.parse::<usize>().unwrap()).collect();
     rmtodo.sort();
     rmtodo.dedup();
 
@@ -365,9 +361,7 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 
     // remove each item one by one
     rmtodo.iter().rev().for_each(|position| {
-        deadline_tasks
-            .todo
-            .remove(position.parse::<usize>().unwrap() - 1);
+        deadline_tasks.todo.remove(position - 1);
     });
 
     // write changes to file

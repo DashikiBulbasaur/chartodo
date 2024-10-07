@@ -40,6 +40,10 @@ pub fn deadline_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut done_remove: Vec<usize> = done_remove
+        .iter()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     done_remove.sort();
     done_remove.dedup();
 
@@ -57,9 +61,7 @@ pub fn deadline_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
 
     // remove each item one by one
     done_remove.iter().rev().for_each(|position| {
-        deadline_tasks
-            .done
-            .remove(position.parse::<usize>().unwrap() - 1);
+        deadline_tasks.done.remove(position - 1);
     });
 
     // write changes to file
@@ -105,6 +107,10 @@ pub fn deadline_tasks_not_done(mut not_done: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut not_done: Vec<usize> = not_done
+        .iter()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     not_done.sort();
     not_done.dedup();
 
@@ -118,16 +124,10 @@ pub fn deadline_tasks_not_done(mut not_done: Vec<String>) -> bool {
 
     // reverse dones one by one
     not_done.iter().rev().for_each(|position| {
-        deadline_tasks.todo.push(
-            deadline_tasks
-                .done
-                .get(position.parse::<usize>().unwrap() - 1)
-                .unwrap()
-                .to_owned(),
-        );
         deadline_tasks
-            .done
-            .remove(position.parse::<usize>().unwrap() - 1);
+            .todo
+            .push(deadline_tasks.done.get(position - 1).unwrap().to_owned());
+        deadline_tasks.done.remove(position - 1);
     });
 
     // write changes to file

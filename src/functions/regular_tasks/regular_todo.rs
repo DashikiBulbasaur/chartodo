@@ -71,7 +71,11 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
         return true;
     }
 
-    // sort and dedup
+    // sort and dedup. Vec<usize> is needed for sorting
+    let mut todo_to_done: Vec<usize> = todo_to_done
+        .iter()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     todo_to_done.sort();
     todo_to_done.dedup();
 
@@ -89,16 +93,10 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     // change todos to dones one by one. no idea if the parse slows down the process significantly
     // rev is done so that removing by position doesn't become invalid
     todo_to_done.iter().rev().for_each(|position| {
-        regular_tasks.done.push(
-            regular_tasks
-                .todo
-                .get(position.parse::<usize>().unwrap() - 1)
-                .unwrap()
-                .to_owned(),
-        );
         regular_tasks
-            .todo
-            .remove(position.parse::<usize>().unwrap() - 1);
+            .done
+            .push(regular_tasks.todo.get(position - 1).unwrap().to_owned());
+        regular_tasks.todo.remove(position - 1);
     });
 
     // write changes to file
@@ -148,6 +146,10 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut todo_to_remove: Vec<usize> = todo_to_remove
+        .iter()
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
     todo_to_remove.sort();
     todo_to_remove.dedup();
 
@@ -165,9 +167,7 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
 
     // remove each item one by one
     todo_to_remove.iter().rev().for_each(|position| {
-        regular_tasks
-            .todo
-            .remove(position.parse::<usize>().unwrap() - 1);
+        regular_tasks.todo.remove(position - 1);
     });
 
     // write changes to file

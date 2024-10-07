@@ -562,6 +562,7 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut done: Vec<usize> = done.iter().map(|x| x.parse::<usize>().unwrap()).collect();
     done.sort();
     done.dedup();
 
@@ -581,23 +582,17 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     done.iter().for_each(|position| {
         repeating_tasks
             .todo
-            .get_mut(position.parse::<usize>().unwrap() - 1)
+            .get_mut(position - 1)
             .unwrap()
             .repeat_done = Some(true);
     });
 
     // change todos to dones one by one
     done.iter().rev().for_each(|position| {
-        repeating_tasks.done.push(
-            repeating_tasks
-                .todo
-                .get(position.parse::<usize>().unwrap() - 1)
-                .unwrap()
-                .to_owned(),
-        );
         repeating_tasks
-            .todo
-            .remove(position.parse::<usize>().unwrap() - 1);
+            .done
+            .push(repeating_tasks.todo.get(position - 1).unwrap().to_owned());
+        repeating_tasks.todo.remove(position - 1);
     });
 
     // write changes to file
@@ -752,6 +747,7 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     }
 
     // sort and dedup
+    let mut rmtodo: Vec<usize> = rmtodo.iter().map(|x| x.parse::<usize>().unwrap()).collect();
     rmtodo.sort();
     rmtodo.dedup();
 
@@ -769,9 +765,7 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 
     // remove each item one by one
     rmtodo.iter().rev().for_each(|position| {
-        repeating_tasks
-            .todo
-            .remove(position.parse::<usize>().unwrap() - 1);
+        repeating_tasks.todo.remove(position - 1);
     });
 
     // write changes to file
@@ -877,6 +871,7 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     }
 
     // sort and dedup
+    let mut start: Vec<usize> = start.iter().map(|x| x.parse::<usize>().unwrap()).collect();
     start.sort();
     start.dedup();
 
@@ -889,21 +884,17 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     start.iter().for_each(|position| {
         let task_and_start = format!(
             "task: {}\n\tstart: {} {}\n",
+            repeating_tasks.todo.get(position - 1).unwrap().task,
             repeating_tasks
                 .todo
-                .get(position.parse::<usize>().unwrap() - 1)
-                .unwrap()
-                .task,
-            repeating_tasks
-                .todo
-                .get(position.parse::<usize>().unwrap() - 1)
+                .get(position - 1)
                 .unwrap()
                 .repeat_original_date
                 .as_ref()
                 .unwrap(),
             repeating_tasks
                 .todo
-                .get(position.parse::<usize>().unwrap() - 1)
+                .get(position - 1)
                 .unwrap()
                 .repeat_original_time
                 .as_ref()
