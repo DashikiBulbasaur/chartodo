@@ -1,12 +1,221 @@
-mod outputs_helpers;
-
+use anyhow::Context;
 use assert_cmd::prelude::*;
-use outputs_helpers::*;
+use chartodo::functions::{json_file_structs::*, regular_tasks::regular_helpers::*};
 use predicates::prelude::*;
-use std::process::Command;
+use std::{path::PathBuf, process::Command};
 
-// cargo test --test todo_outputs -- --test-threads=1
+// cargo test --test regular_todo_tests -- --test-threads=1
 
+// these are taken from regular_helpers
+fn path_to_regular_tasks() -> PathBuf {
+    // get the data dir XDG spec and return it with path to regular_tasks.json
+    let mut regular_tasks_path = dirs::data_dir()
+        .context(
+            "linux: couldn't get $HOME/.local/share/
+                windows: couldn't get C:/Users/your_user/AppData/Local/
+                mac: couldn't get /Users/your_user/Library/Application Support/
+
+                those directories should exist for your OS. please double check that they do.",
+        )
+        .expect("something went wrong with fetching the user's data dirs");
+    regular_tasks_path.push("chartodo/regular_tasks.json");
+
+    regular_tasks_path
+}
+
+fn regular_tasks_copy_path() -> PathBuf {
+    // get the path for regular_tasks_copy.json, which will be used to hold the original contents
+    // of regular_tasks.json while it's getting modified
+    let mut regular_tasks_copy_path = dirs::data_dir()
+        .context(
+            "linux: couldn't get $HOME/.local/share/
+                windows: couldn't get C:/Users/your_user/AppData/Local/
+                mac: couldn't get /Users/your_user/Library/Application Support/
+
+                those directories should exist for your OS. please double check that they do.",
+        )
+        .expect("something went wrong with fetching the user's data dirs");
+    regular_tasks_copy_path.push("chartodo/regular_tasks_copy.json");
+
+    regular_tasks_copy_path
+}
+
+mod aaa_do_this_first {
+    use super::*;
+
+    // these have been tested in other fns, these are just included here as a sanity check
+    #[test]
+    fn regular_tasks_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/regular_tasks.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks.json";
+        let mut got_regular_tasks_path: bool = false;
+        let regular_path = path_to_regular_tasks();
+        let regular_path = regular_path.to_str().unwrap();
+
+        if regular_path.contains(linux_path) {
+            got_regular_tasks_path = true;
+        } else if regular_path.contains(windows_path) {
+            got_regular_tasks_path = true;
+        } else if regular_path.contains(mac_path) {
+            got_regular_tasks_path = true;
+        }
+
+        assert!(got_regular_tasks_path);
+    }
+
+    #[test]
+    fn regular_tasks_copy_path_is_correct() {
+        let linux_path = "/.local/share/chartodo/regular_tasks_copy.json";
+        // note: windows is supposed to have \
+        let windows_path = "/AppData/Local/chartodo/regular_tasks_copy.json";
+        let mac_path = "/Library/Application Support/chartodo/regular_tasks_copy.json";
+        let mut got_regular_tasks_copy_path: bool = false;
+        let regular_tasks_copy_path = regular_tasks_copy_path();
+        let regular_tasks_copy_path = regular_tasks_copy_path.to_str().unwrap();
+
+        if regular_tasks_copy_path.contains(linux_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(windows_path) {
+            got_regular_tasks_copy_path = true;
+        } else if regular_tasks_copy_path.contains(mac_path) {
+            got_regular_tasks_copy_path = true;
+        }
+
+        assert!(got_regular_tasks_copy_path);
+    }
+
+    #[test]
+    fn aaaa_regular_tasks_clone_file() {
+        // name is aaaa so it's done first
+        // since we will be modifying the original file to run a test, the original data must be
+        // preserved first
+        std::fs::File::create(regular_tasks_copy_path())
+            .context("failed to create regular_tasks_copy.json")
+            .expect("failed to create a copy during unit test");
+
+        std::fs::copy(path_to_regular_tasks(), regular_tasks_copy_path())
+            .context("failed to copy regular_tasks.json to regular_tasks_copy.json")
+            .expect("failed to copy original file to copy file during unit test");
+    }
+}
+
+mod regular_todo_add {
+    use super::*;
+
+    #[test]
+    fn regular_todo_adding_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+            context(
+                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // add one
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add").arg("regular-todo-item");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: regular-todo-item"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_adding_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+            context(
+                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // add one
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a").arg("regular-todo-item");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: regular-todo-item"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_adding_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+            context(
+                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // add one
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("add").arg("regular-todo-item").arg("hello");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: regular-todo-item"));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("2: hello"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_adding_multiple_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
+            context(
+                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // add one
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("a").arg("regular-todo-item").arg("hello");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: regular-todo-item"));
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("2: hello"));
+
+        Ok(())
+    }
+}
+
+/*
 mod add_todo_item_tests {
     use super::*;
 
@@ -696,11 +905,32 @@ mod edit_todo_item_tests {
         Ok(())
     }
 }
+*/
 
+mod zzz_do_this_last {
+    use super::*;
+
+    #[test]
+    fn zzzz_rename_copy_to_original() {
+        // name is zzzz so it's done last
+        // now that tests are done, remove the modified original and rename copy to original
+
+        std::fs::remove_file(path_to_regular_tasks())
+            .context("failed delete modified regular_tasks.json after running tests")
+            .expect("failed to delete regular_tasks.json after regular_helpers unit tests");
+
+        std::fs::rename(regular_tasks_copy_path(), path_to_regular_tasks())
+            .context("failed to rename regular_tasks_copy to regular_tasks")
+            .expect("failed to rename regular_tasks_copy to regular_tasks after tests were done");
+    }
+}
+
+/*
 #[test]
-fn zzz_resets_the_file() {
+fn zzz_do_this_last() {
     // note: this is just to reset the file after all the changes for my own convenience.
     // the fn also starts with zzz cuz rust runs the tests in alphabetical order, and I
     // want this to be the last one everytime
     let _ = create_test_file();
 }
+*/
