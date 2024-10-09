@@ -2,6 +2,7 @@ use super::json_file_structs::*;
 use super::repeating_tasks::repeating_helpers::*;
 use chrono::{Days, Duration, Local, Months, NaiveDateTime};
 
+// these Tasks struct come in already sorted I think
 pub fn regular_tasks_list(regular_tasks: Tasks) -> (String, String) {
     let mut regular_todo = String::from("");
     let mut counter: u8 = 1;
@@ -71,6 +72,8 @@ pub fn deadline_tasks_list(deadline_tasks: Tasks) -> (String, String) {
     }
 }
 
+// only possible to unit test if results are MISSED or if date and time are so far beyond current date and time that
+// it's impossible to get 'due' unless you spoofed your own time
 fn check_if_due_or_not(date: &String, time: &String) -> String {
     if date < &Local::now().date_naive().to_string()
         || date == &Local::now().date_naive().to_string() && time < &Local::now().time().to_string()
@@ -255,106 +258,156 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     }
 }
 
-/*
+// cargo test general_helpers_unit_tests
 #[cfg(test)]
-mod helpers_unit_tests {
-    // note: to run this specifically, do cargo test helpers_unit_tests, or just helpers
-
+mod general_helpers_unit_tests {
     use super::*;
-    // note: I'd like to use assert_fs to create temp files, but I can't make NamedTempFile work
-    // like in rust grrs cli tutorial
 
     #[test]
-    fn reading_and_creating_vecs_is_correct() -> Result<(), Box<dyn std::error::Error>> {
-        let mut test_file = File::create("test.txt")?;
-        test_file.write_all(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
+    fn regular_tasks_list_is_correct() {
+        let regular_tasks = Tasks {
+            todo: vec![
+                Task {
+                    task: String::from("todo1"),
+                    date: None,
+                    time: None,
+                    repeat_number: None,
+                    repeat_unit: None,
+                    repeat_done: None,
+                    repeat_original_date: None,
+                    repeat_original_time: None,
+                },
+                Task {
+                    task: String::from("todo2"),
+                    date: None,
+                    time: None,
+                    repeat_number: None,
+                    repeat_unit: None,
+                    repeat_done: None,
+                    repeat_original_date: None,
+                    repeat_original_time: None,
+                },
+            ],
+            done: vec![Task {
+                task: String::from("done"),
+                date: None,
+                time: None,
+                repeat_number: None,
+                repeat_unit: None,
+                repeat_done: None,
+                repeat_original_date: None,
+                repeat_original_time: None,
+            }],
+        };
+        let correct_todo_string = String::from("1: todo1\n2: todo2");
+        let correct_done_string = String::from("DONE\n---\n1: done");
+        let (regular_todo, regular_done) = regular_tasks_list(regular_tasks);
 
-        let (test_todo, test_done) = read_file_and_create_vecs("test.txt".into());
-        std::fs::remove_file("test.txt")?;
-
-        let correct_todo = vec![
-            "CHARTODO".to_string(),
-            "this".to_string(),
-            "is".to_string(),
-            "a".to_string(),
-            "test".to_string(),
-            "---".to_string(),
-        ];
-        let correct_done = vec!["DONE".to_string(), "please".to_string(), "pass".to_string()];
-        assert_eq!((test_todo, test_done), (correct_todo, correct_done));
-
-        Ok(())
+        assert_eq!(correct_todo_string, regular_todo);
+        assert_eq!(correct_done_string, regular_done);
     }
 
     #[test]
-    fn positions_in_lists_are_correct() -> Result<(), Box<dyn std::error::Error>> {
-        let mut test_file = File::create("test1.txt")?;
-        test_file.write_all(b"CHARTODO\nthis\nis\na\ntest\n---\n-----\nDONE\nplease\npass")?;
+    fn due_or_not_is_correct() {
+        let should_be_missed =
+            check_if_due_or_not(&String::from("2020-01-01"), &String::from("00:00"));
+        let should_be_due =
+            check_if_due_or_not(&String::from("2300-01-01"), &String::from("00:00"));
 
-        let (test_todo, test_done) = read_file_and_create_vecs("test1.txt".into());
-        // note: different file cuz I think there's a concurrency issue when I try to delete the
-        // same file from different test fns. I could just run these one by one with the same file,
-        // with test-threads=1, but that takes 2 long and is a last resort
-        std::fs::remove_file("test1.txt")?;
-        let (test_todo, test_done) = add_positions_to_todo_and_done(test_todo, test_done);
-
-        let correct_todo = vec![
-            "CHARTODO".to_string(),
-            "1: this".to_string(),
-            "2: is".to_string(),
-            "3: a".to_string(),
-            "4: test".to_string(),
-            "5: ---".to_string(),
-        ];
-        let correct_done = vec![
-            "DONE".to_string(),
-            "1: please".to_string(),
-            "2: pass".to_string(),
-        ];
-        assert_eq!((test_todo, test_done), (correct_todo, correct_done));
-
-        Ok(())
+        assert_eq!(should_be_missed, "MISSED".to_string());
+        assert_eq!(should_be_due, "due".to_string());
     }
 
     #[test]
-    fn writing_changes_to_file_is_correct() -> Result<(), Box<dyn std::error::Error>> {
-        // note: this might be a convoluted piece of mess, but i wrote this for my own peace of
-        // mind so i know that what's written on the file is correct
-
-        let correct_todo = vec![
-            "CHARTODO".to_string(),
-            "this".to_string(),
-            "is".to_string(),
-            "a".to_string(),
-            "test".to_string(),
-        ];
-        let correct_done = vec!["DONE".to_string(), "please".to_string(), "pass".to_string()];
-        let mut correct_full_list = vec![];
-        correct_todo
-            .iter()
-            .for_each(|item| correct_full_list.push(item));
-        let binding = "-----".to_string();
-        correct_full_list.push(&binding);
-        correct_done
-            .iter()
-            .for_each(|item| correct_full_list.push(item));
-
-        let (_, _) = create_new_file_and_write(
-            "test2.txt".into(),
-            correct_todo.clone(),
-            correct_done.clone(),
+    fn deadline_tasks_list_is_correct() {
+        let deadline_tasks = Tasks {
+            todo: vec![
+                Task {
+                    task: String::from("todo1"),
+                    date: Some(String::from("1900-01-01")),
+                    time: Some(String::from("00:00")),
+                    repeat_number: None,
+                    repeat_unit: None,
+                    repeat_done: None,
+                    repeat_original_date: None,
+                    repeat_original_time: None,
+                },
+                Task {
+                    task: String::from("todo2"),
+                    date: Some(String::from("2300-01-01")),
+                    time: Some(String::from("23:48")),
+                    repeat_number: None,
+                    repeat_unit: None,
+                    repeat_done: None,
+                    repeat_original_date: None,
+                    repeat_original_time: None,
+                },
+            ],
+            done: vec![Task {
+                task: String::from("done"),
+                date: Some(String::from("1930-12-25")),
+                time: Some(String::from("01:06")),
+                repeat_number: None,
+                repeat_unit: None,
+                repeat_done: None,
+                repeat_original_date: None,
+                repeat_original_time: None,
+            }],
+        };
+        let correct_todo_string = String::from(
+            "1: todo1\n   MISSED: 1900-01-01 00:00\n2: todo2\n   due: 2300-01-01 23:48",
         );
-        let (test_todo, test_done) = read_file_and_create_vecs("test2.txt".into());
-        std::fs::remove_file("test2.txt")?;
+        let correct_done_string = String::from("DONE\n---\n1: done\n   done: 1930-12-25 01:06");
+        let (deadline_todo, deadline_done) = deadline_tasks_list(deadline_tasks);
 
-        let mut test_full_list = vec![];
-        test_todo.iter().for_each(|item| test_full_list.push(item));
-        test_full_list.push(&binding);
-        test_done.iter().for_each(|item| test_full_list.push(item));
+        assert_eq!(correct_todo_string, deadline_todo);
+        assert_eq!(correct_done_string, deadline_done);
+    }
 
-        assert_eq!(correct_full_list, test_full_list);
+    #[test]
+    fn repeating_tasks_list_is_correct() {
+        let repeating_tasks = Tasks {
+            todo: vec![
+                Task {
+                    task: String::from("todo1"),
+                    date: Some(String::from("1900-01-01")),
+                    time: Some(String::from("00:00")),
+                    repeat_number: Some(1),
+                    repeat_unit: Some(String::from("year")),
+                    repeat_done: Some(false),
+                    repeat_original_date: Some(String::from("1899-01-01")),
+                    repeat_original_time: Some(String::from("00:00")),
+                },
+                Task {
+                    task: String::from("todo2"),
+                    date: Some(String::from("2300-01-01")),
+                    time: Some(String::from("23:48")),
+                    repeat_number: Some(2),
+                    repeat_unit: Some(String::from("months")),
+                    repeat_done: Some(false),
+                    repeat_original_date: Some(String::from("2299-11-01")),
+                    repeat_original_time: Some(String::from("23:48")),
+                },
+            ],
+            done: vec![Task {
+                task: String::from("done"),
+                date: Some(String::from("2425-12-25")),
+                time: Some(String::from("01:06")),
+                repeat_number: Some(100),
+                repeat_unit: Some("minutes".to_string()),
+                repeat_done: Some(true),
+                repeat_original_date: Some("2425-12-24".to_string()),
+                repeat_original_time: Some("22:40".to_string()),
+            }],
+        };
+        let correct_todo_string = String::from(
+            "1: todo1\n   interval: 1 year\n   MISSED: 1900-01-01 00:00\n2: todo2\n   interval: 2 months\n   due: 2300-01-01 23:48",
+        );
+        let correct_done_string =
+            String::from("DONE\n---\n1: done\n   interval: 100 minutes\n   done: 2425-12-25 01:06");
+        let (deadline_todo, deadline_done) = repeating_tasks_list(repeating_tasks);
 
-        Ok(())
+        assert_eq!(correct_todo_string, deadline_todo);
+        assert_eq!(correct_done_string, deadline_done);
     }
 }
-    */
