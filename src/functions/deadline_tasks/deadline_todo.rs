@@ -21,7 +21,7 @@ pub fn deadline_tasks_add(add: Vec<String>) -> bool {
     // check if we have the right # of args
     // note/potential todo: i'd like to remove division here but idk what else to do lol
     if add.len() % 3 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task. You should have 3, 6, 9, etc. (i.e., divisible by 3) arguments. Proper example: chartodo dl-a new-item 2099-01-01 00:00. Another: chartodo dl-a new-item 2099-01-01 00:00 another-item 2199-01-01 23:59.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) arguments after 'chartodo deadline-add'. You provided {} argument(s).\n\tFormat: chartodo deadline-add ~task ~date ~time [...].\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\tExample: chartodo dl-a new-item 2099-01-01 00:00\n\tAnother example: chartodo dl-a new-item 2099-01-01 00:00 another-item 2199-01-01 23:59", add.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -102,7 +102,7 @@ pub fn deadline_tasks_add_no_time(add_no_time: Vec<String>) -> bool {
 
     // check if right # of arguments
     if add_no_time.len() % 2 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task w/ no time. You should have 2, 4, 6, etc. (i.e., divisible by 2) arguments. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task w/ no time.\n\tThere should be 2, 4, 6, etc. (i.e., divisible by 2) arguments after 'chartodo deadline-addonlydate'. You provided {} argument(s).\n\tFormat: chartodo deadline-addonlydate ~task ~date [...].\n\t\tDate must be in a yy-mm-dd format. The time defaults to 00:00.\n\tExample: chartodo dl-aod new-item 2099-01-01\n\tAnother example: chartodo dl-aod new-item 2099-01-01 another-item 2199-01-01", add_no_time.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -173,7 +173,7 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
 
     // check if right # of arguments
     if add_no_date.len() % 2 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task w/ no time. Proper example: chartodo dl-ant new-item 2099-01-01. Another: chartodo dl-a new-item 2099-01-01 another-item 2199-01-01. After the command dl-ant, there should be 2, 4, 6, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a deadline task w/ no time.\n\tThere should be 2, 4, 6, etc. (i.e., divisible by 2) arguments after 'chartodo deadline-addonlytime'. You provided {} argument(s).\n\tFormat: chartodo deadline-addonlytime ~task ~time [...].\n\t\tTime must be in a 24-hour format. The date defaults to your current date.\n\tExample: chartodo dl-aot new-item 00:00\n\tAnother example: chartodo dl-aot new-item 23:59 another-item 23:59", add_no_date.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -458,7 +458,7 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if position_task_date_time.len() != 4 {
-        writeln!(writer, "ERROR: You must specify the deadline todo's position and all the parameters that will be edited. A proper example would be: chartodo deadline-editall 4 new-item 2150-01-01 00:00.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position and all the parameters that will be edited.\n\tThere should be 4 arguments after 'chartodo deadline-editall'. You provided {} argument(s).\n\tFormat: chartodo deadline-editall ~position ~task ~date ~time\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\tExample: chartodo dl-ea 4 new-item 2150-01-01 00:00", position_task_date_time.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -581,7 +581,7 @@ pub fn deadline_tasks_edit_task(position_task: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if position_task.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-eta 4 new-item.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit the task to.\n\tThere should be 2 arguments after 'chartodo deadline-edittask'. You provided {} argument(s).\n\tFormat: chartodo deadline-edittask ~position ~task.\n\tExample: chartodo dl-eta 4 new-item", position_task.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -661,7 +661,7 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if position_date.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-ed 4 2150-01-01.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit the date to.\n\tThere should be two arguments after 'chartodo deadline-editdate'. You provided {} argument(s).\n\tFormat: chartodo deadline-editdate ~position ~date.\n\t\tDate must be in a yy-mm-dd format.\n\tExample: chartodo dl-ed 4 2150-01-01", position_date.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -756,7 +756,7 @@ pub fn deadline_tasks_edit_time(position_time: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if position_time.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit it to. A proper example would be: chartodo dl-eti 4 23:59.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position that will be edited and what to edit the time to.\n\tThere should be 2 arguments after 'chartodo deadline-edittime'. You provided {} argument(s).\n\tFormat: chartodo deadline-edittime ~position ~time.\n\t\tTime must be in a 24-hour format.\n\tExample: chartodo dl-eti 4 23:59", position_time.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -850,7 +850,7 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_date_time.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the deadline todo's position and what to edit the datetime to. A proper example would be: chartodo deadline-editdatetime 4 2150-01-01 00:00.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the deadline todo's position and what to edit the datetime to.\n\tThere should be 3 arguments after 'chartodo deadline-editdatetime'. You provided {} argument(s).\n\tFormat: chartodo deadline-editdatetime ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo dl-edt 4 2150-01-01 00:00", edit_date_time.len()).expect("writeln failed");
 
         // error = true
         return true;

@@ -270,7 +270,7 @@ pub fn regular_tasks_edit_todo(position_and_new: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if position_and_new.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the regular todo's position that will be edited, and what to edit it to. There should be 2 arguments after 'chartodo edit'. You provided {} argument(s). A proper example would be: chartodo edit 4 new-item.", position_and_new.len()).expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the regular todo's position that will be edited, and what to edit the task to.\n\tThere should be 2 arguments after 'chartodo edit'. You provided {} argument(s).\n\tFormat: chartodo edit ~position ~task\n\tExample: chartodo edit 4 new-item", position_and_new.len()).expect("writeln failed");
 
         // error = true
         return true;
