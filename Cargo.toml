@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.5.20", features = ["derive"] }
 dirs = "5.0.1"
-anyhow = "1.0.89"
-serde_json = "1.0.129"
+anyhow = "1.0.90"
+serde_json = "1.0.132"
 serde = { version = "1.0.210", features = ["derive"] }
 comfy-table = "7.1.1"
 chrono = "0.4.38"
