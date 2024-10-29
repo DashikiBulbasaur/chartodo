@@ -37,6 +37,15 @@ Commands (argument chaining is available where it makes sense):
     clearall | ca
         clear everything (TODO, DEADLINE, REPEATING)
         example: chartodo ca
+    clearall-regular | ca-r
+        clear all regular todo and done tasks
+        example: chartodo ca-r
+    clearall-deadline | ca-d
+        clear all deadline todo and done tasks
+        example: chartodo ca-d
+    clearall-repeating | ca-rp
+        clear all repeating todo and done tasks
+        example: chartodo ca-rp
 
     TODO:
         add | a

@@ -1352,6 +1352,28 @@ mod regular_todo_cleartodo {
     use super::*;
 
     #[test]
+    fn regular_todo_cleartodo_no_args_allowed() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("cleartodo").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "Invalid command. Please try again, or try chartodo help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_cleartodo_abrev_no_args_allowed() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("ct").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "Invalid command. Please try again, or try chartodo help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn regular_todo_cleartodo_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to regular tasks so content is known
         let fresh_regular_tasks = r#"
@@ -1504,6 +1526,28 @@ mod regular_todo_cleartodo {
 
 mod regular_todo_doneall {
     use super::*;
+
+    #[test]
+    fn regular_todo_doneall_no_args_allowed() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("doneall").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "Invalid command. Please try again, or try chartodo help",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_doneall_abrev_no_args_allowed() -> Result<(), Box<dyn std::error::Error>> {
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("da").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "Invalid command. Please try again, or try chartodo help",
+        ));
+
+        Ok(())
+    }
 
     #[test]
     fn regular_todo_doneall_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
