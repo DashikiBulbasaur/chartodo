@@ -409,7 +409,7 @@ pub fn deadline_tasks_done_all() -> bool {
     if deadline_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "The deadline todo list is currently empty, so you can't change any todos to done."
+            "ERROR: The deadline todo list is currently empty, so you can't change any todos to done."
         )
         .expect("writeln failed");
 
