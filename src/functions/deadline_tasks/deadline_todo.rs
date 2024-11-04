@@ -523,7 +523,7 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) -> bool {
     if NaiveDate::parse_from_str(position_task_date_time.get(2).unwrap().as_str(), "%Y-%m-%d")
         .is_err()
     {
-        writeln!(writer, "ERROR: The date provided, '{}', isn't proper. It must be in a yy-mm-dd format, e.g., 2001-01-01", position_task_date_time.get(2).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date provided, '{}', isn't proper. It must be in a yy-mm-dd format, e.g., 2001-12-13", position_task_date_time.get(2).unwrap()).expect("writeln failed");
 
         // error = true
         return true;
@@ -697,7 +697,7 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) -> bool {
     if position_date.first().unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len() {
         writeln!(
             writer,
-            "Your position, '{}', exceed's the todo list's length. Try something between 1 and {}",
+            "ERROR: Your position, '{}', exceeds the todo list's length. Try something between 1 and {}",
             position_date.first().unwrap(),
             deadline_tasks.todo.len()
         )
@@ -711,7 +711,7 @@ pub fn deadline_tasks_edit_date(position_date: Vec<String>) -> bool {
     if NaiveDate::parse_from_str(position_date.last().unwrap().as_str(), "%Y-%m-%d").is_err() {
         writeln!(
             writer,
-            "The date provided, '{}', isn't proper. It must be in a yy-mm-dd format, e.g., 2021-12-24.",
+            "ERROR: The date provided, '{}', isn't proper. It must be in a yy-mm-dd format, e.g., 2021-12-24.",
             position_date.last().unwrap()
         )
         .expect("writeln failed");
@@ -744,7 +744,7 @@ pub fn deadline_tasks_edit_time(position_time: Vec<String>) -> bool {
     if deadline_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROr: The deadline todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -874,8 +874,7 @@ pub fn deadline_tasks_edit_datetime(edit_date_time: Vec<String>) -> bool {
     if edit_date_time.first().unwrap().parse::<usize>().unwrap() == 0 {
         writeln!(
             writer,
-            "ERROR: Positions can't be zero. They have to be between 1 and {}.",
-            deadline_tasks.todo.len()
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
         )
         .expect("writeln failed");
 

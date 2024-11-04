@@ -2267,15 +2267,2747 @@ mod deadline_todo_doneall {
     }
 }
 
-mod deadline_todo_edit_all {}
+mod deadline_todo_edit_all {
+    use super::*;
 
-mod deadline_todo_edit_task {}
+    #[test]
+    fn editall_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-editall",
+        ));
 
-mod deadline_todo_edit_date {}
+        Ok(())
+    }
 
-mod deadline_todo_edit_time {}
+    #[test]
+    fn editall_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-editall",
+        ));
 
-mod deadline_todo_edit_datetime {}
+        Ok(())
+    }
+
+    #[test]
+    fn editall_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position and all the parameters that will be edited.\n\tThere should be 4 arguments after 'chartodo deadline-editall'. You provided 1 argument(s).\n\tFormat: chartodo deadline-editall ~position ~task ~date ~time\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\tExample: chartodo dl-ea 4 new-item 2150-01-01 00:00"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea").arg("1").arg("2").arg("3");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position and all the parameters that will be edited.\n\tThere should be 4 arguments after 'chartodo deadline-editall'. You provided 3 argument(s).\n\tFormat: chartodo deadline-editall ~position ~task ~date ~time\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\tExample: chartodo dl-ea 4 new-item 2150-01-01 00:00"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall")
+            .arg("a")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea")
+            .arg("a")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall")
+            .arg("0")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea")
+            .arg("0")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall")
+            .arg("2")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceed's the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea")
+            .arg("2")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceed's the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall")
+            .arg("1")
+            .arg("edited-task")
+            .arg("2099-13-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date provided, '2099-13-13', isn't proper. It must be in a yy-mm-dd format, e.g., 2001-12-13",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea")
+            .arg("1")
+            .arg("edited-task")
+            .arg("2099-13-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date provided, '2099-13-13', isn't proper. It must be in a yy-mm-dd format, e.g., 2001-12-13",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall")
+            .arg("1")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time provided, '24:37', isn't proper. It must be in a 24-hour format, e.g., 23:08",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea")
+            .arg("1")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time provided, '24:37', isn't proper. It must be in a 24-hour format, e.g., 23:08",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editall")
+            .arg("1")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("14:37");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: edited-task"))
+            .stdout(predicate::str::contains("due: 2099-12-13 14:37"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editall_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ea")
+            .arg("1")
+            .arg("edited-task")
+            .arg("2099-12-13")
+            .arg("14:37");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: edited-task"))
+            .stdout(predicate::str::contains("due: 2099-12-13 14:37"));
+
+        Ok(())
+    }
+}
+
+mod deadline_todo_edit_task {
+    use super::*;
+
+    #[test]
+    fn edittask_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-edittask",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-edittask",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position that will be edited and what to edit the task to.\n\tThere should be 2 arguments after 'chartodo deadline-edittask'. You provided 1 argument(s).\n\tFormat: chartodo deadline-edittask ~position ~task.\n\tExample: chartodo dl-eta 4 new-item"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta").arg("1").arg("2").arg("3");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position that will be edited and what to edit the task to.\n\tThere should be 2 arguments after 'chartodo deadline-edittask'. You provided 3 argument(s).\n\tFormat: chartodo deadline-edittask ~position ~task.\n\tExample: chartodo dl-eta 4 new-item"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask").arg("a").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta").arg("a").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask").arg("0").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta").arg("0").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask").arg("2").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceed's the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta").arg("2").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceed's the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittask").arg("1").arg("edited-task");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: edited-task"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittask_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eta").arg("1").arg("edited-task");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: edited-task"));
+
+        Ok(())
+    }
+}
+
+mod deadline_todo_edit_date {
+    use super::*;
+
+    #[test]
+    fn editdate_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-editdate",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-editdate",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position that will be edited and what to edit the date to.\n\tThere should be two arguments after 'chartodo deadline-editdate'. You provided 1 argument(s).\n\tFormat: chartodo deadline-editdate ~position ~date.\n\t\tDate must be in a yy-mm-dd format.\n\tExample: chartodo dl-ed 4 2150-01-01"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("1").arg("2").arg("3");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position that will be edited and what to edit the date to.\n\tThere should be two arguments after 'chartodo deadline-editdate'. You provided 3 argument(s).\n\tFormat: chartodo deadline-editdate ~position ~date.\n\t\tDate must be in a yy-mm-dd format.\n\tExample: chartodo dl-ed 4 2150-01-01"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("a").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("a").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("0").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("0").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("2").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("2").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("1").arg("2099-13-13");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date provided, '2099-13-13', isn't proper. It must be in a yy-mm-dd format, e.g., 2021-12-24.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("1").arg("2099-13-13");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date provided, '2099-13-13', isn't proper. It must be in a yy-mm-dd format, e.g., 2021-12-24.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdate").arg("1").arg("2099-12-13");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("due: 2099-12-13"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdate_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-ed").arg("1").arg("2099-12-13");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("due: 2099-12-13"));
+
+        Ok(())
+    }
+}
+
+mod deadline_todo_edit_time {
+    use super::*;
+
+    #[test]
+    fn edittime_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-edittime",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-edittime",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position that will be edited and what to edit the time to.\n\tThere should be 2 arguments after 'chartodo deadline-edittime'. You provided 1 argument(s).\n\tFormat: chartodo deadline-edittime ~position ~time.\n\t\tTime must be in a 24-hour format.\n\tExample: chartodo dl-eti 4 23:59"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("1").arg("2").arg("3");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position that will be edited and what to edit the time to.\n\tThere should be 2 arguments after 'chartodo deadline-edittime'. You provided 3 argument(s).\n\tFormat: chartodo deadline-edittime ~position ~time.\n\t\tTime must be in a 24-hour format.\n\tExample: chartodo dl-eti 4 23:59"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("a").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("a").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("0").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("0").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("2").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("2").arg("edited-task");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("1").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time provided, '24:37', isn't proper. It must be in a 24-hour format, e.g., 23:08",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("1").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time provided, '24:37', isn't proper. It must be in a 24-hour format, e.g., 23:08",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-edittime").arg("1").arg("14:37");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("MISSED: 2021-01-01 14:37"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn edittime_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-eti").arg("1").arg("14:37");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("MISSED: 2021-01-01 14:37"));
+
+        Ok(())
+    }
+}
+
+mod deadline_todo_edit_datetime {
+    use super::*;
+
+    #[test]
+    fn editdatetime_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-editdatetime",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for deadline-editdatetime",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The deadline todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position and what to edit the datetime to.\n\tThere should be 3 arguments after 'chartodo deadline-editdatetime'. You provided 1 argument(s).\n\tFormat: chartodo deadline-editdatetime ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo dl-edt 4 2150-01-01 00:00"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("1").arg("2").arg("3").arg("4");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the deadline todo's position and what to edit the datetime to.\n\tThere should be 3 arguments after 'chartodo deadline-editdatetime'. You provided 4 argument(s).\n\tFormat: chartodo deadline-editdatetime ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo dl-edt 4 2150-01-01 00:00"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime")
+            .arg("a")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("a").arg("2099-12-13").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: 'a' isn't a valid position. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime")
+            .arg("0")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("0").arg("2099-12-13").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime")
+            .arg("2")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("2").arg("2099-12-13").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the todo list's length. Try something between 1 and 1",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime")
+            .arg("1")
+            .arg("2099-13-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: '2099-13-13' isn't a proper date in a yy-mm-dd format, e.g., 2100-12-24.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("1").arg("2099-13-13").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: '2099-13-13' isn't a proper date in a yy-mm-dd format, e.g., 2100-12-24.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime")
+            .arg("1")
+            .arg("2099-12-13")
+            .arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: '24:37' isn't a proper time in a 24-hour format, e.g., 13:28",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("1").arg("2099-12-13").arg("24:37");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: '24:37' isn't a proper time in a 24-hour format, e.g., 13:28",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-editdatetime")
+            .arg("1")
+            .arg("2099-12-13")
+            .arg("14:37");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("due: 2099-12-13 14:37"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editdatetime_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
+            context(
+                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-edt").arg("1").arg("2099-12-13").arg("14:37");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("due: 2099-12-13 14:37"));
+
+        Ok(())
+    }
+}
 
 mod zzz_do_this_last {
     use super::*;
