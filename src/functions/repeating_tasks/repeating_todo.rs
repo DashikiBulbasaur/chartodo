@@ -47,7 +47,7 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
         // ah well. usize has a max too. u32 is fine and big enough (pause)
         // check if the interval is proper. has to be u32
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().is_err() {
-            writeln!(writer, "Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
@@ -394,7 +394,7 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
             .parse::<u32>()
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01.", add_end.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00", add_end.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
