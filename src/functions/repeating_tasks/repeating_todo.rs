@@ -212,7 +212,7 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
 
         // check if the interval is proper
         if start.get(counter * 5 - 4).unwrap().parse::<u32>().is_err() {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
