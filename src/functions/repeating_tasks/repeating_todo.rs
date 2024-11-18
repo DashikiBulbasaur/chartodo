@@ -649,7 +649,7 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     if reset.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "ERROR: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall"
+            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall"
         )
         .expect("writeln failed");
 
@@ -850,7 +850,7 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
         return String::from(
-            "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
         );
     }
 
@@ -877,7 +877,7 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
 
     // check if user wants to show starts for all of the items
     if start.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return String::from("WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall.");
+        return String::from("WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall");
     }
 
     let mut show_starts = String::from("");

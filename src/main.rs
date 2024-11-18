@@ -364,7 +364,7 @@ fn main() -> Result<()> {
         "repeating-reset" | "repeating-donereset" | "rp-r" | "rp-dr" => {
             let error_status = repeating_tasks_reset_original_datetime_to_now(
                 args.item_identifier
-                    .context("didn't provide arguments for repeating-reset")?,
+                    .context("didn't provide arguments for repeating-reset/repeating-donereset")?,
             );
             if !error_status {
                 list();
