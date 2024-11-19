@@ -959,7 +959,7 @@ pub fn repeating_tasks_showstartall() -> String {
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
         return String::from(
-            "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
         );
     }
 
