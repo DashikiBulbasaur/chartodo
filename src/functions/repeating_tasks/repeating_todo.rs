@@ -1087,7 +1087,7 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_all.get(5).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_all.get(5).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_all.get(5).unwrap()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1123,7 +1123,7 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
                 )
         }
         _ => {
-            writeln!(writer, "ERROR: you must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else.").expect("writeln failed");
+            writeln!(writer, "ERROR: '{}' isn't correct. You must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks start 2099-12-13 13:08", edit_all.get(4).unwrap()).expect("writeln failed");
 
             // error = treu
             return true;
@@ -1225,7 +1225,7 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
     if edit_task.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceed's the repeating todo list's length. Try something between 1 and {}.",
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
             edit_task.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
