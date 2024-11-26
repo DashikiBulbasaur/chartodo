@@ -1321,7 +1321,7 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     if edit_interval.last().unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the (inclusive) range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval.last().unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval.last().unwrap()
         )
         .expect("writeln failed");
 
@@ -1557,7 +1557,7 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
 
     // check if we have the right number of arguments
     if edit_interval_unit.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to.\n\tThere should be 3 arguments after 'chartodo repeating-editintervalunit'. You provided {} argument(s).\n\tFormat: chartodo repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo rp-ea 4 3 days.", edit_interval_unit.len()).expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to.\n\tThere should be 3 arguments after 'chartodo repeating-editintervalunit'. You provided {} argument(s).\n\tFormat: chartodo repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo rp-eiu 4 3 days.", edit_interval_unit.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1623,7 +1623,7 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     if edit_interval_unit.get(1).unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', isn't proper. It must be in the (inclusive) range of 1 - 4294967295, (i.e., it has to be u32).", edit_interval_unit.get(1).unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval_unit.get(1).unwrap()
         )
         .expect("writeln failed");
 
