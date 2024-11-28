@@ -33,7 +33,7 @@ pub fn deadline_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     }
 
     if done_remove.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the deadline done list's length.").expect("writeln failed");
 
         // error = true
         return true;
@@ -100,7 +100,7 @@ pub fn deadline_tasks_not_done(mut not_done: Vec<String>) -> bool {
     }
 
     if not_done.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length.").expect("writeln failed");
+        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the deadline done list's length.").expect("writeln failed");
 
         // error = true
         return true;

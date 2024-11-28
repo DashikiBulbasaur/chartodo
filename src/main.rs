@@ -364,7 +364,7 @@ fn main() -> Result<()> {
         "repeating-reset" | "repeating-donereset" | "rp-r" | "rp-dr" => {
             let error_status = repeating_tasks_reset_original_datetime_to_now(
                 args.item_identifier
-                    .context("didn't provide arguments for repeating-reset")?,
+                    .context("didn't provide arguments for repeating-reset/repeating-donereset")?,
             );
             if !error_status {
                 list();
@@ -454,7 +454,9 @@ fn main() -> Result<()> {
             writeln!(writer, "{}", show_starts).expect("writeln failed");
             Ok(())
         }
-        "repeating-resetall" | "rp-ra" | "repeating-doneresetall" | "rp-dra" => {
+        "repeating-resetall" | "rp-ra" | "repeating-doneresetall" | "rp-dra"
+            if args.item_identifier.is_none() =>
+        {
             let error_status = repeating_tasks_resetall();
             if !error_status {
                 list();
@@ -462,7 +464,7 @@ fn main() -> Result<()> {
 
             Ok(())
         }
-        "repeating-startall" | "rp-sa" => {
+        "repeating-startall" | "rp-sa" if args.item_identifier.is_none() => {
             let show_starts = repeating_tasks_showstartall();
             let writer = &mut std::io::stdout();
             writeln!(writer, "{}", show_starts).expect("writeln failed");
@@ -554,6 +556,30 @@ fn main() -> Result<()> {
 
             Ok(())
         }
+        "clearall-regular" | "ca-r" if args.item_identifier.is_none() => {
+            let error_status = clear_regular_tasks();
+            if !error_status {
+                list();
+            }
+
+            Ok(())
+        }
+        "clearall-deadline" | "ca-d" if args.item_identifier.is_none() => {
+            let error_status = clear_deadline_tasks();
+            if !error_status {
+                list();
+            }
+
+            Ok(())
+        }
+        "clearall-repeating" | "ca-rp" if args.item_identifier.is_none() => {
+            let error_status = clear_repeating_tasks();
+            if !error_status {
+                list();
+            }
+
+            Ok(())
+        }
         "" => {
             // note: seems like it's hard for the user to reach this
             no_arg_command();
@@ -575,7 +601,7 @@ fn command_error() {
     let writer = &mut std::io::stdout();
     writeln!(
         writer,
-        "Invalid command. please try again, or try chartodo help"
+        "Invalid command. Please try again, or try chartodo help"
     )
     .expect("writeln failed");
 }
@@ -600,6 +626,15 @@ fn help() {
     clearall | ca
         clear everything (TODO, DEADLINE, REPEATING)
         example: chartodo ca
+    clearall-regular | ca-r
+        clear all regular todo and done tasks
+        example: chartodo ca-r
+    clearall-deadline | ca-d
+        clear all deadline todo and done tasks
+        example: chartodo ca-d
+    clearall-repeating | ca-rp
+        clear all repeating todo and done tasks
+        example: chartodo ca-rp
 
     TODO:
         add | a

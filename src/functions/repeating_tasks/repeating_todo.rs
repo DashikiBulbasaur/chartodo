@@ -16,7 +16,7 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
     // check if we have the right # of args
     // note/potential todo: i'd like to remove division here but idk what else to do lol
     if add.len() % 3 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task. Proper example: chartodo rp-a new-item 3 days. Another: chartodo rp-a new-item 3 days another-item 4 years. After the command rp-a, there should be 3, 6, 9, etc. arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) arguments after 'chartodo repeating-add'. You provided {} argument(s).\n\tFormat: chartodo repeating-add ~task ~interval ~time-unit [...].\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-a do-a-backflip 2 days.\n\tAnother example: chartodo rp-a new-item 3 days another-item 4 years", add.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -47,7 +47,7 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
         // ah well. usize has a max too. u32 is fine and big enough (pause)
         // check if the interval is proper. has to be u32
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().is_err() {
-            writeln!(writer, "Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
@@ -162,7 +162,7 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
 
     // check if we have the right # of args
     if start.len() % 5 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime. Proper example: chartodo rp-as new-item 3 days 2099-01-01 00:00. Another: chartodo rp-a new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-a, there should be 5, 10, 15, etc. (i.e., divisible by 5) arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addstart'. You provided {} argument(s).\n\tFormat: chartodo repeating-addstart ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-as new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-as new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59", start.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -212,7 +212,7 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
 
         // check if the interval is proper
         if start.get(counter * 5 - 4).unwrap().parse::<u32>().is_err() {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
@@ -337,7 +337,7 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
 
     // check if we have the right # of args
     if add_end.len() % 5 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime. Proper example: chartodo rp-ae new-item 3 days 2099-01-01 00:00. Another: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years. After the command rp-ae, there should be 5, 10, 15, etc. (i.e., divisible by 5) arguments.").expect("writeln failed");
+        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addend'. You provided {} argument(s).\n\tFormat: chartodo repeating-addend ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate must be in a yy-mm-format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-ae new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59", add_end.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -394,7 +394,7 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
             .parse::<u32>()
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01.", add_end.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00", add_end.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
 
             // error = true
             return true;
@@ -649,7 +649,7 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     if reset.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "ERROR: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall"
+            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall"
         )
         .expect("writeln failed");
 
@@ -850,7 +850,7 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
         return String::from(
-            "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
         );
     }
 
@@ -877,7 +877,7 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
 
     // check if user wants to show starts for all of the items
     if start.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return String::from("WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall.");
+        return String::from("WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall");
     }
 
     let mut show_starts = String::from("");
@@ -959,7 +959,7 @@ pub fn repeating_tasks_showstartall() -> String {
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
         return String::from(
-            "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
         );
     }
 
@@ -1004,7 +1004,7 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_all.len() != 7 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited. A proper example would be: chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00. If you wanted to edit the starting date instead, replace 'end' with 'start', e.g., chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited.\n\tThere should be 7 arguments after 'chartodo repeating-editall'. You provided {} argument(s).\n\tExample: chartodo repeating-editall ~position ~task ~interval ~time-unit ~start/end ~date ~time.\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\t\tYou must specify if you're editing the ending or starting datetime by using the keywords 'start' or 'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00", edit_all.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1087,7 +1087,7 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_all.get(5).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_all.get(5).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_all.get(5).unwrap()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1123,7 +1123,7 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
                 )
         }
         _ => {
-            writeln!(writer, "ERROR: you must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else.").expect("writeln failed");
+            writeln!(writer, "ERROR: '{}' isn't correct. You must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks start 2099-12-13 13:08", edit_all.get(4).unwrap()).expect("writeln failed");
 
             // error = treu
             return true;
@@ -1189,7 +1189,7 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_task.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and the new task to change it to. A proper example would be: chartodo rp-eta 4 new-item.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and the new task to change it to.\n\tThere should be 2 arguments after 'chartodo repeating-edittask'. You provided {} argument(s).\n\tFormat: chartodo repeating-edittask ~position ~task.\n\tExample: chartodo rp-eta 4 new-item.", edit_task.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1225,7 +1225,7 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
     if edit_task.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceed's the repeating todo list's length. Try something between 1 and {}.",
+            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
             edit_task.first().unwrap(), repeating_tasks.todo.len()
         )
         .expect("writeln failed");
@@ -1272,7 +1272,7 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_interval.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to edit the interval to. A proper example would be: chartodo rp-ei 4 3. '4' would be the todo task's position and '3' would be the new interval, i.e., it would now be '3 days'.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to edit the interval to.\n\tThere should be 2 arguments after 'chartodo repeating-editinterval'. You provided {} argument(s).\n\tFormat: chartodo repeating-editinterval ~position ~interval.\n\tExample: chartodo rp-ei 4 3.\n\t\t'4' would be the todo task's position and '3' would be the new interval, i.e., repeating task 4 would now have an interval of '3 days'.", edit_interval.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1321,7 +1321,7 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     if edit_interval.last().unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the (inclusive) range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval.last().unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval.last().unwrap()
         )
         .expect("writeln failed");
 
@@ -1423,7 +1423,7 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_unit.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval time unit to. A proper example would be: chartodo rp-eu 4 weeks. That would change repeating task #4's time unit to 'weeks'.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to edit the time unit to.\n\tThere should be 2 arguments after 'chartodo repeating-eu'. You provided {} arguments().\n\tFormat: chartodo repeating-editunit ~position ~time-unit.\n\tExample: chartodo rp-eu 4 weeks.\n\t\tThat would change repeating task #4's time unit to 'weeks'.", edit_unit.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1557,7 +1557,7 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
 
     // check if we have the right number of arguments
     if edit_interval_unit.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to. A proper example would be: chartodo rp-ea 4 3 days.").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to.\n\tThere should be 3 arguments after 'chartodo repeating-editintervalunit'. You provided {} argument(s).\n\tFormat: chartodo repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo rp-eiu 4 3 days.", edit_interval_unit.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1623,7 +1623,7 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     if edit_interval_unit.get(1).unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', isn't proper. It must be in the (inclusive) range of 1 - 4294967295, (i.e., it has to be u32).", edit_interval_unit.get(1).unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval_unit.get(1).unwrap()
         )
         .expect("writeln failed");
 
@@ -1737,7 +1737,7 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_start.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to. A proper example would be: chartodo rp-es 4 2100-12-24 13:08").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. You provided {} argument(s).\n\tFormat: chartodo repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08", edit_start.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1784,7 +1784,7 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_start.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_start.get(1).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_start.get(1).unwrap()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1866,7 +1866,7 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_end.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to. A proper example would be: chartodo rp-ee 4 2100-12-14 13:08").expect("writeln failed");
+        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You provided {} argument(s).\n\tFormat: chartodo repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08", edit_end.len()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1913,7 +1913,7 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_end.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_end.get(1).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_end.get(1).unwrap()).expect("writeln failed");
 
         // error = treu
         return true;
