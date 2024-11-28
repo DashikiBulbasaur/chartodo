@@ -1784,7 +1784,7 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_start.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_start.get(1).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_start.get(1).unwrap()).expect("writeln failed");
 
         // error = true
         return true;
@@ -1913,7 +1913,7 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_end.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-01-01.", edit_end.get(1).unwrap()).expect("writeln failed");
+        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_end.get(1).unwrap()).expect("writeln failed");
 
         // error = treu
         return true;

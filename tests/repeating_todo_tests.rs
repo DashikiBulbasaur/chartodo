@@ -8810,9 +8810,1237 @@ mod repeating_todo_editintervalunit {
     }
 }
 
-mod repeating_todo_editstart {}
+mod repeating_todo_editstart {
+    use super::*;
 
-mod repeating_todo_editend {}
+    #[test]
+    fn editstart_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for repeating-editstart",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for repeating-editstart",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("1").arg("1").arg("2");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. You provided 1 argument(s).\n\tFormat: chartodo repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("1").arg("2").arg("3").arg("4");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. You provided 4 argument(s).\n\tFormat: chartodo repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart")
+            .arg("a")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("a").arg("2199-02-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart")
+            .arg("0")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("0").arg("2199-02-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart")
+            .arg("2")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("2").arg("2199-02-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart")
+            .arg("1")
+            .arg("2199-13-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("1").arg("2199-13-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart")
+            .arg("1")
+            .arg("2199-02-02")
+            .arg("25:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("1").arg("2199-02-02").arg("25:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editstart")
+            .arg("1")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 5 days"))
+            .stdout(predicate::str::contains("due: 2199-02-07 01:01"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editstart_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-es").arg("1").arg("2199-02-02").arg("01:01");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 5 days"))
+            .stdout(predicate::str::contains("due: 2199-02-07 01:01"));
+
+        Ok(())
+    }
+}
+
+mod repeating_todo_editend {
+    use super::*;
+
+    #[test]
+    fn editend_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for repeating-editend",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_nothing() -> Result<(), Box<dyn std::error::Error>> {
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee");
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "didn't provide arguments for repeating-editend",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_empty_todo() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("1").arg("1").arg("2");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You provided 1 argument(s).\n\tFormat: chartodo repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_wrong_num_of_args() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("1").arg("2");
+        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You provided 2 argument(s).\n\tFormat: chartodo repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend")
+            .arg("a")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The position you provided, 'a', wasn't valid. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_position_not_usize() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("a").arg("2199-02-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The position you provided, 'a', wasn't valid. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend")
+            .arg("0")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_position_is_zero() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("0").arg("2199-02-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Positions can't be zero. They have to be 1 and above.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend")
+            .arg("2")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_position_not_in_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("2").arg("2199-02-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend")
+            .arg("1")
+            .arg("2199-13-02")
+            .arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_date_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("1").arg("2199-13-02").arg("01:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend")
+            .arg("1")
+            .arg("2199-02-02")
+            .arg("25:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_time_is_wrong() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("1").arg("2199-02-02").arg("25:01");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-editend")
+            .arg("1")
+            .arg("2199-02-02")
+            .arg("01:01");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 5 days"))
+            .stdout(predicate::str::contains("due: 2199-02-02 01:01"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn editend_abrev_is_correct() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
+            context(
+                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
+            ).
+            expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-ee").arg("1").arg("2199-02-02").arg("01:01");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 5 days"))
+            .stdout(predicate::str::contains("due: 2199-02-02 01:01"));
+
+        Ok(())
+    }
+}
 
 mod zzz_do_this_last {
     use super::*;
