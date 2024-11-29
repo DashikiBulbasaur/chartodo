@@ -1,6 +1,6 @@
 # CHARTODO
 
-Chartodo is a feature-rich all-in-one todo application (to the best of my abilities). I wanted to make a todo list that I and other people would actually use. It's currently a WIP.
+Chartodo is a feature-rich all-in-one todo application (to the best of my abilities). I wanted to make a todo list that I and other people would actually use. 
 
 ## How to install and run
 
@@ -250,7 +250,7 @@ Commands (argument chaining is available where it makes sense):
 - [x] switch file format to json
 - [x] add deadline-based todo items
 - [x] add repeating todo items
-- [ ] testing complete for launch
+- [x] testing complete for launch
 - [ ] available on crates.io
 - [ ] launched
 - [ ] switch to proper argument chaining (if possible), i.e., chartodo -a ... -d ... -rmt ...
