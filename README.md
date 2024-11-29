@@ -2,6 +2,8 @@
 
 Chartodo is a feature-rich all-in-one todo application (to the best of my abilities). I wanted to make a todo list that I and other people would actually use. 
 
+https://github.com/user-attachments/assets/56e800b3-ef57-4aa8-9dbb-c3f16babfce4
+
 ## How to install and run
 
 First, make sure you have [Rust installed](https://doc.rust-lang.org/book/ch01-01-installation.html). After that, there are several ways to install the program (ordered by recommendation):
