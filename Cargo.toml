@@ -9,7 +9,7 @@ readme = "README.md"
 homepage = "https://github.com/DashikiBulbasaur/chartodo"
 repository = "https://github.com/DashikiBulbasaur/chartodo"
 keywords = ["cli", "todo"]
-categories = ["command-line-utilities", "todo"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.5.21", features = ["derive"] }
