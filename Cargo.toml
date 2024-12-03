@@ -8,7 +8,7 @@ description = "A simple CLI todo list tool with a host of features"
 readme = "README.md"
 homepage = "https://github.com/DashikiBulbasaur/chartodo"
 repository = "https://github.com/DashikiBulbasaur/chartodo"
-keywords = ["cli", "todo", "todo list"]
+keywords = ["cli", "todo"]
 categories = ["command-line-utilities", "todo"]
 
 [dependencies]
