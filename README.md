@@ -1,6 +1,8 @@
 # CHARTODO
 
-Chartodo is a feature-rich all-in-one todo application (to the best of my abilities). I wanted to make a todo list that I and other people would actually use. 
+Chartodo is a simple CLI todo list program written in Rust, which includes many features that I thought would be useful. Essentially, I wanted to make a todo list I would actually use.
+
+You can create tasks with a deadline, and tasks that repeat on a set interval.
 
 https://github.com/user-attachments/assets/56e800b3-ef57-4aa8-9dbb-c3f16babfce4
 
@@ -8,7 +10,7 @@ https://github.com/user-attachments/assets/56e800b3-ef57-4aa8-9dbb-c3f16babfce4
 
 First, make sure you have [Rust installed](https://doc.rust-lang.org/book/ch01-01-installation.html). After that, there are several ways to install the program (ordered by recommendation):
 
-1. (upcoming, not yet available on crates.io)
+1. 
 ```sh-session
 cargo install chartodo
 ```
@@ -253,8 +255,7 @@ Commands (argument chaining is available where it makes sense):
 - [x] add deadline-based todo items
 - [x] add repeating todo items
 - [x] testing complete for launch
-- [ ] available on crates.io
-- [ ] launched
+- [x] available on crates.io
 - [ ] switch to proper argument chaining (if possible), i.e., chartodo -a ... -d ... -rmt ...
 - [ ] finish the advanced functionalities?
 ---

@@ -2,6 +2,14 @@
 name = "chartodo"
 version = "0.1.0"
 edition = "2021"
+authors = ["DashikiBulbasaur <githubearl@gmail.com>"]
+license = "Apache-2.0"
+description = "A simple CLI todo list tool with a host of features"
+readme = "README.md"
+homepage = "https://github.com/DashikiBulbasaur/chartodo"
+repository = "https://github.com/DashikiBulbasaur/chartodo"
+keywords = ["cli", "todo", "todo list"]
+categories = ["command-line-utilities", "todo", "todo list"]
 
 [dependencies]
 clap = { version = "4.5.21", features = ["derive"] }
