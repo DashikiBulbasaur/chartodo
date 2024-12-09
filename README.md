@@ -4,7 +4,7 @@ Chartodo is a simple CLI todo list program written in Rust, which includes many 
 
 You can create tasks with a deadline, and tasks that repeat on a set interval.
 
-![gif][chartodo_example_2.gif]
+![gif](chartodo_example_2.gif)
 
 ## How to install and run
 
