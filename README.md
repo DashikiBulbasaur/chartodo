@@ -54,7 +54,7 @@ Commands:
 
     TODO:
         add | a
-            add an item to the todo list. To add a multi-word item, replace space with something like -
+            add an item to the todo list. To add a multi-word item, replace space with something like -. Has chaining
             format: chartodo add [task]
             example: chartodo add new-item
             example: chartodo add 1st-item 2nd-item 3rd-item
@@ -250,11 +250,11 @@ Commands:
         repeating-editstart | rp-es
             edit the starting datetime of a repeating task
             format: chartodo repeating-editstart [position] [starting date] [starting time]
-            example: chartodo rp-es 2100-12-24 13:08
+            example: chartodo rp-es 1 2100-12-24 13:08
         repeating-editend | rp-ee
             edit the ending datetime of a repeating task
             format: chartodo repeating-editend [position] [ending date] [ending time]
-            example: chartodo rp-ee 2100-12-24 13:08
+            example: chartodo rp-ee 1 2100-12-24 13:08
 ```
 
 ### Tips on usage
