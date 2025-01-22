@@ -119,18 +119,32 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
             let add_to_this = new_original_date.clone() + " " + &new_original_time;
 
             // change to naivedatetime. also being random w/ eprintln and exit
-            let mut change_to_date_time_and_add = match NaiveDateTime::parse_from_str(add_to_this.as_str(), "%Y-%m-%d %H:%M") {
-                Ok(datetime) => datetime,
-                Err(_) => {
-                    eprintln!("ERROR: While changing a repeating task that was marked done back to todo since the due date had passed, there was an error with parsing the set date and time to a NaiveDateTime struct. Parsing it to that ensures that I can set a new due date and time since the old due date + time passed and the repeating task is now not done. You should never be able to see this");
-                    std::process::exit(1);
-                }
-            };
+            let mut change_to_date_time_and_add =
+                match NaiveDateTime::parse_from_str(add_to_this.as_str(), "%Y-%m-%d %H:%M") {
+                    Ok(datetime) => datetime,
+                    Err(_) => {
+                        eprintln!(
+                            "ERROR: While changing a repeating task that was \
+                            marked done back to todo since the due date had passed, there was an error with \
+                            parsing the set date and time to a NaiveDateTime struct. Parsing it to that \
+                            ensures that I can set a new due date and time since the old due date + time \
+                            passed and the repeating task is now not done. You should never be able to see \
+                            this"
+                        );
+                        std::process::exit(1);
+                    }
+                };
 
             // based on the time unit, add to naivedatetime
             match task.repeat_unit.as_ref().unwrap().as_str() {
-                "minutes" | "minute" => change_to_date_time_and_add += Duration::minutes(task.repeat_number.unwrap().into()),
-                "hours" | "hour" => change_to_date_time_and_add += Duration::hours(task.repeat_number.unwrap().into()),
+                "minutes" | "minute" => {
+                    change_to_date_time_and_add +=
+                        Duration::minutes(task.repeat_number.unwrap().into())
+                }
+                "hours" | "hour" => {
+                    change_to_date_time_and_add +=
+                        Duration::hours(task.repeat_number.unwrap().into())
+                }
                 "days" | "day" => {
                     change_to_date_time_and_add = change_to_date_time_and_add
                         .checked_add_days(Days::new(task.repeat_number.unwrap().into()))

@@ -53,11 +53,10 @@ mod aaa_do_this_first {
         let repeating_path = path_to_repeating_tasks();
         let repeating_path = repeating_path.to_str().unwrap();
 
-        if repeating_path.contains(linux_path) {
-            got_repeating_tasks_path = true;
-        } else if repeating_path.contains(windows_path) {
-            got_repeating_tasks_path = true;
-        } else if repeating_path.contains(mac_path) {
+        if repeating_path.contains(linux_path)
+            | repeating_path.contains(windows_path)
+            | repeating_path.contains(mac_path)
+        {
             got_repeating_tasks_path = true;
         }
 
@@ -74,11 +73,10 @@ mod aaa_do_this_first {
         let repeating_tasks_copy_path = repeating_tasks_copy_path();
         let repeating_tasks_copy_path = repeating_tasks_copy_path.to_str().unwrap();
 
-        if repeating_tasks_copy_path.contains(linux_path) {
-            got_repeating_tasks_copy_path = true;
-        } else if repeating_tasks_copy_path.contains(windows_path) {
-            got_repeating_tasks_copy_path = true;
-        } else if repeating_tasks_copy_path.contains(mac_path) {
+        if repeating_tasks_copy_path.contains(linux_path)
+            | repeating_tasks_copy_path.contains(windows_path)
+            | repeating_tasks_copy_path.contains(mac_path)
+        {
             got_repeating_tasks_copy_path = true;
         }
 
@@ -132,7 +130,13 @@ mod repeating_todo_add {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-add").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You don't have the right amount of arguments when adding a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) arguments after 'chartodo repeating-add'. You provided 1 argument(s).\n\tFormat: chartodo repeating-add ~task ~interval ~time-unit [...].\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-a do-a-backflip 2 days.\n\tAnother example: chartodo rp-a new-item 3 days another-item 4 years",
+            "ERROR: You don't have the right amount of arguments when adding \
+            a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) \
+            arguments after 'chartodo repeating-add'. You provided 1 argument(s).\n\tFormat: \
+            chartodo repeating-add ~task ~interval ~time-unit [...].\n\t\tOnly the following \
+            time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and \
+            year(s).\n\tExample: chartodo rp-a do-a-backflip 2 days.\n\tAnother example: \
+            chartodo rp-a new-item 3 days another-item 4 years",
         ));
 
         Ok(())
@@ -144,7 +148,13 @@ mod repeating_todo_add {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-a").arg("1").arg("2").arg("3").arg("4");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You don't have the right amount of arguments when adding a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) arguments after 'chartodo repeating-add'. You provided 4 argument(s).\n\tFormat: chartodo repeating-add ~task ~interval ~time-unit [...].\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-a do-a-backflip 2 days.\n\tAnother example: chartodo rp-a new-item 3 days another-item 4 years",
+            "ERROR: You don't have the right amount of arguments when adding \
+            a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) \
+            arguments after 'chartodo repeating-add'. You provided 4 argument(s).\n\tFormat: \
+            chartodo repeating-add ~task ~interval ~time-unit [...].\n\t\tOnly the following \
+            time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and \
+            year(s).\n\tExample: chartodo rp-a do-a-backflip 2 days.\n\tAnother example: \
+            chartodo rp-a new-item 3 days another-item 4 years",
         ));
 
         Ok(())
@@ -159,7 +169,9 @@ mod repeating_todo_add {
             .arg("3")
             .arg("seconds");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided time unit, 'seconds', in argument set '1', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.",
+            "ERROR: Your provided time unit, 'seconds', in argument set '1', \
+            wasn't proper. It has to be one of the following: minutes, hours, days, weeks, \
+            months, years.",
         ));
 
         Ok(())
@@ -177,7 +189,9 @@ mod repeating_todo_add {
             .arg("3")
             .arg("seconds");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided time unit, 'seconds', in argument set '2', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.",
+            "ERROR: Your provided time unit, 'seconds', in argument set '2', \
+            wasn't proper. It has to be one of the following: minutes, hours, days, weeks, \
+            months, years.",
         ));
 
         Ok(())
@@ -195,7 +209,9 @@ mod repeating_todo_add {
             .arg("3")
             .arg("hours");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided interval, 'a', in argument set '1', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.",
+            "ERROR: Your provided interval, 'a', in argument set '1', wasn't \
+            proper. It can't be negative and can't be above 4294967295 (i.e., it has to be \
+            u32). Proper example: chartodo rp-a gym 2 days.",
         ));
 
         Ok(())
@@ -210,7 +226,9 @@ mod repeating_todo_add {
             .arg("a")
             .arg("minutes");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided interval, 'a', in argument set '1', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.",
+            "ERROR: Your provided interval, 'a', in argument set '1', wasn't \
+            proper. It can't be negative and can't be above 4294967295 (i.e., it has to be \
+            u32). Proper example: chartodo rp-a gym 2 days.",
         ));
 
         Ok(())
@@ -228,7 +246,8 @@ mod repeating_todo_add {
             .arg("0")
             .arg("hours");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You had an interval of 0 in argument set '2'. You can't have an interval of 0, otherwise why are you even making a new repeating task?",
+            "ERROR: You had an interval of 0 in argument set '2'. You can't have \
+            an interval of 0, otherwise why are you even making a new repeating task?",
         ));
 
         Ok(())
@@ -246,7 +265,8 @@ mod repeating_todo_add {
             .arg("4")
             .arg("hours");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You had an interval of 0 in argument set '1'. You can't have an interval of 0, otherwise why are you even making a new repeating task?",
+            "ERROR: You had an interval of 0 in argument set '1'. You can't have \
+            an interval of 0, otherwise why are you even making a new repeating task?",
         ));
 
         Ok(())
@@ -261,11 +281,12 @@ mod repeating_todo_add {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -291,11 +312,12 @@ mod repeating_todo_add {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -321,11 +343,12 @@ mod repeating_todo_add {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -356,11 +379,12 @@ mod repeating_todo_add {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -415,7 +439,15 @@ mod repeating_todo_add_start {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-addstart").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addstart'. You provided 1 argument(s).\n\tFormat: chartodo repeating-addstart ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-as new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-as new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59",
+            "ERROR: You don't have the right amount of arguments when adding a \
+            repeating task with a specific starting datetime.\n\tThere should be 5, 10, 15, \
+            etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addstart'. You \
+            provided 1 argument(s).\n\tFormat: chartodo repeating-addstart ~task ~interval \
+            ~time-unit ~date ~time [...].\n\t\tDate should be in a yy-mm-dd format. Time \
+            should be in a 24-hour format.\n\t\tOnly the following time-units are allowed: \
+            minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo \
+            rp-as new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-as \
+            new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59",
         ));
 
         Ok(())
@@ -427,7 +459,15 @@ mod repeating_todo_add_start {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-as").arg("1").arg("2").arg("3").arg("4");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addstart'. You provided 4 argument(s).\n\tFormat: chartodo repeating-addstart ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-as new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-as new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59",
+            "ERROR: You don't have the right amount of arguments when adding a \
+            repeating task with a specific starting datetime.\n\tThere should be 5, 10, 15, \
+            etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addstart'. You \
+            provided 4 argument(s).\n\tFormat: chartodo repeating-addstart ~task ~interval \
+            ~time-unit ~date ~time [...].\n\t\tDate should be in a yy-mm-dd format. Time \
+            should be in a 24-hour format.\n\t\tOnly the following time-units are allowed: \
+            minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo \
+            rp-as new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-as \
+            new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59",
         ));
 
         Ok(())
@@ -444,7 +484,9 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("25:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided starting time, '25:00', in argument set '1', wasn't proper. Please provide a correct starting time in a 24-hour format, e.g., 23:04.",
+            "ERROR: Your provided starting time, '25:00', in argument set '1', \
+            wasn't proper. Please provide a correct starting time in a 24-hour format, e.g., \
+            23:04.",
         ));
 
         Ok(())
@@ -466,7 +508,9 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("25:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided starting time, '25:00', in argument set '2', wasn't proper. Please provide a correct starting time in a 24-hour format, e.g., 23:04.",
+            "ERROR: Your provided starting time, '25:00', in argument set '2', \
+            wasn't proper. Please provide a correct starting time in a 24-hour format, e.g., \
+            23:04.",
         ));
 
         Ok(())
@@ -488,7 +532,9 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("23:59");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided starting date, '2099-13-13', in argument set '1', wasn't proper. Please provide a correct starting date in a year-month-day format, e.g., 2024-05-13.",
+            "ERROR: Your provided starting date, '2099-13-13', in argument set \
+            '1', wasn't proper. Please provide a correct starting date in a year-month-day \
+            format, e.g., 2024-05-13.",
         ));
 
         Ok(())
@@ -505,7 +551,9 @@ mod repeating_todo_add_start {
             .arg("2099-13-13")
             .arg("23:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided starting date, '2099-13-13', in argument set '1', wasn't proper. Please provide a correct starting date in a year-month-day format, e.g., 2024-05-13.",
+            "ERROR: Your provided starting date, '2099-13-13', in argument set \
+            '1', wasn't proper. Please provide a correct starting date in a year-month-day \
+            format, e.g., 2024-05-13.",
         ));
 
         Ok(())
@@ -522,7 +570,9 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided time unit, 'seconds', in argument set '1', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.",
+            "ERROR: Your provided time unit, 'seconds', in argument set '1', \
+            wasn't proper. It has to be one of the following: minutes, hours, days, weeks, \
+            months, years.",
         ));
 
         Ok(())
@@ -544,7 +594,9 @@ mod repeating_todo_add_start {
             .arg("2098-12-24")
             .arg("23:25");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided time unit, 'seconds', in argument set '2', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.",
+            "ERROR: Your provided time unit, 'seconds', in argument set '2', \
+            wasn't proper. It has to be one of the following: minutes, hours, days, weeks, \
+            months, years.",
         ));
 
         Ok(())
@@ -561,7 +613,9 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("14:15");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided interval, 'a', in argument set '1', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00",
+            "ERROR: Your provided interval, 'a', in argument set '1', wasn't \
+            proper. It can't be negative and can't be above 4294967295 (i.e., it has to be \
+            u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00",
         ));
 
         Ok(())
@@ -583,7 +637,9 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided interval, 'a', in argument set '2', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00",
+            "ERROR: Your provided interval, 'a', in argument set '2', wasn't \
+            proper. It can't be negative and can't be above 4294967295 (i.e., it has to be \
+            u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00",
         ));
 
         Ok(())
@@ -605,7 +661,8 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You provided an interval of 0 in argument set '2'. You can't have an interval of 0, otherwise why are you even making a new repeating task?",
+            "ERROR: You provided an interval of 0 in argument set '2'. You can't \
+            have an interval of 0, otherwise why are you even making a new repeating task?",
         ));
 
         Ok(())
@@ -627,7 +684,8 @@ mod repeating_todo_add_start {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You provided an interval of 0 in argument set '1'. You can't have an interval of 0, otherwise why are you even making a new repeating task?",
+            "ERROR: You provided an interval of 0 in argument set '1'. You can't \
+            have an interval of 0, otherwise why are you even making a new repeating task?",
         ));
 
         Ok(())
@@ -642,11 +700,12 @@ mod repeating_todo_add_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -675,11 +734,12 @@ mod repeating_todo_add_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -711,11 +771,12 @@ mod repeating_todo_add_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -752,11 +813,12 @@ mod repeating_todo_add_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -817,7 +879,15 @@ mod repeating_todo_add_end {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-addend").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addend'. You provided 1 argument(s).\n\tFormat: chartodo repeating-addend ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate must be in a yy-mm-format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-ae new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59",
+            "ERROR: You don't have the right amount of arguments when adding a \
+            repeating task with a specific ending datetime.\n\tThere should be 5, 10, 15, \
+            etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addend'. You \
+            provided 1 argument(s).\n\tFormat: chartodo repeating-addend ~task ~interval \
+            ~time-unit ~date ~time [...].\n\t\tDate must be in a yy-mm-format. Time must be \
+            in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), \
+            hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-ae \
+            new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-ae new-item 3 \
+            days 2099-01-01 00:00 another-item 4 years 23:59",
         ));
 
         Ok(())
@@ -829,7 +899,15 @@ mod repeating_todo_add_end {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ae").arg("1").arg("2").arg("3").arg("4");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addend'. You provided 4 argument(s).\n\tFormat: chartodo repeating-addend ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate must be in a yy-mm-format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-ae new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59",
+            "ERROR: You don't have the right amount of arguments when adding a \
+            repeating task with a specific ending datetime.\n\tThere should be 5, 10, 15, \
+            etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addend'. You \
+            provided 4 argument(s).\n\tFormat: chartodo repeating-addend ~task ~interval \
+            ~time-unit ~date ~time [...].\n\t\tDate must be in a yy-mm-format. Time must be \
+            in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), \
+            hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-ae \
+            new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-ae new-item 3 \
+            days 2099-01-01 00:00 another-item 4 years 23:59",
         ));
 
         Ok(())
@@ -846,7 +924,9 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("25:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided ending time, '25:00', in argument set '1', wasn't proper. Please provide a correct ending time in a 24-hour format, e.g., 23:04.",
+            "ERROR: Your provided ending time, '25:00', in argument set '1', \
+            wasn't proper. Please provide a correct ending time in a 24-hour format, e.g., \
+            23:04.",
         ));
 
         Ok(())
@@ -868,7 +948,9 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("25:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided ending time, '25:00', in argument set '2', wasn't proper. Please provide a correct ending time in a 24-hour format, e.g., 23:04.",
+            "ERROR: Your provided ending time, '25:00', in argument set '2', \
+            wasn't proper. Please provide a correct ending time in a 24-hour format, e.g., \
+            23:04.",
         ));
 
         Ok(())
@@ -890,7 +972,9 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("23:59");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided ending date, '2099-13-13', in argument set '1', wasn't proper. Please provide a correct ending date in a year-month-day format, e.g., 2024-05-12.",
+            "ERROR: Your provided ending date, '2099-13-13', in argument set \
+            '1', wasn't proper. Please provide a correct ending date in a year-month-day \
+            format, e.g., 2024-05-12.",
         ));
 
         Ok(())
@@ -907,7 +991,9 @@ mod repeating_todo_add_end {
             .arg("2099-13-13")
             .arg("23:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided ending date, '2099-13-13', in argument set '1', wasn't proper. Please provide a correct ending date in a year-month-day format, e.g., 2024-05-12.",
+            "ERROR: Your provided ending date, '2099-13-13', in argument set \
+            '1', wasn't proper. Please provide a correct ending date in a year-month-day \
+            format, e.g., 2024-05-12.",
         ));
 
         Ok(())
@@ -924,7 +1010,9 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided time unit, 'seconds', in argument set '1', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.",
+            "ERROR: Your provided time unit, 'seconds', in argument set '1', \
+            wasn't proper. It has to be one of the following: minutes, hours, days, weeks, \
+            months, years.",
         ));
 
         Ok(())
@@ -946,7 +1034,9 @@ mod repeating_todo_add_end {
             .arg("2098-12-24")
             .arg("23:25");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided time unit, 'seconds', in argument set '2', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.",
+            "ERROR: Your provided time unit, 'seconds', in argument set '2', \
+            wasn't proper. It has to be one of the following: minutes, hours, days, weeks, \
+            months, years.",
         ));
 
         Ok(())
@@ -963,7 +1053,9 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("14:15");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided interval, 'a', in argument set '1', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00",
+            "ERROR: Your provided interval, 'a', in argument set '1', wasn't \
+            proper. It can't be negative and can't be above 4294967295 (i.e., it has to be \
+            u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00",
         ));
 
         Ok(())
@@ -985,7 +1077,9 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your provided interval, 'a', in argument set '2', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00",
+            "ERROR: Your provided interval, 'a', in argument set '2', wasn't \
+            proper. It can't be negative and can't be above 4294967295 (i.e., it has to be \
+            u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00",
         ));
 
         Ok(())
@@ -1007,7 +1101,8 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You provided an interval of 0 in argument set 2. You can't have an interval of 0, otherwise why are you even making a new repeating task?",
+            "ERROR: You provided an interval of 0 in argument set 2. You can't \
+            have an interval of 0, otherwise why are you even making a new repeating task?",
         ));
 
         Ok(())
@@ -1029,7 +1124,8 @@ mod repeating_todo_add_end {
             .arg("2099-12-13")
             .arg("00:00");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: You provided an interval of 0 in argument set 1. You can't have an interval of 0, otherwise why are you even making a new repeating task?",
+            "ERROR: You provided an interval of 0 in argument set 1. You can't \
+            have an interval of 0, otherwise why are you even making a new repeating task?",
         ));
 
         Ok(())
@@ -1044,11 +1140,12 @@ mod repeating_todo_add_end {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1077,11 +1174,12 @@ mod repeating_todo_add_end {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1113,11 +1211,12 @@ mod repeating_todo_add_end {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1154,11 +1253,12 @@ mod repeating_todo_add_end {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1223,18 +1323,20 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-done").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -1249,18 +1351,20 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-d").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -1286,18 +1390,20 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-done").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -1323,18 +1429,20 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-d").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -1410,11 +1518,12 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1428,7 +1537,8 @@ mod repeating_todo_done {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-doneall",
+            "WARNING: You've specified the entire repeating todo list that's \
+            relatively long. You should do chartodo repeating-doneall",
         ));
 
         Ok(())
@@ -1504,11 +1614,12 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1522,7 +1633,8 @@ mod repeating_todo_done {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-doneall",
+            "WARNING: You've specified the entire repeating todo list that's \
+            relatively long. You should do chartodo repeating-doneall",
         ));
 
         Ok(())
@@ -1536,33 +1648,34 @@ mod repeating_todo_done {
                 "todo": [
                     {
                         "task": "repeating-task",
-                        "date": "2025-01-04",
+                        "date": "2099-01-04",
                         "time": "00:00",
                         "repeat_number": 3,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     },
                     {
                         "task": "repeating-task-2",
-                        "date": "2025-01-05",
+                        "date": "2099-01-05",
                         "time": "00:00",
                         "repeat_number": 4,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     }
                 ],
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1572,10 +1685,10 @@ mod repeating_todo_done {
             .success()
             .stdout(predicate::str::contains("1: repeating-task"))
             .stdout(predicate::str::contains("interval: 3 days"))
-            .stdout(predicate::str::contains("done: 2025-01-04 00:00"))
+            .stdout(predicate::str::contains("done: 2099-01-04 00:00"))
             .stdout(predicate::str::contains("1: repeating-task-2"))
             .stdout(predicate::str::contains("interval: 4 days"))
-            .stdout(predicate::str::contains("due: 2025-01-05 00:00"));
+            .stdout(predicate::str::contains("due: 2099-01-05 00:00"));
 
         Ok(())
     }
@@ -1588,33 +1701,34 @@ mod repeating_todo_done {
                 "todo": [
                     {
                         "task": "repeating-task",
-                        "date": "2025-01-04",
+                        "date": "2099-01-04",
                         "time": "00:00",
                         "repeat_number": 3,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     },
                     {
                         "task": "repeating-task-2",
-                        "date": "2025-01-05",
+                        "date": "2099-01-05",
                         "time": "00:00",
                         "repeat_number": 4,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     }
                 ],
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1624,10 +1738,10 @@ mod repeating_todo_done {
             .success()
             .stdout(predicate::str::contains("1: repeating-task"))
             .stdout(predicate::str::contains("interval: 3 days"))
-            .stdout(predicate::str::contains("done: 2025-01-04 00:00"))
+            .stdout(predicate::str::contains("done: 2099-01-04 00:00"))
             .stdout(predicate::str::contains("1: repeating-task-2"))
             .stdout(predicate::str::contains("interval: 4 days"))
-            .stdout(predicate::str::contains("due: 2025-01-05 00:00"));
+            .stdout(predicate::str::contains("due: 2099-01-05 00:00"));
 
         Ok(())
     }
@@ -1692,11 +1806,12 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1787,11 +1902,12 @@ mod repeating_todo_done {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -1879,18 +1995,20 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-reset").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -1905,18 +2023,20 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-r").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -1931,18 +2051,20 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-donereset").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -1957,18 +2079,20 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-dr").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -1994,11 +2118,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2009,7 +2134,8 @@ mod repeating_todo_reset {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -2035,18 +2161,20 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-r").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -2072,11 +2200,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2087,7 +2216,8 @@ mod repeating_todo_reset {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -2113,18 +2243,20 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-dr").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -2200,11 +2332,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2218,7 +2351,9 @@ mod repeating_todo_reset {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall",
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
         ));
 
         Ok(())
@@ -2294,11 +2429,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2312,7 +2448,9 @@ mod repeating_todo_reset {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall",
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
         ));
 
         Ok(())
@@ -2388,11 +2526,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2406,7 +2545,9 @@ mod repeating_todo_reset {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall",
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
         ));
 
         Ok(())
@@ -2483,11 +2624,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2501,7 +2643,9 @@ mod repeating_todo_reset {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall",
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
         ));
 
         Ok(())
@@ -2516,33 +2660,34 @@ mod repeating_todo_reset {
                 "todo": [
                     {
                         "task": "repeating-task-1",
-                        "date": "2025-01-04",
+                        "date": "2099-01-04",
                         "time": "00:00",
                         "repeat_number": 3,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     },
                     {
                         "task": "repeating-task-2",
-                        "date": "2025-01-05",
+                        "date": "2099-01-05",
                         "time": "00:00",
                         "repeat_number": 4,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     }
                 ],
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2566,33 +2711,34 @@ mod repeating_todo_reset {
                 "todo": [
                     {
                         "task": "repeating-task-1",
-                        "date": "2025-01-04",
+                        "date": "2099-01-04",
                         "time": "00:00",
                         "repeat_number": 3,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     },
                     {
                         "task": "repeating-task-2",
-                        "date": "2025-01-05",
+                        "date": "2099-01-05",
                         "time": "00:00",
                         "repeat_number": 4,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     }
                 ],
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2616,33 +2762,34 @@ mod repeating_todo_reset {
                 "todo": [
                     {
                         "task": "repeating-task-1",
-                        "date": "2025-01-04",
+                        "date": "2099-01-04",
                         "time": "00:00",
                         "repeat_number": 3,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     },
                     {
                         "task": "repeating-task-2",
-                        "date": "2025-01-05",
+                        "date": "2099-01-05",
                         "time": "00:00",
                         "repeat_number": 4,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     }
                 ],
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2666,33 +2813,34 @@ mod repeating_todo_reset {
                 "todo": [
                     {
                         "task": "repeating-task-1",
-                        "date": "2025-01-04",
+                        "date": "2099-01-04",
                         "time": "00:00",
                         "repeat_number": 3,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     },
                     {
                         "task": "repeating-task-2",
-                        "date": "2025-01-05",
+                        "date": "2099-01-05",
                         "time": "00:00",
                         "repeat_number": 4,
                         "repeat_unit": "days",
                         "repeat_done": false,
-                        "repeat_original_date": "2025-01-01",
+                        "repeat_original_date": "2099-01-01",
                         "repeat_original_time": "00:00"
                     }
                 ],
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2768,11 +2916,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2858,11 +3007,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -2944,11 +3094,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3034,11 +3185,12 @@ mod repeating_todo_reset {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3097,18 +3249,20 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-rmtodo").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -3123,18 +3277,20 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-rmt").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -3160,11 +3316,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3175,7 +3332,8 @@ mod repeating_todo_rmtodo {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -3201,18 +3359,20 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-rmt").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -3288,11 +3448,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3306,7 +3467,8 @@ mod repeating_todo_rmtodo {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list, one that's relatively long. You should do repeating-cleartodo",
+            "WARNING: You've specified the entire repeating todo list, one \
+            that's relatively long. You should do repeating-cleartodo",
         ));
 
         Ok(())
@@ -3382,11 +3544,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3400,7 +3563,8 @@ mod repeating_todo_rmtodo {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You've specified the entire repeating todo list, one that's relatively long. You should do repeating-cleartodo",
+            "WARNING: You've specified the entire repeating todo list, one \
+            that's relatively long. You should do repeating-cleartodo",
         ));
 
         Ok(())
@@ -3436,11 +3600,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3485,11 +3650,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3564,11 +3730,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3650,11 +3817,12 @@ mod repeating_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3709,18 +3877,20 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-start").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -3735,18 +3905,20 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-s").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -3772,11 +3944,12 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3787,7 +3960,8 @@ mod repeating_todo_show_start {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -3813,18 +3987,20 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-s").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable -- they were \
+            all either negative, zero, or exceeded the repeating todo list's length.",
         ));
 
         Ok(())
@@ -3900,11 +4076,12 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -3918,7 +4095,8 @@ mod repeating_todo_show_start {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall",
+            "WARNING: You want to show the start times for an entire list that's \
+            relatively long. You should do repeating-startall.",
         ));
 
         Ok(())
@@ -3994,11 +4172,12 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4012,7 +4191,8 @@ mod repeating_todo_show_start {
             .arg("5")
             .arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
-            "WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall",
+            "WARNING: You want to show the start times for an entire list that's \
+            relatively long. You should do repeating-startall.",
         ));
 
         Ok(())
@@ -4048,11 +4228,12 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4095,11 +4276,12 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4172,11 +4354,12 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4186,9 +4369,11 @@ mod repeating_todo_show_start {
             .arg("1")
             .arg("3")
             .arg("5");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("task: repeating-task-5\n\tstart: 2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: repeating-task\n\tstart: 2099-01-01 00:00"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "task: repeating-task-5\n\tstart: \
+            2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: \
+            repeating-task\n\tstart: 2099-01-01 00:00",
+        ));
 
         Ok(())
     }
@@ -4253,19 +4438,22 @@ mod repeating_todo_show_start {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-s").arg("1").arg("1").arg("3").arg("5");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("task: repeating-task-5\n\tstart: 2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: repeating-task\n\tstart: 2099-01-01 00:00"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "task: repeating-task-5\n\tstart: \
+            2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: \
+            repeating-task\n\tstart: 2099-01-01 00:00",
+        ));
 
         Ok(())
     }
@@ -4307,18 +4495,20 @@ mod repeating_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-doneall");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so you can't change any todos to done.",
+            "ERROR: The repeating todo list is currently empty, so you can't \
+            change any todos to done.",
         ));
 
         Ok(())
@@ -4333,18 +4523,20 @@ mod repeating_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-da");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so you can't change any todos to done.",
+            "ERROR: The repeating todo list is currently empty, so you can't \
+            change any todos to done.",
         ));
 
         Ok(())
@@ -4410,11 +4602,12 @@ mod repeating_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4501,11 +4694,12 @@ mod repeating_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4569,18 +4763,20 @@ mod repeating_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-cleartodo");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first before removing any.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first before removing any.",
         ));
 
         Ok(())
@@ -4595,18 +4791,20 @@ mod repeating_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ct");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first before removing any.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first before removing any.",
         ));
 
         Ok(())
@@ -4672,11 +4870,12 @@ mod repeating_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4751,11 +4950,12 @@ mod repeating_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -4831,18 +5031,20 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-resetall");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -4857,18 +5059,20 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ra");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -4883,18 +5087,20 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-doneresetall");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -4909,18 +5115,20 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-dra");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -4986,11 +5194,12 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5072,11 +5281,12 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5158,11 +5368,12 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5244,11 +5455,12 @@ mod repeating_todo_resetall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5307,18 +5519,20 @@ mod repeating_todo_showstartall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-startall");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -5333,18 +5547,20 @@ mod repeating_todo_showstartall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-sa");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
+            "ERROR: The repeating todo list is currently empty. Try adding items \
+            to it first.",
         ));
 
         Ok(())
@@ -5410,17 +5626,24 @@ mod repeating_todo_showstartall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-startall");
-        cmd.assert().success().stdout(predicate::str::contains("task: repeating-task-5\n\tstart: 2099-01-01 00:00\ntask: repeating-task-4\n\tstart: 2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: repeating-task-2\n\tstart: 2099-01-01 00:00\ntask: repeating-task-1\n\tstart: 2099-01-01 00:00"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "task: \
+            repeating-task-5\n\tstart: 2099-01-01 00:00\ntask: repeating-task-4\n\tstart: \
+            2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: \
+            repeating-task-2\n\tstart: 2099-01-01 00:00\ntask: repeating-task-1\n\tstart: \
+            2099-01-01 00:00",
+        ));
 
         Ok(())
     }
@@ -5485,17 +5708,24 @@ mod repeating_todo_showstartall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-sa");
-        cmd.assert().success().stdout(predicate::str::contains("task: repeating-task-5\n\tstart: 2099-01-01 00:00\ntask: repeating-task-4\n\tstart: 2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: repeating-task-2\n\tstart: 2099-01-01 00:00\ntask: repeating-task-1\n\tstart: 2099-01-01 00:00"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "task: \
+            repeating-task-5\n\tstart: 2099-01-01 00:00\ntask: repeating-task-4\n\tstart: \
+            2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: \
+            repeating-task-2\n\tstart: 2099-01-01 00:00\ntask: repeating-task-1\n\tstart: \
+            2099-01-01 00:00",
+        ));
 
         Ok(())
     }
@@ -5537,18 +5767,20 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editall").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -5563,18 +5795,20 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ea").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -5600,17 +5834,30 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editall").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and all the parameters that will be edited.\n\tThere should be 7 arguments after 'chartodo repeating-editall'. You provided 1 argument(s).\n\tExample: chartodo repeating-editall ~position ~task ~interval ~time-unit ~start/end ~date ~time.\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\t\tYou must specify if you're editing the ending or starting datetime by using the keywords 'start' or 'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You \
+            must specify the repeating todo's position and all the parameters that will be \
+            edited.\n\tThere should be 7 arguments after 'chartodo repeating-editall'. You \
+            provided 1 argument(s).\n\tExample: chartodo repeating-editall ~position ~task \
+            ~interval ~time-unit ~start/end ~date ~time.\n\t\tDate must be in a yy-mm-dd \
+            format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are \
+            allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\t\tYou \
+            must specify if you're editing the ending or starting datetime by using the \
+            keywords 'start' or 'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 \
+            days end 2150-01-01 00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 \
+            days start 2150-01-01 00:00",
+        ));
 
         Ok(())
     }
@@ -5635,17 +5882,30 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ea").arg("1").arg("2").arg("3");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and all the parameters that will be edited.\n\tThere should be 7 arguments after 'chartodo repeating-editall'. You provided 3 argument(s).\n\tExample: chartodo repeating-editall ~position ~task ~interval ~time-unit ~start/end ~date ~time.\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\t\tYou must specify if you're editing the ending or starting datetime by using the keywords 'start' or 'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You \
+            must specify the repeating todo's position and all the parameters that will be \
+            edited.\n\tThere should be 7 arguments after 'chartodo repeating-editall'. You \
+            provided 3 argument(s).\n\tExample: chartodo repeating-editall ~position ~task \
+            ~interval ~time-unit ~start/end ~date ~time.\n\t\tDate must be in a yy-mm-dd \
+            format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are \
+            allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\t\tYou \
+            must specify if you're editing the ending or starting datetime by using the \
+            keywords 'start' or 'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 \
+            days end 2150-01-01 00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 \
+            days start 2150-01-01 00:00",
+        ));
 
         Ok(())
     }
@@ -5670,11 +5930,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5688,7 +5949,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -5714,11 +5976,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5732,7 +5995,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -5758,11 +6022,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5802,11 +6067,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5846,11 +6112,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5864,7 +6131,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: The position you provided, '2', exceeds the repeating todo \
+            list's length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -5890,11 +6158,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5908,7 +6177,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: The position you provided, '2', exceeds the repeating todo \
+            list's length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -5934,11 +6204,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5952,7 +6223,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The interval you provided, 'b', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            "ERROR: The interval you provided, 'b', wasn't proper. It must be in \
+            the range of 1 - 4294967295 (i.e., it has to be u32).",
         ));
 
         Ok(())
@@ -5978,11 +6250,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -5996,7 +6269,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The interval you provided, 'b', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            "ERROR: The interval you provided, 'b', wasn't proper. It must be in \
+            the range of 1 - 4294967295 (i.e., it has to be u32).",
         ));
 
         Ok(())
@@ -6022,11 +6296,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6040,7 +6315,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?",
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?",
         ));
 
         Ok(())
@@ -6066,11 +6342,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6084,7 +6361,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?",
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?",
         ));
 
         Ok(())
@@ -6110,11 +6388,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6128,7 +6407,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time unit you provided, 'haha', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.",
+            "ERROR: The time unit you provided, 'haha', wasn't proper. Proper \
+            examples: minutes, hours, days, weeks, months or years.",
         ));
 
         Ok(())
@@ -6154,11 +6434,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6172,7 +6453,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time unit you provided, 'seconds', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.",
+            "ERROR: The time unit you provided, 'seconds', wasn't proper. Proper \
+            examples: minutes, hours, days, weeks, months or years.",
         ));
 
         Ok(())
@@ -6198,11 +6480,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6216,7 +6499,8 @@ mod repeating_todo_editall {
             .arg("2199-13-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must \
+            be in the following format: Year-Month-Day, e.g., 2000-12-13.",
         ));
 
         Ok(())
@@ -6242,11 +6526,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6260,7 +6545,8 @@ mod repeating_todo_editall {
             .arg("2199-13-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must \
+            be in the following format: Year-Month-Day, e.g., 2000-12-13.",
         ));
 
         Ok(())
@@ -6286,11 +6572,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6304,7 +6591,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("25:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in \
+            the following 24-hour format: H:M, e.g., 13:08.",
         ));
 
         Ok(())
@@ -6330,11 +6618,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6348,7 +6637,8 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("25:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in \
+            the following 24-hour format: H:M, e.g., 13:08.",
         ));
 
         Ok(())
@@ -6374,11 +6664,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6392,7 +6683,10 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: 'haha' isn't correct. You must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks start 2099-12-13 13:08",
+            "ERROR: 'haha' isn't correct. You must specify whether the given \
+            datetime is the starting or ending datetime. Please use the 'start' or 'end' \
+            keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks \
+            start 2099-12-13 13:08",
         ));
 
         Ok(())
@@ -6418,11 +6712,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6436,7 +6731,10 @@ mod repeating_todo_editall {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: 'haha' isn't correct. You must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks start 2099-12-13 13:08",
+            "ERROR: 'haha' isn't correct. You must specify whether the given \
+            datetime is the starting or ending datetime. Please use the 'start' or 'end' \
+            keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks \
+            start 2099-12-13 13:08",
         ));
 
         Ok(())
@@ -6462,11 +6760,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6508,11 +6807,12 @@ mod repeating_todo_editall {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6571,18 +6871,20 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-edittask").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -6597,18 +6899,20 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eta").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -6634,17 +6938,24 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-edittask").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and the new task to change it to.\n\tThere should be 2 arguments after 'chartodo repeating-edittask'. You provided 1 argument(s).\n\tFormat: chartodo repeating-edittask ~position ~task.\n\tExample: chartodo rp-eta 4 new-item."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You must \
+            specify the repeating todo's position and the new task to change it to.\n\tThere \
+            should be 2 arguments after 'chartodo repeating-edittask'. You provided 1 \
+            argument(s).\n\tFormat: chartodo repeating-edittask ~position ~task.\n\tExample: \
+            chartodo rp-eta 4 new-item.",
+        ));
 
         Ok(())
     }
@@ -6669,17 +6980,24 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eta").arg("1").arg("2").arg("3");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and the new task to change it to.\n\tThere should be 2 arguments after 'chartodo repeating-edittask'. You provided 3 argument(s).\n\tFormat: chartodo repeating-edittask ~position ~task.\n\tExample: chartodo rp-eta 4 new-item."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You must \
+            specify the repeating todo's position and the new task to change it to.\n\tThere \
+            should be 2 arguments after 'chartodo repeating-edittask'. You provided 3 \
+            argument(s).\n\tFormat: chartodo repeating-edittask ~position ~task.\n\tExample: \
+            chartodo rp-eta 4 new-item.",
+        ));
 
         Ok(())
     }
@@ -6704,11 +7022,12 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6717,7 +7036,8 @@ mod repeating_todo_edittask {
             .arg("a")
             .arg("new-repeating-task");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -6743,18 +7063,20 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eta").arg("a").arg("new-repeating-task");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -6780,11 +7102,12 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6819,11 +7142,12 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6856,11 +7180,12 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6869,7 +7194,8 @@ mod repeating_todo_edittask {
             .arg("2")
             .arg("new-repeating-task");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -6895,18 +7221,20 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eta").arg("2").arg("new-repeating-task");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -6932,11 +7260,12 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -6973,11 +7302,12 @@ mod repeating_todo_edittask {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7029,18 +7359,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editinterval").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -7055,18 +7387,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ei").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -7092,17 +7426,26 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editinterval").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to edit the interval to.\n\tThere should be 2 arguments after 'chartodo repeating-editinterval'. You provided 1 argument(s).\n\tFormat: chartodo repeating-editinterval ~position ~interval.\n\tExample: chartodo rp-ei 4 3.\n\t\t'4' would be the todo task's position and '3' would be the new interval, i.e., repeating task 4 would now have an interval of '3 days'."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You \
+            must specify the repeating todo's position and what to edit the interval \
+            to.\n\tThere should be 2 arguments after 'chartodo repeating-editinterval'. You \
+            provided 1 argument(s).\n\tFormat: chartodo repeating-editinterval ~position \
+            ~interval.\n\tExample: chartodo rp-ei 4 3.\n\t\t'4' would be the todo task's \
+            position and '3' would be the new interval, i.e., repeating task 4 would now \
+            have an interval of '3 days'.",
+        ));
 
         Ok(())
     }
@@ -7127,17 +7470,26 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ei").arg("1").arg("2").arg("3");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to edit the interval to.\n\tThere should be 2 arguments after 'chartodo repeating-editinterval'. You provided 3 argument(s).\n\tFormat: chartodo repeating-editinterval ~position ~interval.\n\tExample: chartodo rp-ei 4 3.\n\t\t'4' would be the todo task's position and '3' would be the new interval, i.e., repeating task 4 would now have an interval of '3 days'."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You \
+            must specify the repeating todo's position and what to edit the interval \
+            to.\n\tThere should be 2 arguments after 'chartodo repeating-editinterval'. You \
+            provided 3 argument(s).\n\tFormat: chartodo repeating-editinterval ~position \
+            ~interval.\n\tExample: chartodo rp-ei 4 3.\n\t\t'4' would be the todo task's \
+            position and '3' would be the new interval, i.e., repeating task 4 would now \
+            have an interval of '3 days'.",
+        ));
 
         Ok(())
     }
@@ -7162,18 +7514,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editinterval").arg("a").arg("11");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -7199,18 +7553,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ei").arg("a").arg("11");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -7236,11 +7592,12 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7273,11 +7630,12 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7310,18 +7668,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editinterval").arg("2").arg("11");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -7347,18 +7707,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ei").arg("2").arg("11");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -7384,18 +7746,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editinterval").arg("1").arg("b");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The interval you provided, 'b', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            "ERROR: The interval you provided, 'b', wasn't proper. It must be in \
+            the range of 1 - 4294967295 (i.e., it has to be u32).",
         ));
 
         Ok(())
@@ -7421,18 +7785,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ei").arg("1").arg("b");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The interval you provided, 'b', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            "ERROR: The interval you provided, 'b', wasn't proper. It must be in \
+            the range of 1 - 4294967295 (i.e., it has to be u32).",
         ));
 
         Ok(())
@@ -7458,18 +7824,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editinterval").arg("1").arg("0");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?",
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?",
         ));
 
         Ok(())
@@ -7495,18 +7863,20 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ei").arg("1").arg("0");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?",
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?",
         ));
 
         Ok(())
@@ -7532,11 +7902,12 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7571,11 +7942,12 @@ mod repeating_todo_editinterval {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7627,18 +7999,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editunit").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -7653,18 +8027,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eu").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -7690,17 +8066,25 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editunit").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to edit the time unit to.\n\tThere should be 2 arguments after 'chartodo repeating-eu'. You provided 1 arguments().\n\tFormat: chartodo repeating-editunit ~position ~time-unit.\n\tExample: chartodo rp-eu 4 weeks.\n\t\tThat would change repeating task #4's time unit to 'weeks'."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: \
+            You must specify the repeating todo's position and what to edit the time \
+            unit to.\n\tThere should be 2 arguments after 'chartodo repeating-eu'. You \
+            provided 1 arguments().\n\tFormat: chartodo repeating-editunit ~position \
+            ~time-unit.\n\tExample: chartodo rp-eu 4 weeks.\n\t\tThat would change repeating \
+            task #4's time unit to 'weeks'.",
+        ));
 
         Ok(())
     }
@@ -7725,17 +8109,25 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eu").arg("1").arg("2").arg("3");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to edit the time unit to.\n\tThere should be 2 arguments after 'chartodo repeating-eu'. You provided 3 arguments().\n\tFormat: chartodo repeating-editunit ~position ~time-unit.\n\tExample: chartodo rp-eu 4 weeks.\n\t\tThat would change repeating task #4's time unit to 'weeks'."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: \
+            You must specify the repeating todo's position and what to edit the time \
+            unit to.\n\tThere should be 2 arguments after 'chartodo repeating-eu'. You \
+            provided 3 arguments().\n\tFormat: chartodo repeating-editunit ~position \
+            ~time-unit.\n\tExample: chartodo rp-eu 4 weeks.\n\t\tThat would change repeating \
+            task #4's time unit to 'weeks'.",
+        ));
 
         Ok(())
     }
@@ -7760,18 +8152,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editunit").arg("a").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -7797,18 +8191,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eu").arg("a").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -7834,11 +8230,12 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7871,11 +8268,12 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -7908,18 +8306,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editunit").arg("2").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -7945,18 +8345,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eu").arg("2").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -7982,18 +8384,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editunit").arg("1").arg("haha");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time unit you provided, 'haha', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.",
+            "ERROR: The time unit you provided, 'haha', wasn't proper. Proper \
+            examples: minutes, hours, days, weeks, months or years.",
         ));
 
         Ok(())
@@ -8019,18 +8423,20 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eu").arg("1").arg("seconds");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time unit you provided, 'seconds', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.",
+            "ERROR: The time unit you provided, 'seconds', wasn't proper. Proper \
+            examples: minutes, hours, days, weeks, months or years.",
         ));
 
         Ok(())
@@ -8056,11 +8462,12 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8096,11 +8503,12 @@ mod repeating_todo_edittimeunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8153,18 +8561,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editintervalunit").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -8179,18 +8589,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -8216,17 +8628,25 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editintervalunit").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the interval and time unit to.\n\tThere should be 3 arguments after 'chartodo repeating-editintervalunit'. You provided 1 argument(s).\n\tFormat: chartodo repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo rp-eiu 4 3 days."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: \
+            You must specify the repeating todo's position and what to change the \
+            interval and time unit to.\n\tThere should be 3 arguments after 'chartodo \
+            repeating-editintervalunit'. You provided 1 argument(s).\n\tFormat: chartodo \
+            repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo \
+            rp-eiu 4 3 days.",
+        ));
 
         Ok(())
     }
@@ -8251,17 +8671,25 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("1").arg("2").arg("3").arg("4");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the interval and time unit to.\n\tThere should be 3 arguments after 'chartodo repeating-editintervalunit'. You provided 4 argument(s).\n\tFormat: chartodo repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo rp-eiu 4 3 days."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: \
+            You must specify the repeating todo's position and what to change the \
+            interval and time unit to.\n\tThere should be 3 arguments after 'chartodo \
+            repeating-editintervalunit'. You provided 4 argument(s).\n\tFormat: chartodo \
+            repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo \
+            rp-eiu 4 3 days.",
+        ));
 
         Ok(())
     }
@@ -8286,11 +8714,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8300,7 +8729,8 @@ mod repeating_todo_editintervalunit {
             .arg("4")
             .arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', wasn't valid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', wasn't valid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -8326,18 +8756,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("a").arg("4").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', wasn't valid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', wasn't valid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -8363,11 +8795,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8403,11 +8836,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8440,11 +8874,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8454,7 +8889,8 @@ mod repeating_todo_editintervalunit {
             .arg("4")
             .arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -8480,18 +8916,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("2").arg("4").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -8517,11 +8955,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8531,7 +8970,8 @@ mod repeating_todo_editintervalunit {
             .arg("b")
             .arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The interval you provided, 'b', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            "ERROR: The interval you provided, 'b', wasn't proper. It must be in \
+            the range of 1 - 4294967295 (i.e., it has to be u32).",
         ));
 
         Ok(())
@@ -8557,18 +8997,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("1").arg("b").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The interval you provided, 'b', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            "ERROR: The interval you provided, 'b', wasn't proper. It must be in \
+            the range of 1 - 4294967295 (i.e., it has to be u32).",
         ));
 
         Ok(())
@@ -8594,11 +9036,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8608,7 +9051,8 @@ mod repeating_todo_editintervalunit {
             .arg("0")
             .arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?",
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?",
         ));
 
         Ok(())
@@ -8634,18 +9078,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("1").arg("0").arg("weeks");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?",
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?",
         ));
 
         Ok(())
@@ -8671,11 +9117,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8685,7 +9132,8 @@ mod repeating_todo_editintervalunit {
             .arg("4")
             .arg("haha");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time unit you provided, 'haha', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.",
+            "ERROR: The time unit you provided, 'haha', wasn't proper. Proper \
+            examples: minutes, hours, days, weeks, months or years.",
         ));
 
         Ok(())
@@ -8711,18 +9159,20 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-eiu").arg("1").arg("4").arg("seconds");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time unit you provided, 'seconds', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.",
+            "ERROR: The time unit you provided, 'seconds', wasn't proper. Proper \
+            examples: minutes, hours, days, weeks, months or years.",
         ));
 
         Ok(())
@@ -8748,11 +9198,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8790,11 +9241,12 @@ mod repeating_todo_editintervalunit {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8846,18 +9298,20 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editstart").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -8872,18 +9326,20 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-es").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -8909,17 +9365,26 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editstart").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. You provided 1 argument(s).\n\tFormat: chartodo repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You \
+            must specify the repeating todo's position and what to change the repeating \
+            task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo \
+            repeating-editstart'. You provided 1 argument(s).\n\tFormat: chartodo \
+            repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd \
+            format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 \
+            2100-12-24 13:08",
+        ));
 
         Ok(())
     }
@@ -8944,17 +9409,26 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-es").arg("1").arg("2").arg("3").arg("4");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. You provided 4 argument(s).\n\tFormat: chartodo repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You \
+            must specify the repeating todo's position and what to change the repeating \
+            task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo \
+            repeating-editstart'. You provided 4 argument(s).\n\tFormat: chartodo \
+            repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd \
+            format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 \
+            2100-12-24 13:08",
+        ));
 
         Ok(())
     }
@@ -8979,11 +9453,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -8993,7 +9468,8 @@ mod repeating_todo_editstart {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -9019,18 +9495,20 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-es").arg("a").arg("2199-02-02").arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', was invalid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', was invalid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -9056,11 +9534,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9096,11 +9575,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9133,11 +9613,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9147,7 +9628,8 @@ mod repeating_todo_editstart {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -9173,18 +9655,20 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-es").arg("2").arg("2199-02-02").arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -9210,11 +9694,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9224,7 +9709,8 @@ mod repeating_todo_editstart {
             .arg("2199-13-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must \
+            be in the following format: Year-Month-Day, e.g., 2000-12-13.",
         ));
 
         Ok(())
@@ -9250,18 +9736,20 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-es").arg("1").arg("2199-13-02").arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must \
+            be in the following format: Year-Month-Day, e.g., 2000-12-13.",
         ));
 
         Ok(())
@@ -9287,11 +9775,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9301,7 +9790,8 @@ mod repeating_todo_editstart {
             .arg("2199-02-02")
             .arg("25:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in \
+            the following 24-hour format: H:M, e.g., 13:08.",
         ));
 
         Ok(())
@@ -9327,18 +9817,20 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-es").arg("1").arg("2199-02-02").arg("25:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in \
+            the following 24-hour format: H:M, e.g., 13:08.",
         ));
 
         Ok(())
@@ -9364,11 +9856,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9406,11 +9899,12 @@ mod repeating_todo_editstart {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9462,18 +9956,20 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editend").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -9488,18 +9984,20 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ee").arg("1").arg("1").arg("2");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited.",
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited.",
         ));
 
         Ok(())
@@ -9525,17 +10023,26 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-editend").arg("1");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You provided 1 argument(s).\n\tFormat: chartodo repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: \
+            You must specify the repeating todo's position and what to change the \
+            repeating task's ending datetime to.\n\tThere should be 3 arguments after \
+            'chartodo repeating-editend'. You provided 1 argument(s).\n\tFormat: chartodo \
+            repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd \
+            format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 \
+            2100-12-14 13:08",
+        ));
 
         Ok(())
     }
@@ -9560,17 +10067,26 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ee").arg("1").arg("2");
-        cmd.assert().success().stdout(predicate::str::contains("ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You provided 2 argument(s).\n\tFormat: chartodo repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: \
+            You must specify the repeating todo's position and what to change the \
+            repeating task's ending datetime to.\n\tThere should be 3 arguments after \
+            'chartodo repeating-editend'. You provided 2 argument(s).\n\tFormat: chartodo \
+            repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd \
+            format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 \
+            2100-12-14 13:08",
+        ));
 
         Ok(())
     }
@@ -9595,11 +10111,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9609,7 +10126,8 @@ mod repeating_todo_editend {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', wasn't valid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', wasn't valid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -9635,18 +10153,20 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ee").arg("a").arg("2199-02-02").arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you provided, 'a', wasn't valid. Try something between 1 and 1.",
+            "ERROR: The position you provided, 'a', wasn't valid. Try something \
+            between 1 and 1.",
         ));
 
         Ok(())
@@ -9672,11 +10192,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9712,11 +10233,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9749,11 +10271,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9763,7 +10286,8 @@ mod repeating_todo_editend {
             .arg("2199-02-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -9789,18 +10313,20 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ee").arg("2").arg("2199-02-02").arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: Your position, '2', exceeds the repeating todo list's length. Try something between 1 and 1.",
+            "ERROR: Your position, '2', exceeds the repeating todo list's \
+            length. Try something between 1 and 1.",
         ));
 
         Ok(())
@@ -9826,11 +10352,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9840,7 +10367,8 @@ mod repeating_todo_editend {
             .arg("2199-13-02")
             .arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must \
+            be in the following format: Year-Month-Day, e.g., 2000-12-13.",
         ));
 
         Ok(())
@@ -9866,18 +10394,20 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ee").arg("1").arg("2199-13-02").arg("01:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            "ERROR: The date you provided, '2199-13-02', wasn't proper. It must \
+            be in the following format: Year-Month-Day, e.g., 2000-12-13.",
         ));
 
         Ok(())
@@ -9903,11 +10433,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -9917,7 +10448,8 @@ mod repeating_todo_editend {
             .arg("2199-02-02")
             .arg("25:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in \
+            the following 24-hour format: H:M, e.g., 13:08.",
         ));
 
         Ok(())
@@ -9943,18 +10475,20 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-ee").arg("1").arg("2199-02-02").arg("25:01");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The time you provided, '25:01', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            "ERROR: The time you provided, '25:01', wasn't proper. It must be in \
+            the following 24-hour format: H:M, e.g., 13:08.",
         ));
 
         Ok(())
@@ -9980,11 +10514,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions
@@ -10022,11 +10557,12 @@ mod repeating_todo_editend {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // actions

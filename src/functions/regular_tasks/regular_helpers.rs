@@ -79,7 +79,7 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
             .with_context(|| {
                 format!(
                     "old general_list.txt file exists and couldn't remove in the following dirs:
-                {}",
+                    {}",
                     CHARTODO_PATH
                 )
             })
@@ -92,7 +92,7 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
             .with_context(|| {
                 format!(
                     "couldn't create regular_tasks json file in the following dirs:
-                {}",
+                    {}",
                     CHARTODO_PATH
                 )
             })
@@ -127,18 +127,19 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
         }
         "#;
 
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                    "the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-                ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "the fresh data to put in the new regular_tasks file wasn't\
+                correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(regular_tasks_json);
         serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
             .with_context(|| {
                 format!(
                     "failed to write fresh regular tasks to new regular_tasks json file in:
-            {}",
+                    {}",
                     CHARTODO_PATH
                 )
             })
@@ -147,9 +148,18 @@ pub fn regular_tasks_create_dir_and_file_if_needed() {
 }
 
 fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf) {
-    let file = File::open(old_path).with_context(|| format!("couldn't open old file in the following dirs:
-{}", CHARTODO_PATH
-)).expect("old file not found even though it was already checked that it exists. something went very wrong");
+    let file = File::open(old_path)
+        .with_context(|| {
+            format!(
+                "couldn't open old file in the following dirs:
+                {}",
+                CHARTODO_PATH
+            )
+        })
+        .expect(
+            "old file not found even though it was already checked that it\
+            exists. something went very wrong",
+        );
 
     let reader = BufReader::new(file);
 
@@ -233,7 +243,7 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
         .with_context(|| {
             format!(
                 "couldn't create regular_tasks json file in the following dirs:
-            {}",
+                {}",
                 CHARTODO_PATH
             )
         })
@@ -242,8 +252,9 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
     serde_json::to_writer_pretty(&mut write_to_file, &regular_tasks)
         .with_context(|| {
             format!(
-                "couldn't write old contens to regular_tasks json file in the following dirs:
-            {}",
+                "couldn't write old contens to regular_tasks json file in the\
+                following dirs:
+                {}",
                 CHARTODO_PATH
             )
         })
@@ -254,7 +265,7 @@ fn transfer_old_file_contents_to_new_json(old_path: &PathBuf, new_json: &PathBuf
         .with_context(|| {
             format!(
                 "couldn't remove old general_list.txt in the following dirs:
-    {}",
+                {}",
                 CHARTODO_PATH
             )
         })
@@ -266,8 +277,9 @@ pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
     let regular_tasks_file = File::create(path_to_regular_tasks())
         .with_context(|| {
             format!(
-                "couldn't create new regular_tasks.json file in the following directories:
-{}",
+                "couldn't create new regular_tasks.json file in the following\
+                directories:
+                {}",
                 CHARTODO_PATH
             )
         })
@@ -277,7 +289,7 @@ pub fn write_changes_to_new_regular_tasks(regular_tasks: Tasks) {
         .with_context(|| {
             format!(
                 "failed to write changes to regular_tasks.json in the following dirs:
-    {}",
+                {}",
                 CHARTODO_PATH
             )
         })
@@ -339,18 +351,19 @@ pub fn open_regular_tasks_and_return_tasks_struct() -> Tasks {
                     )
                 })
                 .expect("couldn't open regular_tasks.json file");
-            let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-                context(
-                        "the fresh data to put in an empty regular_tasks file wasn't correct. you should never be able to see this"
-                    ).
-                expect("changing str to tasks struct failed");
+            let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+                .context(
+                    "the fresh data to put in an empty regular_tasks file
+                    wasn't correct. you should never be able to see this",
+                )
+                .expect("changing str to tasks struct failed");
 
             let mut write_to_file = BufWriter::new(open_regular_tasks_file);
             serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
                 .with_context(|| {
                     format!(
                         "failed to write fresh regular tasks to new regular_tasks json file in:
-                {}",
+                        {}",
                         CHARTODO_PATH
                     )
                 })
@@ -396,11 +409,10 @@ mod regular_helpers_unit_tests {
         let regular_tasks_copy_path = regular_tasks_copy_path();
         let regular_tasks_copy_path = regular_tasks_copy_path.to_str().unwrap();
 
-        if regular_tasks_copy_path.contains(linux_path) {
-            got_regular_tasks_copy_path = true;
-        } else if regular_tasks_copy_path.contains(windows_path) {
-            got_regular_tasks_copy_path = true;
-        } else if regular_tasks_copy_path.contains(mac_path) {
+        if regular_tasks_copy_path.contains(linux_path)
+            || regular_tasks_copy_path.contains(windows_path)
+            || regular_tasks_copy_path.contains(mac_path)
+        {
             got_regular_tasks_copy_path = true;
         }
 
@@ -417,11 +429,10 @@ mod regular_helpers_unit_tests {
         let regular_path = path_to_regular_tasks();
         let regular_path = regular_path.to_str().unwrap();
 
-        if regular_path.contains(linux_path) {
-            got_regular_tasks_path = true;
-        } else if regular_path.contains(windows_path) {
-            got_regular_tasks_path = true;
-        } else if regular_path.contains(mac_path) {
+        if regular_path.contains(linux_path)
+            | regular_path.contains(windows_path)
+            | regular_path.contains(mac_path)
+        {
             got_regular_tasks_path = true;
         }
 
@@ -483,18 +494,19 @@ mod regular_helpers_unit_tests {
                 )
             })
             .expect("couldn't open regular_tasks.json file");
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                    "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-                ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new\
+                regular_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(open_regular_tasks_file);
         serde_json::to_writer_pretty(&mut write_to_file, &fresh_regular_tasks)
             .with_context(|| {
                 format!(
                     "failed to write fresh regular tasks to new regular_tasks json file in:
-            {}",
+                    {}",
                     CHARTODO_PATH
                 )
             })
