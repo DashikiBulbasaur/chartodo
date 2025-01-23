@@ -36,21 +36,28 @@ fn main() -> Result<()> {
             Ok(())
         }
         "add" | "a" => {
-            regular_tasks_add_todo(
-                args
-                    .item_identifier
-                    .with_context(|| format!("Did not provide the todo item(s) to be added. Good example: chartodo {} new-item, or chartodo {} item next-item one-more-item. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
-            );
+            regular_tasks_add_todo(args.item_identifier.with_context(|| {
+                format!(
+                    "Did not provide the todo item(s) \
+                    to be added. Good example: chartodo {} new-item, or chartodo {} item next-item \
+                    one-more-item. If you have questions, try chartodo help or chartodo --help",
+                    args.command, args.command
+                )
+            })?);
             list();
 
             Ok(())
         }
         "done" | "d" => {
-            let error_status = regular_tasks_change_todo_to_done(
-                args
-                    .item_identifier
-                    .with_context(|| format!("Did not provide the todo item(s) to be changed to done. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have questions, try chartodo help or chartodo --help", args.command, args.command))?
-            );
+            let error_status =
+                regular_tasks_change_todo_to_done(args.item_identifier.with_context(|| {
+                    format!(
+                        "Did not provide the todo item(s) \
+                        to be changed to done. Good example: chartodo {} 3, or chartodo {} 3 4 5. \
+                        If you have questions, try chartodo help or chartodo --help",
+                        args.command, args.command
+                    )
+                })?);
             if !error_status {
                 list();
             }
@@ -58,11 +65,15 @@ fn main() -> Result<()> {
             Ok(())
         }
         "rmtodo" | "rmt" => {
-            let error_status = regular_tasks_remove_todo(
-                args
-                    .item_identifier
-                    .with_context(|| format!("Did not provide the todo item(s) to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
-            );
+            let error_status =
+                regular_tasks_remove_todo(args.item_identifier.with_context(|| {
+                    format!(
+                        "Did not provide the todo item(s) \
+                        to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you \
+                        have more questions, try chartodo help or chartodo --help",
+                        args.command, args.command
+                    )
+                })?);
             if !error_status {
                 list();
             }
@@ -102,11 +113,15 @@ fn main() -> Result<()> {
             Ok(())
         }
         "rmdone" | "rmd" => {
-            let error_status = regular_tasks_remove_done(
-                args
-                    .item_identifier
-                    .with_context(|| format!("Did not provide the done item to be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
-            );
+            let error_status =
+                regular_tasks_remove_done(args.item_identifier.with_context(|| {
+                    format!(
+                        "Did not provide the done item to \
+                        be removed. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more \
+                        questions, try chartodo help or chartodo --help",
+                        args.command, args.command
+                    )
+                })?);
             if !error_status {
                 list();
             }
@@ -114,11 +129,14 @@ fn main() -> Result<()> {
             Ok(())
         }
         "notdone" | "nd" => {
-            let error_status = regular_tasks_not_done(
-                args
-                    .item_identifier
-                    .with_context(|| format!("Did not provide the done item to be reversed back to todo. Good example: chartodo {} 3, or chartodo {} 3 4 5. If you have more questions, try chartodo help or chartodo --help", args.command, args.command))?
-            );
+            let error_status = regular_tasks_not_done(args.item_identifier.with_context(|| {
+                format!(
+                    "Did not provide the done item to \
+                    be reversed back to todo. Good example: chartodo {} 3, or chartodo {} 3 4 5. If \
+                    you have more questions, try chartodo help or chartodo --help",
+                    args.command, args.command
+                )
+            })?);
             if !error_status {
                 list();
             }
@@ -126,11 +144,15 @@ fn main() -> Result<()> {
             Ok(())
         }
         "edit" | "e" => {
-            let error_status = regular_tasks_edit_todo(
-                args
-                    .item_identifier
-                    .with_context(|| format!("Did not provide the todo item to be edited. Good example: chartodo {} 3 abc. If you have more questions, try chartodo help or chartodo --help", args.command))?,
-            );
+            let error_status =
+                regular_tasks_edit_todo(args.item_identifier.with_context(|| {
+                    format!(
+                        "Did not provide the todo item \
+                        to be edited. Good example: chartodo {} 3 abc. If you have more questions, try \
+                        chartodo help or chartodo --help",
+                        args.command
+                    )
+                })?);
             if !error_status {
                 list();
             }
@@ -362,10 +384,11 @@ fn main() -> Result<()> {
             Ok(())
         }
         "repeating-reset" | "repeating-donereset" | "rp-r" | "rp-dr" => {
-            let error_status = repeating_tasks_reset_original_datetime_to_now(
-                args.item_identifier
-                    .context("didn't provide arguments for repeating-reset/repeating-donereset")?,
-            );
+            let error_status =
+                repeating_tasks_reset_original_datetime_to_now(args.item_identifier.context(
+                    "didn't provide arguments for \
+                    repeating-reset/repeating-donereset",
+                )?);
             if !error_status {
                 list();
             }

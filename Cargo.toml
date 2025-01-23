@@ -4,7 +4,7 @@ version = "0.1.1"
 edition = "2021"
 authors = ["DashikiBulbasaur <githubearl@gmail.com>"]
 license = "Apache-2.0"
-description = "A simple CLI todo list tool with a host of features"
+description = "A simple CLI todo list program with a host of features"
 readme = "README.md"
 homepage = "https://github.com/DashikiBulbasaur/chartodo"
 repository = "https://github.com/DashikiBulbasaur/chartodo"
@@ -13,13 +13,16 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
-dirs = "5.0.1"
-anyhow = "1.0.94"
-serde_json = "1.0.133"
+dirs = "6.0.0"
+anyhow = "1.0.95"
+serde_json = "1.0.134"
 serde = { version = "1.0.216", features = ["derive"] }
 comfy-table = "7.1.3"
 chrono = "0.4.39"
 
 [dev-dependencies]
 assert_cmd = "2.0.16"
-predicates = "3.1.2"
+predicates = "3.1.3"
+
+[profile.release]
+lto = true

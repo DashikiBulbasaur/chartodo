@@ -33,7 +33,13 @@ pub fn deadline_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     }
 
     if done_remove.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the deadline done list's length.").expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the deadline done list's \
+            length."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -51,7 +57,8 @@ pub fn deadline_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     if done_remove.len() >= deadline_tasks.done.len() && deadline_tasks.done.len() > 5 {
         writeln!(
             writer,
-            "WARNING: You might as well do deadline-cleardone since you want to remove all of the items."
+            "WARNING: You might as well do deadline-cleardone since you want to \
+            remove all of the items."
         )
         .expect("writeln failed");
 
@@ -100,7 +107,13 @@ pub fn deadline_tasks_not_done(mut not_done: Vec<String>) -> bool {
     }
 
     if not_done.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the deadline done list's length.").expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the deadline done list's \
+            length."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -116,7 +129,12 @@ pub fn deadline_tasks_not_done(mut not_done: Vec<String>) -> bool {
 
     // check if user wants to remove all done items to todo
     if not_done.len() >= deadline_tasks.done.len() && deadline_tasks.done.len() > 5 {
-        writeln!(writer, "WARNING: You might as well do deadline-notdoneall since you want to reverse all deadline done items.").expect("writeln failed");
+        writeln!(
+            writer,
+            "WARNING: You might as well do deadline-notdoneall \
+            since you want to reverse all deadline done items."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -248,11 +266,10 @@ mod deadline_done_unit_tests {
         let deadline_path = path_to_deadline_tasks();
         let deadline_path = deadline_path.to_str().unwrap();
 
-        if deadline_path.contains(linux_path) {
-            got_deadline_tasks_path = true;
-        } else if deadline_path.contains(windows_path) {
-            got_deadline_tasks_path = true;
-        } else if deadline_path.contains(mac_path) {
+        if deadline_path.contains(linux_path)
+            | deadline_path.contains(windows_path)
+            | deadline_path.contains(mac_path)
+        {
             got_deadline_tasks_path = true;
         }
 
@@ -269,11 +286,10 @@ mod deadline_done_unit_tests {
         let deadline_tasks_copy_path = deadline_tasks_copy_path();
         let deadline_tasks_copy_path = deadline_tasks_copy_path.to_str().unwrap();
 
-        if deadline_tasks_copy_path.contains(linux_path) {
-            got_deadline_tasks_copy_path = true;
-        } else if deadline_tasks_copy_path.contains(windows_path) {
-            got_deadline_tasks_copy_path = true;
-        } else if deadline_tasks_copy_path.contains(mac_path) {
+        if deadline_tasks_copy_path.contains(linux_path)
+            | deadline_tasks_copy_path.contains(windows_path)
+            | deadline_tasks_copy_path.contains(mac_path)
+        {
             got_deadline_tasks_copy_path = true;
         }
 
@@ -303,11 +319,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -337,11 +354,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // check that there are no valid args
@@ -421,11 +439,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // check that there are no valid args
@@ -463,11 +482,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -482,11 +502,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, deadline_tasks);
@@ -532,11 +553,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -562,11 +584,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, deadline_tasks);
@@ -581,11 +604,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -615,11 +639,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // check that there are no valid args
@@ -699,11 +724,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // check that there are no valid args
@@ -741,11 +767,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -771,11 +798,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, deadline_tasks);
@@ -821,11 +849,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -872,11 +901,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, deadline_tasks);
@@ -891,11 +921,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -924,11 +955,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -942,11 +974,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, deadline_tasks);
@@ -961,11 +994,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -1014,11 +1048,12 @@ mod deadline_done_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         // perform actions
@@ -1063,11 +1098,12 @@ mod deadline_done_unit_tests {
                 "done": []
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, deadline_tasks);

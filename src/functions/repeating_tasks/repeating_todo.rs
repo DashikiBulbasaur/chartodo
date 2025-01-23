@@ -4,19 +4,28 @@ use chrono::{Days, Duration, Local, Months, NaiveDate, NaiveDateTime, NaiveTime}
 use std::io::Write;
 
 // chartodo rp-a rp_task_1 3 days rp_task_2 4 days => len % 3
-
 pub fn repeating_tasks_add(add: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
-
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if we have the right # of args
     // note/potential todo: i'd like to remove division here but idk what else to do lol
     if add.len() % 3 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., divisible by 3) arguments after 'chartodo repeating-add'. You provided {} argument(s).\n\tFormat: chartodo repeating-add ~task ~interval ~time-unit [...].\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-a do-a-backflip 2 days.\n\tAnother example: chartodo rp-a new-item 3 days another-item 4 years", add.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You don't have the right amount of arguments \
+            when adding a repeating task.\n\tThere should be 3, 6, 9, etc. (i.e., \
+            divisible by 3) arguments after 'chartodo repeating-add'. You provided {} \
+            argument(s).\n\tFormat: chartodo repeating-add ~task ~interval ~time-unit \
+            [...].\n\t\tOnly the following time-units are allowed: minute(s), hour(s), \
+            day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-a do-a-backflip \
+            2 days.\n\tAnother example: chartodo rp-a new-item 3 days another-item 4 years",
+            add.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -36,7 +45,15 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
             "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
             | "months" | "month" | "years" | "year" => (),
             _ => {
-                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.", add.get(counter * 3 - 1).unwrap(), counter).expect("writeln failed");
+                writeln!(
+                    writer,
+                    "ERROR: Your provided time unit, '{}', in \
+                    argument set '{}', wasn't proper. It has to be one of the following: minutes, \
+                    hours, days, weeks, months, years.",
+                    add.get(counter * 3 - 1).unwrap(),
+                    counter
+                )
+                .expect("writeln failed");
 
                 // error = true
                 return true;
@@ -47,7 +64,15 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
         // ah well. usize has a max too. u32 is fine and big enough (pause)
         // check if the interval is proper. has to be u32
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().is_err() {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.", add.get(counter * 3 - 2).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided interval, '{}', in argument \
+                set '{}', wasn't proper. It can't be negative and can't be above 4294967295 \
+                (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days.",
+                add.get(counter * 3 - 2).unwrap(),
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -55,7 +80,14 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
 
         // check if interval is 0
         if add.get(counter * 3 - 2).unwrap().parse::<u32>().unwrap() == 0 {
-            writeln!(writer, "ERROR: You had an interval of 0 in argument set '{}'. You can't have an interval of 0, otherwise why are you even making a new repeating task?", counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: You had an interval of 0 in argument set \
+                '{}'. You can't have an interval of 0, otherwise why are you even making a new \
+                repeating task?",
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -162,7 +194,21 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
 
     // check if we have the right # of args
     if start.len() % 5 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific starting datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addstart'. You provided {} argument(s).\n\tFormat: chartodo repeating-addstart ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-as new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-as new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59", start.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You don't have the right amount of arguments \
+            when adding a repeating task with a specific starting datetime.\n\tThere \
+            should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo \
+            repeating-addstart'. You provided {} argument(s).\n\tFormat: chartodo \
+            repeating-addstart ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate \
+            should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\t\tOnly \
+            the following time-units are allowed: minute(s), hour(s), day(s), week(s), \
+            month(s), and year(s).\n\tExample: chartodo rp-as new-item 3 days 2099-01-01 \
+            00:00.\n\tAnother example: chartodo rp-as new-item 3 days 2099-01-01 00:00 \
+            another-item 4 years 23:59",
+            start.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -182,7 +228,15 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
         // check if the starting time is proper
         if NaiveTime::parse_from_str(start.get(counter * 5 - 1).unwrap().as_str(), "%H:%M").is_err()
         {
-            writeln!(writer, "ERROR: Your provided starting time, '{}', in argument set '{}', wasn't proper. Please provide a correct starting time in a 24-hour format, e.g., 23:04.", start.get(counter * 5 - 1).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided starting time, '{}', in \
+                argument set '{}', wasn't proper. Please provide a correct starting time \
+                in a 24-hour format, e.g., 23:04.",
+                start.get(counter * 5 - 1).unwrap(),
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -192,7 +246,15 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
         if NaiveDate::parse_from_str(start.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d")
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided starting date, '{}', in argument set '{}', wasn't proper. Please provide a correct starting date in a year-month-day format, e.g., 2024-05-13.", start.get(counter * 5 - 2).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided starting date, '{}', in \
+                argument set '{}', wasn't proper. Please provide a correct starting date in a \
+                year-month-day format, e.g., 2024-05-13.",
+                start.get(counter * 5 - 2).unwrap(),
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -203,7 +265,15 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
             "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
             | "months" | "month" | "years" | "year" => (),
             _ => {
-                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.", start.get(counter * 5 - 3).unwrap(), counter).expect("writeln failed");
+                writeln!(
+                    writer,
+                    "ERROR: Your provided time unit, '{}', in \
+                    argument set '{}', wasn't proper. It has to be one of the following: minutes, \
+                    hours, days, weeks, months, years.",
+                    start.get(counter * 5 - 3).unwrap(),
+                    counter
+                )
+                .expect("writeln failed");
 
                 // error = true
                 return true;
@@ -212,7 +282,16 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
 
         // check if the interval is proper
         if start.get(counter * 5 - 4).unwrap().parse::<u32>().is_err() {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 00:00", start.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided interval, '{}', in argument \
+                set '{}', wasn't proper. It can't be negative and can't be above 4294967295 \
+                (i.e., it has to be u32). Proper example: chartodo rp-a gym 2 days 2020-01-01 \
+                00:00",
+                start.get(counter * 5 - 4).unwrap(),
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -220,7 +299,14 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
 
         // check if interval is 0
         if start.get(counter * 5 - 4).unwrap().parse::<u32>().unwrap() == 0 {
-            writeln!(writer, "ERROR: You provided an interval of 0 in argument set '{}'. You can't have an interval of 0, otherwise why are you even making a new repeating task?", counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: You provided an interval of 0 in argument \
+                set '{}'. You can't have an interval of 0, otherwise why are you even making a \
+                new repeating task?",
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -286,7 +372,18 @@ fn add_to_given_starting_datetime(
     // let start_date = format!("{}", start_date.format("%Y-%m-%d"));
     // let start_time = format!("{}", start_time.format("%H:%M"));
     let starting_datetime = start_date + " " + &start_time;
-    let starting_datetime = NaiveDateTime::parse_from_str(starting_datetime.as_str(), "%Y-%m-%d %H:%M").expect("You should never be able to see this error. Somehow, when parsing a datetime from str in fn add_to_given_starting_datetime in path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should never happen since there were several checks that happened up to this point. If you see this, please open an issue on github.");
+    let starting_datetime = NaiveDateTime::parse_from_str(
+        starting_datetime.as_str(),
+        "%Y-%m-%d
+        %H:%M",
+    )
+    .expect(
+        "You should never be able to see this error. Somehow, when \
+        parsing a datetime from str in fn add_to_given_starting_datetime in path \
+        src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should \
+        never happen since there were several checks that happened up to this point. If \
+        you see this, please open an issue on github.",
+    );
     let mut add_to_start = starting_datetime;
 
     match unit.as_str() {
@@ -337,7 +434,21 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
 
     // check if we have the right # of args
     if add_end.len() % 5 != 0 {
-        writeln!(writer, "ERROR: You don't have the right amount of arguments when adding a repeating task with a specific ending datetime.\n\tThere should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo repeating-addend'. You provided {} argument(s).\n\tFormat: chartodo repeating-addend ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate must be in a yy-mm-format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\tExample: chartodo rp-ae new-item 3 days 2099-01-01 00:00.\n\tAnother example: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years 23:59", add_end.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You don't have the right amount of arguments \
+            when adding a repeating task with a specific ending datetime.\n\tThere \
+            should be 5, 10, 15, etc. (i.e., divisible by 5) arguments after 'chartodo \
+            repeating-addend'. You provided {} argument(s).\n\tFormat: chartodo \
+            repeating-addend ~task ~interval ~time-unit ~date ~time [...].\n\t\tDate must \
+            be in a yy-mm-format. Time must be in a 24-hour format.\n\t\tOnly the following \
+            time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and \
+            year(s).\n\tExample: chartodo rp-ae new-item 3 days 2099-01-01 00:00.\n\tAnother \
+            example: chartodo rp-ae new-item 3 days 2099-01-01 00:00 another-item 4 years \
+            23:59",
+            add_end.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -359,7 +470,15 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
         if NaiveTime::parse_from_str(add_end.get(counter * 5 - 1).unwrap().as_str(), "%H:%M")
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided ending time, '{}', in argument set '{}', wasn't proper. Please provide a correct ending time in a 24-hour format, e.g., 23:04.", add_end.get(counter * 5 - 1).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided ending time, '{}', in \
+                argument set '{}', wasn't proper. Please provide a correct ending time in \
+                a 24-hour format, e.g., 23:04.",
+                add_end.get(counter * 5 - 1).unwrap(),
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -369,7 +488,15 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
         if NaiveDate::parse_from_str(add_end.get(counter * 5 - 2).unwrap().as_str(), "%Y-%m-%d")
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided ending date, '{}', in argument set '{}', wasn't proper. Please provide a correct ending date in a year-month-day format, e.g., 2024-05-12.", add_end.get(counter * 5 - 2).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided ending date, '{}', in \
+                argument set '{}', wasn't proper. Please provide a correct ending date \
+                in a year-month-day format, e.g., 2024-05-12.",
+                add_end.get(counter * 5 - 2).unwrap(),
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -380,7 +507,15 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
             "minutes" | "minute" | "hours" | "hour" | "days" | "day" | "weeks" | "week"
             | "months" | "month" | "years" | "year" => (),
             _ => {
-                writeln!(writer, "ERROR: Your provided time unit, '{}', in argument set '{}', wasn't proper. It has to be one of the following: minutes, hours, days, weeks, months, years.", add_end.get(counter * 5 - 3).unwrap(), counter).expect("writeln failed");
+                writeln!(
+                    writer,
+                    "ERROR: Your provided time unit, '{}', in \
+                    argument set '{}', wasn't proper. It has to be one of the following: minutes, \
+                    hours, days, weeks, months, years.",
+                    add_end.get(counter * 5 - 3).unwrap(),
+                    counter
+                )
+                .expect("writeln failed");
 
                 // error = true
                 return true;
@@ -394,7 +529,19 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
             .parse::<u32>()
             .is_err()
         {
-            writeln!(writer, "ERROR: Your provided interval, '{}', in argument set '{}', wasn't proper. It can't be negative and can't be above 4294967295 (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 00:00", add_end.get(counter * 5 - 4).unwrap(), counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: Your provided interval, '{}', in argument \
+                set '{}', wasn't proper. It can't be negative and can't be above 4294967295 \
+                (i.e., it has to be u32). Proper example: chartodo rp-ae gym 2 days 2000-01-01 \
+                00:00",
+                add_end.get(counter * 5 - 4).unwrap(),
+                counter
+            )
+            .expect(
+                "writeln
+                failed",
+            );
 
             // error = true
             return true;
@@ -408,7 +555,14 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
             .unwrap()
             == 0
         {
-            writeln!(writer, "ERROR: You provided an interval of 0 in argument set {}. You can't have an interval of 0, otherwise why are you even making a new repeating task?", counter).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: You provided an interval of 0 in argument \
+                set {}. You can't have an interval of 0, otherwise why are you even making a new \
+                repeating task?",
+                counter
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -483,7 +637,14 @@ fn subract_from_given_ending_datetime(
     // let end_date = format!("{}", end_date.format("%Y-%m-%d"));
     // let end_time = format!("{}", end_time.format("%H:%M"));
     let ending_datetime = end_date + " " + &end_time;
-    let ending_datetime = NaiveDateTime::parse_from_str(ending_datetime.as_str(), "%Y-%m-%d %H:%M").expect("You should never be able to see this error. Somehow, when parsing a datetime from str in fn subtract_from_given_ending_datetime in path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should never happen since there were several checks that happened up to this point. If you see this, please open an issue on github.");
+    let ending_datetime = NaiveDateTime::parse_from_str(ending_datetime.as_str(), "%Y-%m-%d %H:%M")
+        .expect(
+            "You should never be able to see this error. Somehow, \
+            when parsing a datetime from str in fn subtract_from_given_ending_datetime in \
+            path src/functions/repeating_tasks/repeating_todo.rs, the parsing failed. Should \
+            never happen since there were several checks that happened up to this point. If \
+            you see this, please open an issue on github.",
+        );
     let mut subtract_from_end = ending_datetime;
 
     match unit.as_str() {
@@ -555,7 +716,13 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
 
     // no valid arguments
     if done.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.").expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -570,7 +737,8 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     if done.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-doneall"
+            "WARNING: You've specified the entire repeating todo list that's \
+            relatively long. You should do chartodo repeating-doneall"
         )
         .expect("writeln failed");
 
@@ -635,7 +803,13 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
 
     // no valid args
     if reset.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.").expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -649,7 +823,9 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     if reset.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "WARNING: You've specified the entire repeating todo list that's relatively long. You should do chartodo repeating-resetall/repeating-doneresetall"
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall"
         )
         .expect("writeln failed");
 
@@ -740,7 +916,13 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 
     // no valid args
     if rmtodo.is_empty() {
-        writeln!(writer, "ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.").expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -755,7 +937,8 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     if rmtodo.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
         writeln!(
             writer,
-            "WARNING: You've specified the entire repeating todo list, one that's relatively long. You should do repeating-cleartodo"
+            "WARNING: You've specified the entire repeating todo list, one \
+            that's relatively long. You should do repeating-cleartodo"
         )
         .expect("writeln failed");
 
@@ -824,7 +1007,12 @@ pub fn repeating_tasks_clear_todo() -> bool {
 
     // check if todo list is empty
     if repeating_tasks.todo.is_empty() {
-        writeln!(writer, "ERROR: The repeating todo list is currently empty. Try adding items to it first before removing any.").expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The repeating todo list is currently empty. Try \
+            adding items to it first before removing any."
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -867,7 +1055,11 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
 
     // no valid args
     if start.is_empty() {
-        return String::from("ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length.");
+        return String::from(
+            "ERROR: None of the positions you provided were \
+            viable -- they were all either negative, zero, or exceeded the repeating todo \
+            list's length.",
+        );
     }
 
     // sort and dedup
@@ -877,7 +1069,10 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
 
     // check if user wants to show starts for all of the items
     if start.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return String::from("WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall");
+        return String::from(
+            "WARNING: You want to show the start times for an \
+            entire list that's relatively long. You should do repeating-startall.",
+        );
     }
 
     let mut show_starts = String::from("");
@@ -990,7 +1185,8 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
     if repeating_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -1004,7 +1200,22 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_all.len() != 7 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and all the parameters that will be edited.\n\tThere should be 7 arguments after 'chartodo repeating-editall'. You provided {} argument(s).\n\tExample: chartodo repeating-editall ~position ~task ~interval ~time-unit ~start/end ~date ~time.\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), day(s), week(s), month(s), and year(s).\n\t\tYou must specify if you're editing the ending or starting datetime by using the keywords 'start' or 'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 days end 2150-01-01 00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 days start 2150-01-01 00:00", edit_all.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's position \
+            and all the parameters that will be edited.\n\tThere should be 7 arguments \
+            after 'chartodo repeating-editall'. You provided {} argument(s).\n\tExample: \
+            chartodo repeating-editall ~position ~task ~interval ~time-unit ~start/end \
+            ~date ~time.\n\t\tDate must be in a yy-mm-dd format. Time must be in a 24-hour \
+            format.\n\t\tOnly the following time-units are allowed: minute(s), hour(s), \
+            day(s), week(s), month(s), and year(s).\n\t\tYou must specify if you're \
+            editing the ending or starting datetime by using the keywords 'start' or \
+            'end'.\n\tExample (with end): chartodo rp-ea 4 new-item 3 days end 2150-01-01 \
+            00:00.\n\tExample (with start): chartodo rp-ea 4 new-item 3 days start \
+            2150-01-01 00:00",
+            edit_all.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1040,8 +1251,10 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
     if edit_all.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: The position you provided, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_all.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: The position you provided, '{}', exceeds the repeating todo \
+            list's length. Try something between 1 and {}.",
+            edit_all.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1053,7 +1266,9 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
     if edit_all.get(2).unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_all.get(2).unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. \
+            It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            edit_all.get(2).unwrap()
         )
         .expect("writeln failed");
 
@@ -1078,7 +1293,13 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
         "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month"
         | "months" | "year" | "years" => (),
         _ => {
-            writeln!(writer, "ERROR: The time unit you provided, '{}', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.", edit_all.get(3).unwrap()).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: The time unit you provided, '{}', wasn't \
+                proper. Proper examples: minutes, hours, days, weeks, months or years.",
+                edit_all.get(3).unwrap()
+            )
+            .expect("writeln failed");
 
             // error = treu
             return true;
@@ -1087,7 +1308,13 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_all.get(5).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_all.get(5).unwrap()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The date you provided, '{}', wasn't proper. \
+            It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            edit_all.get(5).unwrap()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1095,7 +1322,13 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
 
     // time isn't proper
     if NaiveTime::parse_from_str(edit_all.last().unwrap().as_str(), "%H:%M").is_err() {
-        writeln!(writer, "ERROR: The time you provided, '{}', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.", edit_all.last().unwrap()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The time you provided, '{}', wasn't \
+            proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            edit_all.last().unwrap()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1123,7 +1356,15 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
                 )
         }
         _ => {
-            writeln!(writer, "ERROR: '{}' isn't correct. You must specify whether the given datetime is the starting or ending datetime. Please use the 'start' or 'end' keywords and nothing else, e.g., repeating-editall 1 new-repeating-task 4 weeks start 2099-12-13 13:08", edit_all.get(4).unwrap()).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: '{}' isn't correct. You must \
+                specify whether the given datetime is the starting or ending datetime. \
+                Please use the 'start' or 'end' keywords and nothing else, e.g., \
+                repeating-editall 1 new-repeating-task 4 weeks start 2099-12-13 13:08",
+                edit_all.get(4).unwrap()
+            )
+            .expect("writeln failed");
 
             // error = treu
             return true;
@@ -1175,7 +1416,8 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
     if repeating_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -1189,7 +1431,15 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_task.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and the new task to change it to.\n\tThere should be 2 arguments after 'chartodo repeating-edittask'. You provided {} argument(s).\n\tFormat: chartodo repeating-edittask ~position ~task.\n\tExample: chartodo rp-eta 4 new-item.", edit_task.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's \
+            position and the new task to change it to.\n\tThere should be 2 arguments after \
+            'chartodo repeating-edittask'. You provided {} argument(s).\n\tFormat: chartodo \
+            repeating-edittask ~position ~task.\n\tExample: chartodo rp-eta 4 new-item.",
+            edit_task.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1225,8 +1475,10 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
     if edit_task.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_task.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's \
+            length. Try something between 1 and {}.",
+            edit_task.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1258,7 +1510,8 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     if repeating_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -1272,7 +1525,17 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_interval.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to edit the interval to.\n\tThere should be 2 arguments after 'chartodo repeating-editinterval'. You provided {} argument(s).\n\tFormat: chartodo repeating-editinterval ~position ~interval.\n\tExample: chartodo rp-ei 4 3.\n\t\t'4' would be the todo task's position and '3' would be the new interval, i.e., repeating task 4 would now have an interval of '3 days'.", edit_interval.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's \
+            position and what to edit the interval to.\n\tThere should be 2 arguments after \
+            'chartodo repeating-editinterval'. You provided {} argument(s).\n\tFormat: \
+            chartodo repeating-editinterval ~position ~interval.\n\tExample: chartodo \
+            rp-ei 4 3.\n\t\t'4' would be the todo task's position and '3' would be the \
+            new interval, i.e., repeating task 4 would now have an interval of '3 days'.",
+            edit_interval.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1308,8 +1571,10 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     if edit_interval.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_interval.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's \
+            length. Try something between 1 and {}.",
+            edit_interval.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1321,7 +1586,9 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     if edit_interval.last().unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval.last().unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. \
+            It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            edit_interval.last().unwrap()
         )
         .expect("writeln failed");
 
@@ -1333,7 +1600,8 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     if edit_interval.last().unwrap().parse::<u32>().unwrap() == 0 {
         writeln!(
             writer,
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?"
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?"
         )
         .expect("writeln failed");
 
@@ -1409,7 +1677,8 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
     if repeating_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -1423,7 +1692,16 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_unit.len() != 2 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to edit the time unit to.\n\tThere should be 2 arguments after 'chartodo repeating-eu'. You provided {} arguments().\n\tFormat: chartodo repeating-editunit ~position ~time-unit.\n\tExample: chartodo rp-eu 4 weeks.\n\t\tThat would change repeating task #4's time unit to 'weeks'.", edit_unit.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's \
+            position and what to edit the time unit to.\n\tThere should be 2 arguments \
+            after 'chartodo repeating-eu'. You provided {} arguments().\n\tFormat: \
+            chartodo repeating-editunit ~position ~time-unit.\n\tExample: chartodo rp-eu \
+            4 weeks.\n\t\tThat would change repeating task #4's time unit to 'weeks'.",
+            edit_unit.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1433,7 +1711,8 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
     if edit_unit.first().unwrap().parse::<usize>().is_err() {
         writeln!(
             writer,
-            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            "ERROR: The position you provided, '{}', was invalid. Try something \
+            between 1 and {}.",
             edit_unit.first().unwrap(),
             repeating_tasks.todo.len()
         )
@@ -1459,8 +1738,10 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
     if edit_unit.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_unit.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's \
+            length. Try something between 1 and {}.",
+            edit_unit.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1473,7 +1754,13 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
         "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month"
         | "months" | "year" | "years" => (),
         _ => {
-            writeln!(writer, "ERROR: The time unit you provided, '{}', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.", edit_unit.last().unwrap()).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: The time unit you provided, '{}', wasn't \
+                proper. Proper examples: minutes, hours, days, weeks, months or years.",
+                edit_unit.last().unwrap()
+            )
+            .expect("writeln failed");
 
             // error = true
             return true;
@@ -1557,7 +1844,16 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
 
     // check if we have the right number of arguments
     if edit_interval_unit.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the interval and time unit to.\n\tThere should be 3 arguments after 'chartodo repeating-editintervalunit'. You provided {} argument(s).\n\tFormat: chartodo repeating-editintervalunit ~position ~interval ~time-unit.\n\tExample: chartodo rp-eiu 4 3 days.", edit_interval_unit.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's \
+            position and what to change the interval and time unit to.\n\tThere \
+            should be 3 arguments after 'chartodo repeating-editintervalunit'. You \
+            provided {} argument(s).\n\tFormat: chartodo repeating-editintervalunit \
+            ~position ~interval ~time-unit.\n\tExample: chartodo rp-eiu 4 3 days.",
+            edit_interval_unit.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1572,7 +1868,8 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     {
         writeln!(
             writer,
-            "ERROR: The position you provided, '{}', wasn't valid. Try something between 1 and {}.",
+            "ERROR: The position you provided, '{}', wasn't valid. Try something \
+            between 1 and {}.",
             edit_interval_unit.first().unwrap(),
             repeating_tasks.todo.len()
         )
@@ -1610,8 +1907,10 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_interval_unit.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's \
+            length. Try something between 1 and {}.",
+            edit_interval_unit.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1623,7 +1922,9 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     if edit_interval_unit.get(1).unwrap().parse::<u32>().is_err() {
         writeln!(
             writer,
-            "ERROR: The interval you provided, '{}', wasn't proper. It must be in the range of 1 - 4294967295 (i.e., it has to be u32).", edit_interval_unit.get(1).unwrap()
+            "ERROR: The interval you provided, '{}', wasn't proper. \
+            It must be in the range of 1 - 4294967295 (i.e., it has to be u32).",
+            edit_interval_unit.get(1).unwrap()
         )
         .expect("writeln failed");
 
@@ -1635,7 +1936,8 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     if edit_interval_unit.get(1).unwrap().parse::<u32>().unwrap() == 0 {
         writeln!(
             writer,
-            "ERROR: Your interval can't be 0, otherwise why are you even setting a repeating task?"
+            "ERROR: Your interval can't be 0, otherwise why are you even setting \
+            a repeating task?"
         )
         .expect("writeln failed");
 
@@ -1648,7 +1950,13 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
         "minute" | "minutes" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month"
         | "months" | "year" | "years" => (),
         _ => {
-            writeln!(writer, "ERROR: The time unit you provided, '{}', wasn't proper. Proper examples: minutes, hours, days, weeks, months or years.", edit_interval_unit.last().unwrap()).expect("writeln failed");
+            writeln!(
+                writer,
+                "ERROR: The time unit you provided, '{}', wasn't \
+                proper. Proper examples: minutes, hours, days, weeks, months or years.",
+                edit_interval_unit.last().unwrap()
+            )
+            .expect("writeln failed");
 
             // error = treu
             return true;
@@ -1723,7 +2031,8 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
     if repeating_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -1737,7 +2046,17 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_start.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's starting datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. You provided {} argument(s).\n\tFormat: chartodo repeating-editstart ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08", edit_start.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's \
+            position and what to change the repeating task's starting datetime \
+            to.\n\tThere should be 3 arguments after 'chartodo repeating-editstart'. \
+            You provided {} argument(s).\n\tFormat: chartodo repeating-editstart \
+            ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should \
+            be in a 24-hour format.\n\tExample: chartodo rp-es 4 2100-12-24 13:08",
+            edit_start.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1747,7 +2066,8 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
     if edit_start.first().unwrap().parse::<usize>().is_err() {
         writeln!(
             writer,
-            "ERROR: The position you provided, '{}', was invalid. Try something between 1 and {}.",
+            "ERROR: The position you provided, '{}', was invalid. Try something \
+            between 1 and {}.",
             edit_start.first().unwrap(),
             repeating_tasks.todo.len()
         )
@@ -1773,8 +2093,10 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
     if edit_start.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_start.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's \
+            length. Try something between 1 and {}.",
+            edit_start.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1784,7 +2106,13 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_start.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_start.get(1).unwrap()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The date you provided, '{}', wasn't proper. \
+            It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            edit_start.get(1).unwrap()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1792,7 +2120,13 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
 
     // time isn't proper
     if NaiveTime::parse_from_str(edit_start.last().unwrap().as_str(), "%H:%M").is_err() {
-        writeln!(writer, "ERROR: The time you provided, '{}', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.", edit_start.last().unwrap()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The time you provided, '{}', wasn't \
+            proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            edit_start.last().unwrap()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1852,7 +2186,8 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
     if repeating_tasks.todo.is_empty() {
         writeln!(
             writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
+            "ERROR: The repeating todo list is currently empty, so there are no \
+            todos that can be edited."
         )
         .expect("writeln failed");
 
@@ -1866,7 +2201,17 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // check if we have the right number of arguments
     if edit_end.len() != 3 {
-        writeln!(writer, "ERROR: You must specify the repeating todo's position and what to change the repeating task's ending datetime to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You provided {} argument(s).\n\tFormat: chartodo repeating-editend ~position ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08", edit_end.len()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: You must specify the repeating todo's \
+            position and what to change the repeating task's ending datetime \
+            to.\n\tThere should be 3 arguments after 'chartodo repeating-editend'. You \
+            provided {} argument(s).\n\tFormat: chartodo repeating-editend ~position \
+            ~date ~time.\n\t\tDate should be in a yy-mm-dd format. Time should be \
+            in a 24-hour format.\n\tExample: chartodo rp-ee 4 2100-12-14 13:08",
+            edit_end.len()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -1876,7 +2221,8 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
     if edit_end.first().unwrap().parse::<usize>().is_err() {
         writeln!(
             writer,
-            "ERROR: The position you provided, '{}', wasn't valid. Try something between 1 and {}.",
+            "ERROR: The position you provided, '{}', wasn't valid. Try something \
+            between 1 and {}.",
             edit_end.first().unwrap(),
             repeating_tasks.todo.len()
         )
@@ -1902,8 +2248,10 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
     if edit_end.first().unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len() {
         writeln!(
             writer,
-            "ERROR: Your position, '{}', exceeds the repeating todo list's length. Try something between 1 and {}.",
-            edit_end.first().unwrap(), repeating_tasks.todo.len()
+            "ERROR: Your position, '{}', exceeds the repeating todo list's \
+            length. Try something between 1 and {}.",
+            edit_end.first().unwrap(),
+            repeating_tasks.todo.len()
         )
         .expect("writeln failed");
 
@@ -1913,7 +2261,13 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // date isn't proper
     if NaiveDate::parse_from_str(edit_end.get(1).unwrap().as_str(), "%Y-%m-%d").is_err() {
-        writeln!(writer, "ERROR: The date you provided, '{}', wasn't proper. It must be in the following format: Year-Month-Day, e.g., 2000-12-13.", edit_end.get(1).unwrap()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The date you provided, '{}', wasn't proper. \
+            It must be in the following format: Year-Month-Day, e.g., 2000-12-13.",
+            edit_end.get(1).unwrap()
+        )
+        .expect("writeln failed");
 
         // error = treu
         return true;
@@ -1921,7 +2275,13 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
 
     // time isn't proper
     if NaiveTime::parse_from_str(edit_end.last().unwrap().as_str(), "%H:%M").is_err() {
-        writeln!(writer, "ERROR: The time you provided, '{}', wasn't proper. It must be in the following 24-hour format: H:M, e.g., 13:08.", edit_end.last().unwrap()).expect("writeln failed");
+        writeln!(
+            writer,
+            "ERROR: The time you provided, '{}', wasn't \
+            proper. It must be in the following 24-hour format: H:M, e.g., 13:08.",
+            edit_end.last().unwrap()
+        )
+        .expect("writeln failed");
 
         // error = true
         return true;
@@ -2028,11 +2388,10 @@ mod repeating_todo_unit_tests {
         let repeating_path = path_to_repeating_tasks();
         let repeating_path = repeating_path.to_str().unwrap();
 
-        if repeating_path.contains(linux_path) {
-            got_repeating_tasks_path = true;
-        } else if repeating_path.contains(windows_path) {
-            got_repeating_tasks_path = true;
-        } else if repeating_path.contains(mac_path) {
+        if repeating_path.contains(linux_path)
+            | repeating_path.contains(windows_path)
+            | repeating_path.contains(mac_path)
+        {
             got_repeating_tasks_path = true;
         }
 
@@ -2049,11 +2408,10 @@ mod repeating_todo_unit_tests {
         let repeating_tasks_copy_path = repeating_tasks_copy_path();
         let repeating_tasks_copy_path = repeating_tasks_copy_path.to_str().unwrap();
 
-        if repeating_tasks_copy_path.contains(linux_path) {
-            got_repeating_tasks_copy_path = true;
-        } else if repeating_tasks_copy_path.contains(windows_path) {
-            got_repeating_tasks_copy_path = true;
-        } else if repeating_tasks_copy_path.contains(mac_path) {
+        if repeating_tasks_copy_path.contains(linux_path)
+            | repeating_tasks_copy_path.contains(windows_path)
+            | repeating_tasks_copy_path.contains(mac_path)
+        {
             got_repeating_tasks_copy_path = true;
         }
 
@@ -2146,11 +2504,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions on file
@@ -2175,11 +2534,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions on file
@@ -2331,11 +2691,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions on file
@@ -2367,11 +2728,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -2386,11 +2748,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions on file
@@ -2437,11 +2800,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -2591,11 +2955,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions on file
@@ -2627,11 +2992,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -2646,11 +3012,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions on file
@@ -2697,11 +3064,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -2732,11 +3100,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -2766,11 +3135,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -2855,11 +3225,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -2911,11 +3282,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -2941,11 +3313,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -3008,11 +3381,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3074,11 +3448,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -3093,11 +3468,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -3127,11 +3503,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3216,11 +3593,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3262,11 +3640,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3327,11 +3706,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3355,11 +3735,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -3389,11 +3770,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3478,11 +3860,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3530,11 +3913,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3560,11 +3944,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -3610,11 +3995,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3640,11 +4026,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -3659,11 +4046,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -3723,11 +4111,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3782,11 +4171,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -3801,11 +4191,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -3854,11 +4245,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3872,11 +4264,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -3891,11 +4284,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -3905,7 +4299,8 @@ mod repeating_todo_unit_tests {
         assert_eq!(
             error_msg,
             String::from(
-                "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+                "ERROR: The repeating todo list is currently empty. Try adding \
+                items to it first.",
             )
         );
     }
@@ -3930,11 +4325,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -3946,7 +4342,14 @@ mod repeating_todo_unit_tests {
         ];
         let error_msg = repeating_tasks_show_start(arguments);
 
-        assert_eq!(error_msg, String::from("ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the repeating todo list's length."));
+        assert_eq!(
+            error_msg,
+            String::from(
+                "ERROR: None of the positions you \
+                provided were viable -- they were all either negative, zero, or exceeded the \
+                repeating todo list's length."
+            )
+        );
     }
 
     #[test]
@@ -4019,11 +4422,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -4038,7 +4442,14 @@ mod repeating_todo_unit_tests {
         ];
         let error_msg = repeating_tasks_show_start(arguments);
 
-        assert_eq!(error_msg, String::from("WARNING: You want to show the start times for an entire list that's relatively long, You should do repeating-startall."));
+        assert_eq!(
+            error_msg,
+            String::from(
+                "WARNING: You want to show \
+                the start times for an entire list that's relatively long. You should do \
+                repeating-startall."
+            )
+        );
     }
 
     #[test]
@@ -4071,11 +4482,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -4118,11 +4530,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -4144,11 +4557,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -4210,11 +4624,12 @@ mod repeating_todo_unit_tests {
                 ]
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -4232,11 +4647,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // check that repeating todo list is correctly identified as empty
@@ -4245,7 +4661,8 @@ mod repeating_todo_unit_tests {
         assert_eq!(
             error_msg,
             String::from(
-                "ERROR: the repeating todo list is currently empty. try adding items to it first.",
+                "ERROR: The repeating todo list is currently empty. Try adding \
+                items to it first.",
             )
         );
     }
@@ -4280,11 +4697,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // no valid args
@@ -4292,7 +4710,10 @@ mod repeating_todo_unit_tests {
 
         assert_eq!(
             error_msg,
-            String::from("task: this-is-the-todo-list\n\tstart: 2020-12-31 23:57\ntask: hi\n\tstart: 2020-12-31 23:56")
+            String::from(
+                "task: this-is-the-todo-list\n\tstart: 2020-12-31 \
+                23:57\ntask: hi\n\tstart: 2020-12-31 23:56"
+            )
         );
     }
 
@@ -4305,11 +4726,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4339,11 +4761,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4377,11 +4800,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4419,11 +4843,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4461,11 +4886,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4505,11 +4931,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4547,11 +4974,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4589,11 +5017,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4631,11 +5060,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4673,11 +5103,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4715,11 +5146,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4757,11 +5189,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4795,11 +5228,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -4814,11 +5248,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4848,11 +5283,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4886,11 +5322,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4920,11 +5357,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4954,11 +5392,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -4988,11 +5427,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5018,11 +5458,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -5037,11 +5478,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5071,11 +5513,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5109,11 +5552,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5143,11 +5587,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5177,11 +5622,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5211,11 +5657,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5245,11 +5692,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5279,11 +5727,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5309,11 +5758,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -5328,11 +5778,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5362,11 +5813,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5400,11 +5852,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5434,11 +5887,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5468,11 +5922,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5502,11 +5957,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5536,11 +5992,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5566,11 +6023,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -5585,11 +6043,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5619,11 +6078,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5653,11 +6113,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5687,11 +6148,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5721,11 +6183,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5755,11 +6218,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5789,11 +6253,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5823,11 +6288,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5857,11 +6323,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5887,11 +6354,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -5906,11 +6374,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5940,11 +6409,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -5974,11 +6444,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6008,11 +6479,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6042,11 +6514,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6076,11 +6549,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6110,11 +6584,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6148,11 +6623,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6182,11 +6658,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);
@@ -6201,11 +6678,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6235,11 +6713,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6269,11 +6748,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6303,11 +6783,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6337,11 +6818,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6371,11 +6853,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6405,11 +6888,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6443,11 +6927,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // perform actions
@@ -6477,11 +6962,12 @@ mod repeating_todo_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         assert!(!error_should_be_false);
         assert_eq!(read_test_file, repeating_tasks);

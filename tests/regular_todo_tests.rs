@@ -54,11 +54,10 @@ mod aaa_do_this_first {
         let regular_path = path_to_regular_tasks();
         let regular_path = regular_path.to_str().unwrap();
 
-        if regular_path.contains(linux_path) {
-            got_regular_tasks_path = true;
-        } else if regular_path.contains(windows_path) {
-            got_regular_tasks_path = true;
-        } else if regular_path.contains(mac_path) {
+        if regular_path.contains(linux_path)
+            | regular_path.contains(windows_path)
+            | regular_path.contains(mac_path)
+        {
             got_regular_tasks_path = true;
         }
 
@@ -75,11 +74,10 @@ mod aaa_do_this_first {
         let regular_tasks_copy_path = regular_tasks_copy_path();
         let regular_tasks_copy_path = regular_tasks_copy_path.to_str().unwrap();
 
-        if regular_tasks_copy_path.contains(linux_path) {
-            got_regular_tasks_copy_path = true;
-        } else if regular_tasks_copy_path.contains(windows_path) {
-            got_regular_tasks_copy_path = true;
-        } else if regular_tasks_copy_path.contains(mac_path) {
+        if regular_tasks_copy_path.contains(linux_path)
+            | regular_tasks_copy_path.contains(windows_path)
+            | regular_tasks_copy_path.contains(mac_path)
+        {
             got_regular_tasks_copy_path = true;
         }
 
@@ -109,9 +107,11 @@ mod regular_todo_add {
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("add");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item(s) to be added. Good example: chartodo add new-item, or chartodo add item next-item one-more-item. If you have questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item(s) \
+            to be added. Good example: chartodo add new-item, or chartodo add item next-item \
+            one-more-item. If you have questions, try chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -121,9 +121,11 @@ mod regular_todo_add {
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("a");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item(s) to be added. Good example: chartodo a new-item, or chartodo a item next-item one-more-item. If you have questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item(s) \
+            to be added. Good example: chartodo a new-item, or chartodo a item next-item \
+            one-more-item. If you have questions, try chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -137,11 +139,12 @@ mod regular_todo_add {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -163,11 +166,12 @@ mod regular_todo_add {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -189,11 +193,12 @@ mod regular_todo_add {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -216,11 +221,12 @@ mod regular_todo_add {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -243,9 +249,11 @@ mod regular_todo_done {
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item(s) to be changed to done. Good example: chartodo done 3, or chartodo done 3 4 5. If you have questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item(s) \
+            to be changed to done. Good example: chartodo done 3, or chartodo done 3 4 5. If \
+            you have questions, try chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -255,9 +263,11 @@ mod regular_todo_done {
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item(s) to be changed to done. Good example: chartodo d 3, or chartodo d 3 4 5. If you have questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item(s) \
+            to be changed to done. Good example: chartodo d 3, or chartodo d 3 4 5. If you \
+            have questions, try chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -271,19 +281,21 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty so you can't change any todos to done."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty so you can't change any todos to done.",
+        ));
 
         Ok(())
     }
@@ -297,19 +309,21 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty so you can't change any todos to done."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty so you can't change any todos to done.",
+        ));
 
         Ok(())
     }
@@ -334,19 +348,22 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("a").arg("2").arg("0");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: None of the positions you \
+            provided were viable -- they were all either negative, zero, or exceeded the \
+            regular todo list's length.",
+        ));
 
         Ok(())
     }
@@ -371,19 +388,22 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("a").arg("2").arg("0");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: None of the positions you provided were viable -- they were all either negative, zero, or exceeded the regular todo list's length."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: None of the positions you \
+            provided were viable -- they were all either negative, zero, or exceeded the \
+            regular todo list's length.",
+        ));
 
         Ok(())
     }
@@ -458,11 +478,12 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -475,9 +496,10 @@ mod regular_todo_done {
             .arg("4")
             .arg("5")
             .arg("6");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("WARNING: you've specified marking the entire regular todo list as done. You should do chartodo doneall."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: you've specified marking \
+            the entire regular todo list as done. You should do chartodo doneall.",
+        ));
 
         Ok(())
     }
@@ -552,11 +574,12 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -569,9 +592,10 @@ mod regular_todo_done {
             .arg("4")
             .arg("5")
             .arg("6");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("WARNING: you've specified marking the entire regular todo list as done. You should do chartodo doneall."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: you've specified marking \
+            the entire regular todo list as done. You should do chartodo doneall.",
+        ));
 
         Ok(())
     }
@@ -606,11 +630,12 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -656,11 +681,12 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -716,11 +742,12 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -775,11 +802,12 @@ mod regular_todo_done {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -801,9 +829,11 @@ mod regular_todo_rmtodo {
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item(s) to be removed. Good example: chartodo rmtodo 3, or chartodo rmtodo 3 4 5. If you have more questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item(s) \
+            to be removed. Good example: chartodo rmtodo 3, or chartodo rmtodo 3 4 5. If you \
+            have more questions, try chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -813,9 +843,11 @@ mod regular_todo_rmtodo {
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item(s) to be removed. Good example: chartodo rmt 3, or chartodo rmt 3 4 5. If you have more questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item(s) \
+            to be removed. Good example: chartodo rmt 3, or chartodo rmt 3 4 5. If you have \
+            more questions, try chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -829,19 +861,22 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty, so you can't remove any items. Try adding to it first before removing any."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty, so you can't remove any items. Try adding to it first before \
+            removing any.",
+        ));
 
         Ok(())
     }
@@ -855,19 +890,22 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty, so you can't remove any items. Try adding to it first before removing any."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty, so you can't remove any items. Try adding to it first before \
+            removing any.",
+        ));
 
         Ok(())
     }
@@ -892,19 +930,22 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("a").arg("2").arg("0");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: none of the positions you gave were valid -- they were all either negative, zero, or exceeded the regular todo list's length."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: none of the positions you \
+            gave were valid -- they were all either negative, zero, or exceeded the regular \
+            todo list's length.",
+        ));
 
         Ok(())
     }
@@ -929,19 +970,22 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("a").arg("2").arg("0");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: none of the positions you gave were valid -- they were all either negative, zero, or exceeded the regular todo list's length."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: none of the positions you \
+            gave were valid -- they were all either negative, zero, or exceeded the regular \
+            todo list's length.",
+        ));
 
         Ok(())
     }
@@ -1016,11 +1060,12 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1033,9 +1078,10 @@ mod regular_todo_rmtodo {
             .arg("4")
             .arg("5")
             .arg("6");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("WARNING: You specified removing the entire regular todo list. You should instead do chartodo cleartodo."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You specified removing \
+            the entire regular todo list. You should instead do chartodo cleartodo.",
+        ));
 
         Ok(())
     }
@@ -1110,11 +1156,12 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1127,9 +1174,10 @@ mod regular_todo_rmtodo {
             .arg("4")
             .arg("5")
             .arg("6");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("WARNING: You specified removing the entire regular todo list. You should instead do chartodo cleartodo."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You specified removing \
+            the entire regular todo list. You should instead do chartodo cleartodo.",
+        ));
 
         Ok(())
     }
@@ -1164,11 +1212,12 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1211,11 +1260,12 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1272,11 +1322,12 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1330,11 +1381,12 @@ mod regular_todo_rmtodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1382,19 +1434,21 @@ mod regular_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("cleartodo");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty. Try adding items to it first before removing any."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty. Try adding items to it first before removing any.",
+        ));
 
         Ok(())
     }
@@ -1408,19 +1462,21 @@ mod regular_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("ct");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty. Try adding items to it first before removing any."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty. Try adding items to it first before removing any.",
+        ));
 
         Ok(())
     }
@@ -1455,11 +1511,12 @@ mod regular_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1504,11 +1561,12 @@ mod regular_todo_cleartodo {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1558,19 +1616,21 @@ mod regular_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("doneall");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty, so you can't change any todos to done."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty, so you can't change any todos to done.",
+        ));
 
         Ok(())
     }
@@ -1584,19 +1644,21 @@ mod regular_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("da");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty, so you can't change any todos to done."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty, so you can't change any todos to done.",
+        ));
 
         Ok(())
     }
@@ -1641,11 +1703,12 @@ mod regular_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1707,11 +1770,12 @@ mod regular_todo_doneall {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -1746,19 +1810,22 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item to be edited. Good example: chartodo edit 3 abc. If you have more questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item to \
+            be edited. Good example: chartodo edit 3 abc. If you have more questions, try \
+            chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -1772,19 +1839,22 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e");
-        cmd.assert()
-            .failure()
-            .stderr(predicate::str::contains("Did not provide the todo item to be edited. Good example: chartodo e 3 abc. If you have more questions, try chartodo help or chartodo --help"));
+        cmd.assert().failure().stderr(predicate::str::contains(
+            "Did not provide the todo item \
+            to be edited. Good example: chartodo e 3 abc. If you have more questions, try \
+            chartodo help or chartodo --help",
+        ));
 
         Ok(())
     }
@@ -1798,19 +1868,21 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty, so there are no todos that can be edited."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty, so there are no todos that can be edited.",
+        ));
 
         Ok(())
     }
@@ -1824,19 +1896,21 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("a");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: The regular todo list is currently empty, so there are no todos that can be edited."));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: The regular todo list is \
+            currently empty, so there are no todos that can be edited.",
+        ));
 
         Ok(())
     }
@@ -1861,19 +1935,24 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: You must specify the regular todo's position that will be edited, and what to edit the task to.\n\tThere should be 2 arguments after 'chartodo edit'. You provided 1 argument(s).\n\tFormat: chartodo edit ~position ~task\n\tExample: chartodo edit 4 new-item"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You must specify the \
+            regular todo's position that will be edited, and what to edit the task \
+            to.\n\tThere should be 2 arguments after 'chartodo edit'. You provided 1 \
+            argument(s).\n\tFormat: chartodo edit ~position ~task\n\tExample: chartodo edit \
+            4 new-item",
+        ));
 
         Ok(())
     }
@@ -1898,19 +1977,24 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("1");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: You must specify the regular todo's position that will be edited, and what to edit the task to.\n\tThere should be 2 arguments after 'chartodo edit'. You provided 1 argument(s).\n\tFormat: chartodo edit ~position ~task\n\tExample: chartodo edit 4 new-item"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: You must specify the \
+            regular todo's position that will be edited, and what to edit the task \
+            to.\n\tThere should be 2 arguments after 'chartodo edit'. You provided 1 \
+            argument(s).\n\tFormat: chartodo edit ~position ~task\n\tExample: chartodo edit \
+            4 new-item",
+        ));
 
         Ok(())
     }
@@ -1935,19 +2019,21 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("a").arg("a");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: To edit a regular task item, you must provide a viable position. Try something between 1 and 1"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: To edit a regular task \
+            item, you must provide a viable position. Try something between 1 and 1",
+        ));
 
         Ok(())
     }
@@ -1972,19 +2058,21 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("a").arg("a");
-        cmd.assert()
-            .success()
-            .stdout(predicate::str::contains("ERROR: To edit a regular task item, you must provide a viable position. Try something between 1 and 1"));
+        cmd.assert().success().stdout(predicate::str::contains(
+            "ERROR: To edit a regular task \
+            item, you must provide a viable position. Try something between 1 and 1",
+        ));
 
         Ok(())
     }
@@ -2009,11 +2097,12 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -2046,11 +2135,12 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -2083,18 +2173,20 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("edit").arg("2").arg("a");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you specified exceeds the regular todo list's current length. Try something between 1 and 1",
+            "ERROR: The position you specified exceeds the regular todo list's \
+            current length. Try something between 1 and 1",
         ));
 
         Ok(())
@@ -2120,18 +2212,20 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("e").arg("2").arg("a");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: The position you specified exceeds the regular todo list's current length. Try something between 1 and 1",
+            "ERROR: The position you specified exceeds the regular todo list's \
+            current length. Try something between 1 and 1",
         ));
 
         Ok(())
@@ -2157,11 +2251,12 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions
@@ -2199,11 +2294,12 @@ mod regular_todo_edit {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // actions

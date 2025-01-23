@@ -85,11 +85,12 @@ pub fn repeating_tasks_create_dir_and_file_if_needed() {
         }
         "#;
 
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                    "somehow the fucking data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-                ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "somehow the fucking data to put in the new repeating_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(repeating_tasks_json);
         serde_json::to_writer_pretty(&mut write_to_file, &fresh_repeating_tasks)
@@ -148,17 +149,19 @@ pub fn open_repeating_tasks_and_return_tasks_struct() -> Tasks {
                     )
                 })
                 .expect("couldn't open repeating_tasks.json file");
-            let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-                context(
-                        "the fresh data to put in an empty repeating_tasks file wasn't correct. you should never be able to see this"
-                    ).
-                expect("changing str to tasks struct failed");
+            let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+                .context(
+                    "the fresh data to put in an empty repeating_tasks file \
+                    wasn't correct. you should never be able to see this",
+                )
+                .expect("changing str to tasks struct failed");
 
             let mut write_to_file = BufWriter::new(open_repeating_tasks_file);
             serde_json::to_writer_pretty(&mut write_to_file, &fresh_repeating_tasks)
                 .with_context(|| {
                     format!(
-                        "failed to write fresh repeating tasks to new repeating_tasks json file in:
+                        "failed to write fresh repeating tasks to new \
+                        repeating_tasks json file in:
                 {}",
                         CHARTODO_PATH
                     )
@@ -242,11 +245,10 @@ mod repeating_helpers_unit_tests {
         let repeating_tasks_copy_path = repeating_tasks_copy_path();
         let repeating_tasks_copy_path = repeating_tasks_copy_path.to_str().unwrap();
 
-        if repeating_tasks_copy_path.contains(linux_path) {
-            got_repeating_tasks_copy_path = true;
-        } else if repeating_tasks_copy_path.contains(windows_path) {
-            got_repeating_tasks_copy_path = true;
-        } else if repeating_tasks_copy_path.contains(mac_path) {
+        if repeating_tasks_copy_path.contains(linux_path)
+            | repeating_tasks_copy_path.contains(windows_path)
+            | repeating_tasks_copy_path.contains(mac_path)
+        {
             got_repeating_tasks_copy_path = true;
         }
 
@@ -263,11 +265,10 @@ mod repeating_helpers_unit_tests {
         let repeating_path = path_to_repeating_tasks();
         let repeating_path = repeating_path.to_str().unwrap();
 
-        if repeating_path.contains(linux_path) {
-            got_repeating_tasks_path = true;
-        } else if repeating_path.contains(windows_path) {
-            got_repeating_tasks_path = true;
-        } else if repeating_path.contains(mac_path) {
+        if repeating_path.contains(linux_path)
+            | repeating_path.contains(windows_path)
+            | repeating_path.contains(mac_path)
+        {
             got_repeating_tasks_path = true;
         }
 
@@ -318,11 +319,12 @@ mod repeating_helpers_unit_tests {
                 )
             })
             .expect("couldn't open repeating_tasks.json file");
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                    "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-                ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(open_repeating_tasks_file);
         serde_json::to_writer_pretty(&mut write_to_file, &fresh_repeating_tasks)

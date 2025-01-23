@@ -343,11 +343,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
         // write fresh to deadline tasks so content is known
         let fresh_deadline_tasks = r#"
@@ -356,11 +357,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -369,11 +371,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         let error_should_be_true = clear_all_lists();
@@ -411,11 +414,12 @@ mod general_commands_unit_tests {
                 ]
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
         // write fresh to deadline tasks so content is known
         let fresh_deadline_tasks = r#"
@@ -446,11 +450,12 @@ mod general_commands_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -481,11 +486,12 @@ mod general_commands_unit_tests {
                 ]
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         // this should be the content of the files
@@ -496,11 +502,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let regular_tasks: Tasks = serde_json::from_str(regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let regular_tasks: Tasks = serde_json::from_str(regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         // write fresh to deadline tasks so content is known
         let deadline_tasks = r#"
             {
@@ -508,11 +515,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         // write fresh to repeating tasks so content is known
         let repeating_tasks = r#"
             {
@@ -520,11 +528,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let error_should_be_false = clear_all_lists();
         assert!(!error_should_be_false);
@@ -546,11 +555,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         let error_should_be_true = clear_regular_tasks();
@@ -588,11 +598,12 @@ mod general_commands_unit_tests {
                 ]
             }
         "#;
-        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // this should be the content of the file
@@ -602,11 +613,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let regular_tasks: Tasks = serde_json::from_str(regular_tasks).
-            context(
-                "during testing: the fresh data to put in the new regular_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let regular_tasks: Tasks = serde_json::from_str(regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let error_should_be_false = clear_regular_tasks();
         assert!(!error_should_be_false);
@@ -624,11 +636,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         let error_should_be_true = clear_deadline_tasks();
@@ -666,11 +679,12 @@ mod general_commands_unit_tests {
                 ]
             }
         "#;
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
 
         let error_should_be_false = clear_deadline_tasks();
@@ -683,11 +697,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks).
-            context(
-                "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let deadline_tasks: Tasks = serde_json::from_str(deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let read_deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
         assert_eq!(read_deadline_tasks, deadline_tasks);
@@ -702,11 +717,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         let error_should_be_true = clear_repeating_tasks();
@@ -744,11 +760,12 @@ mod general_commands_unit_tests {
                 ]
             }
         "#;
-        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
         write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
 
         let error_should_be_false = clear_repeating_tasks();
@@ -761,11 +778,12 @@ mod general_commands_unit_tests {
                 "done": []
             }
         "#;
-        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks).
-            context(
-                "during testing: the fresh data to put in the new repeating_tasks file wasn't correct. you should never be able to see this"
-            ).
-            expect("changing str to tasks struct failed");
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let read_repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
         assert_eq!(read_repeating_tasks, repeating_tasks);

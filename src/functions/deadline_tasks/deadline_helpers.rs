@@ -85,11 +85,12 @@ pub fn deadline_tasks_create_dir_and_file_if_needed() {
         }
         "#;
 
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                    "the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-                ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "the fresh data to put in the new deadline_tasks file wasn't \
+                correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(deadline_tasks_json);
         serde_json::to_writer_pretty(&mut write_to_file, &fresh_deadline_tasks)
@@ -148,11 +149,12 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
                     )
                 })
                 .expect("couldn't open deadline_tasks.json file");
-            let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-                context(
-                        "the fresh data to put in an empty deadline_tasks file wasn't correct. you should never be able to see this"
-                    ).
-                expect("changing str to tasks struct failed");
+            let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+                .context(
+                    "the fresh data to put in an empty deadline_tasks file \
+                    wasn't correct. you should never be able to see this",
+                )
+                .expect("changing str to tasks struct failed");
 
             let mut write_to_file = BufWriter::new(open_deadline_tasks_file);
             serde_json::to_writer_pretty(&mut write_to_file, &fresh_deadline_tasks)
@@ -242,11 +244,10 @@ mod deadline_helpers_unit_tests {
         let deadline_tasks_copy_path = deadline_tasks_copy_path();
         let deadline_tasks_copy_path = deadline_tasks_copy_path.to_str().unwrap();
 
-        if deadline_tasks_copy_path.contains(linux_path) {
-            got_deadline_tasks_copy_path = true;
-        } else if deadline_tasks_copy_path.contains(windows_path) {
-            got_deadline_tasks_copy_path = true;
-        } else if deadline_tasks_copy_path.contains(mac_path) {
+        if deadline_tasks_copy_path.contains(linux_path)
+            | deadline_tasks_copy_path.contains(windows_path)
+            | deadline_tasks_copy_path.contains(mac_path)
+        {
             got_deadline_tasks_copy_path = true;
         }
 
@@ -263,11 +264,10 @@ mod deadline_helpers_unit_tests {
         let deadline_path = path_to_deadline_tasks();
         let deadline_path = deadline_path.to_str().unwrap();
 
-        if deadline_path.contains(linux_path) {
-            got_deadline_tasks_path = true;
-        } else if deadline_path.contains(windows_path) {
-            got_deadline_tasks_path = true;
-        } else if deadline_path.contains(mac_path) {
+        if deadline_path.contains(linux_path)
+            | deadline_path.contains(windows_path)
+            | deadline_path.contains(mac_path)
+        {
             got_deadline_tasks_path = true;
         }
 
@@ -318,11 +318,12 @@ mod deadline_helpers_unit_tests {
                 )
             })
             .expect("couldn't open deadline_tasks.json file");
-        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks).
-            context(
-                    "during testing: the fresh data to put in the new deadline_tasks file wasn't correct. you should never be able to see this"
-                ).
-            expect("changing str to tasks struct failed");
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                deadline_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
 
         let mut write_to_file = BufWriter::new(open_deadline_tasks_file);
         serde_json::to_writer_pretty(&mut write_to_file, &fresh_deadline_tasks)
