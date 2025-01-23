@@ -34,7 +34,7 @@ pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
         writeln!(
             writer,
             "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            -- they were all either negative, zero, or exceeded the repeating done list's \
             length."
         )
         .expect("writeln failed");
