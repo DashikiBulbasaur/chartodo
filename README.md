@@ -273,6 +273,7 @@ Commands:
 - [x] add repeating todo items
 - [x] testing complete for launch
 - [x] available on crates.io
+- [ ] add range position arguments to all applicable commands
 - [ ] switch to proper argument chaining (if possible), i.e., chartodo -a ... -d ... -rmt ...
 - [ ] finish the advanced functionalities?
 ---
