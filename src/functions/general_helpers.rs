@@ -272,6 +272,60 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     }
 }
 
+pub fn check_if_range_positioning(range: String) -> (bool, usize, usize) {
+    let mut passed_line: bool = false;
+    let mut first_bound: String = String::from("");
+    let mut second_bound: String = String::from("");
+    let mut error: bool = false;
+    let mut line_counter: u8 = 0;
+    const RADIX: u32 = 10;
+
+    for character in range.chars() {
+        if character == '-' {
+            line_counter += 1;
+            passed_line = true;
+        }
+        if line_counter > 1 {
+            error = true;
+            return (error, 1, 1);
+        }
+        if character != '-' && character.is_digit(RADIX) {
+            if !passed_line {
+                first_bound.push_str(character.to_string().as_str());
+            // this is disgusting bruh
+            } else {
+                second_bound.push_str(character.to_string().as_str());
+            }
+        }
+    }
+
+    if first_bound.parse::<usize>().is_err() | second_bound.parse::<usize>().is_err() {
+        error = true;
+        return (error, 1, 1);
+    }
+
+    if first_bound >= second_bound {
+        error = true;
+        return (error, 1, 1);
+    }
+
+    let first_bound = first_bound.parse::<usize>().unwrap();
+    let second_bound = second_bound.parse::<usize>().unwrap();
+
+    (error, first_bound, second_bound)
+}
+
+pub fn unwrap_range_positioning(mut bound1: usize, bound2: usize) -> Vec<usize> {
+    let mut unwrap_bounds: Vec<usize> = vec![];
+
+    while bound1 <= bound2 {
+        unwrap_bounds.push(bound1);
+        bound1 += 1;
+    }
+
+    unwrap_bounds
+}
+
 // cargo test general_helpers_unit_tests
 #[cfg(test)]
 mod general_helpers_unit_tests {

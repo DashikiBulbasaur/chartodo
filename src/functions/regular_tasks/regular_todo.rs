@@ -1,4 +1,5 @@
 use super::regular_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
 use std::io::Write;
 
@@ -50,6 +51,19 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
 
         // error = true
         return true;
+    }
+
+    for i in (0..todo_to_done.len()).rev() {
+        let (error_or_not, bound1, bound2) =
+            check_if_range_positioning(todo_to_done.get(i).unwrap().to_string());
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| todo_to_done.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items
