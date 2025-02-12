@@ -1,4 +1,5 @@
 use super::regular_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use std::io::Write;
 
 pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
@@ -20,6 +21,23 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..done_to_remove.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            done_to_remove.get(i).unwrap().to_string(),
+            regular_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| done_to_remove.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items
@@ -99,6 +117,23 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..done_to_todo.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            done_to_todo.get(i).unwrap().to_string(),
+            regular_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| done_to_todo.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items

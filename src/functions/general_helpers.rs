@@ -272,7 +272,14 @@ pub fn repeating_tasks_list(mut repeating_tasks: Tasks) -> (String, String) {
     }
 }
 
-pub fn check_if_range_positioning(range: String) -> (bool, usize, usize) {
+// check if something is ranged position. several fail states:
+// 1) no - in item, i.e., it should be 6-10
+// 2) if the numbers in the item are invalid, e.g., shouldn't be a-b or a-9
+// 3) if the first number is equal to or bigger than the second number.
+// if this is the case, i could just reverse it, but i don't want to
+// 4) if the second bound is bigger than the todo list's len
+// this is mostly to just stop big numbers that might slow down the program
+pub fn check_if_range_positioning(range: String, list_len: usize) -> (bool, usize, usize) {
     let mut passed_line: bool = false;
     let mut first_bound: String = String::from("");
     let mut second_bound: String = String::from("");
@@ -309,12 +316,19 @@ pub fn check_if_range_positioning(range: String) -> (bool, usize, usize) {
         return (error, 1, 1);
     }
 
+    if second_bound.parse::<usize>().unwrap() > list_len {
+        error = true;
+        return (error, 1, 1);
+    }
+
     let first_bound = first_bound.parse::<usize>().unwrap();
     let second_bound = second_bound.parse::<usize>().unwrap();
 
     (error, first_bound, second_bound)
 }
 
+// following a check that the item is indeed a ranged, unwrap the ranged and return all of them
+// note: should probably check if the 2nd bound is within the todo list's len, whether here or on the previous check
 pub fn unwrap_range_positioning(mut bound1: usize, bound2: usize) -> Vec<usize> {
     let mut unwrap_bounds: Vec<usize> = vec![];
 

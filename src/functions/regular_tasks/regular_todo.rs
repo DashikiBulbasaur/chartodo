@@ -53,9 +53,13 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
         return true;
     }
 
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
     for i in (0..todo_to_done.len()).rev() {
-        let (error_or_not, bound1, bound2) =
-            check_if_range_positioning(todo_to_done.get(i).unwrap().to_string());
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            todo_to_done.get(i).unwrap().to_string(),
+            regular_tasks.todo.len(),
+        );
 
         if !error_or_not {
             let unwrapped_range = unwrap_range_positioning(bound1, bound2);
@@ -148,6 +152,23 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..todo_to_remove.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            todo_to_remove.get(i).unwrap().to_string(),
+            regular_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| todo_to_remove.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items
