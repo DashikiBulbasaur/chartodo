@@ -1,4 +1,5 @@
 use super::deadline_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
 use chrono::{Local, NaiveDate, NaiveTime};
 use std::io::Write;
@@ -317,6 +318,21 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
         return true;
     }
 
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..done.len()).rev() {
+        let (error_or_not, bound1, bound2) =
+            check_if_range_positioning(done.get(i).unwrap().to_string(), deadline_tasks.todo.len());
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| done.push(number.to_string()));
+            // this is not good
+        }
+    }
+
     // filter for viable positions
     for i in (0..done.len()).rev() {
         if done.get(i).unwrap().parse::<usize>().is_err()
@@ -394,6 +410,23 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..rmtodo.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            rmtodo.get(i).unwrap().to_string(),
+            deadline_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| rmtodo.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable positions

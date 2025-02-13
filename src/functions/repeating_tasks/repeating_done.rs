@@ -1,4 +1,5 @@
 use super::repeating_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use std::io::Write;
 
 pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
@@ -16,6 +17,23 @@ pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..not_done.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            not_done.get(i).unwrap().to_string(),
+            repeating_tasks.done.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| not_done.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items
@@ -103,6 +121,23 @@ pub fn repeating_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..done_remove.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            done_remove.get(i).unwrap().to_string(),
+            repeating_tasks.done.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| done_remove.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items

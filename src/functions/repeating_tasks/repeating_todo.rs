@@ -1,4 +1,5 @@
 use super::repeating_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
 use chrono::{Days, Duration, Local, Months, NaiveDate, NaiveDateTime, NaiveTime};
 use std::io::Write;
@@ -703,6 +704,23 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
         return true;
     }
 
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..done.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            done.get(i).unwrap().to_string(),
+            repeating_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| done.push(number.to_string()));
+            // this is not good
+        }
+    }
+
     // filter for viable positions
     for i in (0..done.len()).rev() {
         if done.get(i).unwrap().parse::<usize>().is_err()
@@ -788,6 +806,23 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..reset.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            reset.get(i).unwrap().to_string(),
+            repeating_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| reset.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable positions
@@ -901,6 +936,23 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..rmtodo.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            rmtodo.get(i).unwrap().to_string(),
+            repeating_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| rmtodo.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable positions
@@ -1040,6 +1092,23 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
         return String::from(
             "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
         );
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..start.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            start.get(i).unwrap().to_string(),
+            repeating_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| start.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable positions

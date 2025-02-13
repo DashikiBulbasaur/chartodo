@@ -28,7 +28,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     for i in (0..done_to_remove.len()).rev() {
         let (error_or_not, bound1, bound2) = check_if_range_positioning(
             done_to_remove.get(i).unwrap().to_string(),
-            regular_tasks.todo.len(),
+            regular_tasks.done.len(),
         );
 
         if !error_or_not {
@@ -124,7 +124,7 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     for i in (0..done_to_todo.len()).rev() {
         let (error_or_not, bound1, bound2) = check_if_range_positioning(
             done_to_todo.get(i).unwrap().to_string(),
-            regular_tasks.todo.len(),
+            regular_tasks.done.len(),
         );
 
         if !error_or_not {
