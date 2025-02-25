@@ -313,18 +313,18 @@ pub fn check_if_range_positioning(range: String, list_len: usize) -> (bool, usiz
         return (error, 1, 1);
     }
 
-    if first_bound.parse::<usize>().unwrap() >= second_bound.parse::<usize>().unwrap() {
-        error = true;
-        return (error, 1, 1);
-    }
-
-    if second_bound.parse::<usize>().unwrap() > list_len {
-        error = true;
-        return (error, 1, 1);
-    }
-
     let first_bound = first_bound.parse::<usize>().unwrap();
     let second_bound = second_bound.parse::<usize>().unwrap();
+
+    if first_bound >= second_bound {
+        error = true;
+        return (error, 1, 1);
+    }
+
+    if second_bound > list_len {
+        error = true;
+        return (error, 1, 1);
+    }
 
     (error, first_bound, second_bound)
 }
