@@ -360,9 +360,9 @@ mod regular_todo_done {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("done").arg("a").arg("2").arg("0");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you \
-            provided were viable -- they were all either negative, zero, or exceeded the \
-            regular todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, exceeded the regular \
+            todo list's length, or were invalid range positioning.",
         ));
 
         Ok(())
@@ -400,9 +400,9 @@ mod regular_todo_done {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("d").arg("a").arg("2").arg("0");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you \
-            provided were viable -- they were all either negative, zero, or exceeded the \
-            regular todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, exceeded the regular \
+            todo list's length, or were invalid range positioning.",
         ));
 
         Ok(())
@@ -505,6 +505,95 @@ mod regular_todo_done {
     }
 
     #[test]
+    fn regular_todo_done_should_do_doneall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("1-6").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: you've specified marking \
+            the entire regular todo list as done. You should do chartodo doneall.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn regular_todo_done_abrev_should_do_doneall() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to regular tasks so content is known
         let fresh_regular_tasks = r#"
@@ -592,6 +681,95 @@ mod regular_todo_done {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: you've specified marking \
+            the entire regular todo list as done. You should do chartodo doneall.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_done_abrev_should_do_doneall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("1-6").arg("1");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: you've specified marking \
             the entire regular todo list as done. You should do chartodo doneall.",
@@ -762,6 +940,65 @@ mod regular_todo_done {
     }
 
     #[test]
+    fn regular_todo_done_multiple_args_is_correct_range() -> Result<(), Box<dyn std::error::Error>>
+    {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("done").arg("1-2");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: hello"));
+
+        Ok(())
+    }
+
+    #[test]
     fn regular_todo_done_abrev_multiple_args_is_correct() -> Result<(), Box<dyn std::error::Error>>
     {
         // write fresh to regular tasks so content is known
@@ -816,6 +1053,65 @@ mod regular_todo_done {
         cmd.assert()
             .success()
             .stdout(predicate::str::contains("1: hi"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_done_abrev_multiple_args_is_correct_range(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("d").arg("1-2");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: hello"));
 
         Ok(())
     }
@@ -942,9 +1238,9 @@ mod regular_todo_rmtodo {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmtodo").arg("a").arg("2").arg("0");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: none of the positions you \
-            gave were valid -- they were all either negative, zero, or exceeded the regular \
-            todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, exceeded the regular \
+            todo list's length, or were invalid range positioning.",
         ));
 
         Ok(())
@@ -982,9 +1278,9 @@ mod regular_todo_rmtodo {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rmt").arg("a").arg("2").arg("0");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: none of the positions you \
-            gave were valid -- they were all either negative, zero, or exceeded the regular \
-            todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, exceeded the regular \
+            todo list's length, or were invalid range positioning.",
         ));
 
         Ok(())
@@ -1087,6 +1383,95 @@ mod regular_todo_rmtodo {
     }
 
     #[test]
+    fn regular_todo_rmtodo_should_do_doneall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("1-6").arg("1");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You specified removing \
+            the entire regular todo list. You should instead do chartodo cleartodo.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn regular_todo_rmtodo_abrev_should_do_doneall() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to regular tasks so content is known
         let fresh_regular_tasks = r#"
@@ -1174,6 +1559,96 @@ mod regular_todo_rmtodo {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You specified removing \
+            the entire regular todo list. You should instead do chartodo cleartodo.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_rmtodo_abrev_should_do_doneall_range() -> Result<(), Box<dyn std::error::Error>>
+    {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You specified removing \
             the entire regular todo list. You should instead do chartodo cleartodo.",
@@ -1341,6 +1816,65 @@ mod regular_todo_rmtodo {
     }
 
     #[test]
+    fn regular_todo_rmtodo_multiple_args_is_correct_range() -> Result<(), Box<dyn std::error::Error>>
+    {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmtodo").arg("1-2");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: hello"));
+
+        Ok(())
+    }
+
+    #[test]
     fn regular_todo_rmtodo_abrev_multiple_args_is_correct() -> Result<(), Box<dyn std::error::Error>>
     {
         // write fresh to regular tasks so content is known
@@ -1395,6 +1929,65 @@ mod regular_todo_rmtodo {
         cmd.assert()
             .success()
             .stdout(predicate::str::contains("1: hi"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn regular_todo_rmtodo_abrev_multiple_args_is_correct_range(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this-is-the-todo-list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rmt").arg("1-2");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: hello"));
 
         Ok(())
     }
