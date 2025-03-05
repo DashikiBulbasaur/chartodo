@@ -1402,8 +1402,9 @@ mod repeating_todo_done {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("repeating-done").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -1441,8 +1442,9 @@ mod repeating_todo_done {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-d").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -1545,6 +1547,95 @@ mod repeating_todo_done {
     }
 
     #[test]
+    fn done_should_do_repeating_doneall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-done").arg("1-6").arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating todo list that's \
+            relatively long. You should do chartodo repeating-doneall",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn done_abrev_should_do_repeating_doneall() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -1632,6 +1723,95 @@ mod repeating_todo_done {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating todo list that's \
+            relatively long. You should do chartodo repeating-doneall",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn done_abrev_should_do_repeating_doneall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-d").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You've specified the entire repeating todo list that's \
             relatively long. You should do chartodo repeating-doneall",
@@ -1843,6 +2023,88 @@ mod repeating_todo_done {
     }
 
     #[test]
+    fn done_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-done").arg("1-3");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-5"))
+            .stdout(predicate::str::contains("2: repeating-task-4"))
+            .stdout(predicate::str::contains("3: repeating-task-3"))
+            .stdout(predicate::str::contains("1: repeating-task-2"))
+            .stdout(predicate::str::contains("2: repeating-task-1"));
+
+        Ok(())
+    }
+
+    #[test]
     fn done_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -1930,6 +2192,88 @@ mod repeating_todo_done {
             .stdout(predicate::str::contains("2: repeating-task-2"))
             .stdout(predicate::str::contains("interval: 4 days"))
             .stdout(predicate::str::contains("due: 2099-01-05 00:00"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn done_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-d").arg("1-3");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-5"))
+            .stdout(predicate::str::contains("2: repeating-task-4"))
+            .stdout(predicate::str::contains("3: repeating-task-3"))
+            .stdout(predicate::str::contains("1: repeating-task-2"))
+            .stdout(predicate::str::contains("2: repeating-task-1"));
 
         Ok(())
     }
@@ -2134,8 +2478,9 @@ mod repeating_todo_reset {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -2173,8 +2518,9 @@ mod repeating_todo_reset {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-r").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -2216,8 +2562,9 @@ mod repeating_todo_reset {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -2255,8 +2602,9 @@ mod repeating_todo_reset {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-dr").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -2350,6 +2698,96 @@ mod repeating_todo_reset {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn reset_should_do_repeating_resetall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-reset").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You've specified the entire repeating \
             todo list that's relatively long. You should do chartodo \
@@ -2457,6 +2895,96 @@ mod repeating_todo_reset {
     }
 
     #[test]
+    fn reset_abrev_should_do_repeating_resetall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-r").arg("1-6").arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn donereset_should_do_repeating_doneresetall() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -2544,6 +3072,97 @@ mod repeating_todo_reset {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn donereset_should_do_repeating_doneresetall_range() -> Result<(), Box<dyn std::error::Error>>
+    {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-donereset").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You've specified the entire repeating \
             todo list that's relatively long. You should do chartodo \
@@ -2642,6 +3261,97 @@ mod repeating_todo_reset {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating \
+            todo list that's relatively long. You should do chartodo \
+            repeating-resetall/repeating-doneresetall",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn donereset_abrev_should_do_repeating_doneresetall_range(
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-dr").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You've specified the entire repeating \
             todo list that's relatively long. You should do chartodo \
@@ -2948,6 +3658,93 @@ mod repeating_todo_reset {
     }
 
     #[test]
+    fn reset_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-reset").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-3"))
+            .stdout(predicate::str::contains("interval: 2 days"))
+            .stdout(predicate::str::contains("2: repeating-task-2"))
+            .stdout(predicate::str::contains("interval: 4 days"))
+            .stdout(predicate::str::contains("3: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 1 day"))
+            .stdout(predicate::str::contains("4: repeating-task-5"))
+            .stdout(predicate::str::contains("interval: 3 days"))
+            .stdout(predicate::str::contains("5: repeating-task-4"))
+            .stdout(predicate::str::contains("interval: 5 days"));
+
+        Ok(())
+    }
+
+    #[test]
     fn reset_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -3029,6 +3826,93 @@ mod repeating_todo_reset {
             .stdout(predicate::str::contains("4: repeating-task-3"))
             .stdout(predicate::str::contains("interval: 3 days"))
             .stdout(predicate::str::contains("5: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 5 days"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn reset_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-r").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-3"))
+            .stdout(predicate::str::contains("interval: 2 days"))
+            .stdout(predicate::str::contains("2: repeating-task-2"))
+            .stdout(predicate::str::contains("interval: 4 days"))
+            .stdout(predicate::str::contains("3: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 1 day"))
+            .stdout(predicate::str::contains("4: repeating-task-5"))
+            .stdout(predicate::str::contains("interval: 3 days"))
+            .stdout(predicate::str::contains("5: repeating-task-4"))
             .stdout(predicate::str::contains("interval: 5 days"));
 
         Ok(())
@@ -3126,6 +4010,93 @@ mod repeating_todo_reset {
     }
 
     #[test]
+    fn donereset_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-donereset").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-3"))
+            .stdout(predicate::str::contains("interval: 2 days"))
+            .stdout(predicate::str::contains("2: repeating-task-2"))
+            .stdout(predicate::str::contains("interval: 4 days"))
+            .stdout(predicate::str::contains("3: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 1 day"))
+            .stdout(predicate::str::contains("4: repeating-task-5"))
+            .stdout(predicate::str::contains("interval: 3 days"))
+            .stdout(predicate::str::contains("5: repeating-task-4"))
+            .stdout(predicate::str::contains("interval: 5 days"));
+
+        Ok(())
+    }
+
+    #[test]
     fn donereset_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -3207,6 +4178,93 @@ mod repeating_todo_reset {
             .stdout(predicate::str::contains("4: repeating-task-3"))
             .stdout(predicate::str::contains("interval: 3 days"))
             .stdout(predicate::str::contains("5: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 5 days"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn donereset_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-dr").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-3"))
+            .stdout(predicate::str::contains("interval: 2 days"))
+            .stdout(predicate::str::contains("2: repeating-task-2"))
+            .stdout(predicate::str::contains("interval: 4 days"))
+            .stdout(predicate::str::contains("3: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 1 day"))
+            .stdout(predicate::str::contains("4: repeating-task-5"))
+            .stdout(predicate::str::contains("interval: 3 days"))
+            .stdout(predicate::str::contains("5: repeating-task-4"))
             .stdout(predicate::str::contains("interval: 5 days"));
 
         Ok(())
@@ -3332,8 +4390,9 @@ mod repeating_todo_rmtodo {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -3371,8 +4430,9 @@ mod repeating_todo_rmtodo {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-rmt").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -3475,6 +4535,95 @@ mod repeating_todo_rmtodo {
     }
 
     #[test]
+    fn rmtodo_should_do_repeating_cleartodo_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-rmtodo").arg("1-6").arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating todo list, one \
+            that's relatively long. You should do repeating-cleartodo",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn rmtodo_abrev_should_do_repeating_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -3562,6 +4711,96 @@ mod repeating_todo_rmtodo {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You've specified the entire repeating todo list, one \
+            that's relatively long. You should do repeating-cleartodo",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn rmtodo_abrev_should_do_repeating_cleartodo_range() -> Result<(), Box<dyn std::error::Error>>
+    {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-rmt").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You've specified the entire repeating todo list, one \
             that's relatively long. You should do repeating-cleartodo",
@@ -3758,6 +4997,85 @@ mod repeating_todo_rmtodo {
     }
 
     #[test]
+    fn rmtodo_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-rmtodo").arg("1-3");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-2"))
+            .stdout(predicate::str::contains("2: repeating-task-1"));
+
+        Ok(())
+    }
+
+    #[test]
     fn rmtodo_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -3836,6 +5154,86 @@ mod repeating_todo_rmtodo {
             .stdout(predicate::str::contains("2: repeating-task-2"))
             .stdout(predicate::str::contains("interval: 4 days"))
             .stdout(predicate::str::contains("due: 2099-01-05 00:00"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn rmtodo_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-rmt").arg("1-3");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: repeating-task-2"))
+            .stdout(predicate::str::contains("2: repeating-task-1"))
+            .stdout(predicate::str::contains("interval: 4 days"));
 
         Ok(())
     }
@@ -3960,8 +5358,9 @@ mod repeating_todo_show_start {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -3999,8 +5398,9 @@ mod repeating_todo_show_start {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("rp-s").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the repeating todo list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the repeating todo list's \
+            length.",
         ));
 
         Ok(())
@@ -4103,6 +5503,95 @@ mod repeating_todo_show_start {
     }
 
     #[test]
+    fn start_should_do_repeating_startall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-start").arg("1-6").arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You want to show the start times for an entire list that's \
+            relatively long. You should do repeating-startall.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn start_abrev_should_do_repeating_startall() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -4190,6 +5679,95 @@ mod repeating_todo_show_start {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You want to show the start times for an entire list that's \
+            relatively long. You should do repeating-startall.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn start_abrev_should_do_repeating_startall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "repeating",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-s").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You want to show the start times for an entire list that's \
             relatively long. You should do repeating-startall.",
@@ -4379,6 +5957,86 @@ mod repeating_todo_show_start {
     }
 
     #[test]
+    fn start_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("repeating-start").arg("1-3");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "task: repeating-task-5\n\tstart: \
+            2099-01-01 00:00\ntask: repeating-task-4\n\tstart: 2099-01-01 00:00\ntask: \
+            repeating-task-3\n\tstart: 2099-01-01 00:00",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn start_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -4453,6 +6111,86 @@ mod repeating_todo_show_start {
             "task: repeating-task-5\n\tstart: \
             2099-01-01 00:00\ntask: repeating-task-3\n\tstart: 2099-01-01 00:00\ntask: \
             repeating-task\n\tstart: 2099-01-01 00:00",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn start_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "repeating-task-1",
+                        "date": "2099-01-06",
+                        "time": "00:00",
+                        "repeat_number": 5,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-2",
+                        "date": "2099-01-05",
+                        "time": "00:00",
+                        "repeat_number": 4,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-3",
+                        "date": "2099-01-04",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-4",
+                        "date": "2099-01-03",
+                        "time": "00:00",
+                        "repeat_number": 2,
+                        "repeat_unit": "days",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    },
+                    {
+                        "task": "repeating-task-5",
+                        "date": "2099-01-02",
+                        "time": "00:00",
+                        "repeat_number": 1,
+                        "repeat_unit": "day",
+                        "repeat_done": false,
+                        "repeat_original_date": "2099-01-01",
+                        "repeat_original_time": "00:00"
+                    }
+                ],
+                "done": []
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("rp-s").arg("1-3");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "task: repeating-task-5\n\tstart: \
+            2099-01-01 00:00\ntask: repeating-task-4\n\tstart: 2099-01-01 00:00\ntask: \
+            repeating-task-3\n\tstart: 2099-01-01 00:00",
         ));
 
         Ok(())
