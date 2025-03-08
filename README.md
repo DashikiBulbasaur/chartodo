@@ -2,7 +2,7 @@
 
 Chartodo is a simple CLI todo list program written in Rust, which includes many features that I thought would be useful. Essentially, I wanted to make a todo list I would actually use.
 
-You can create tasks with a deadline, and tasks that repeat on a set interval.
+What separates it from most terminal todo programs is that you can create tasks with a deadline and tasks that repeat.
 
 ![gif](chartodo_example_2.gif)
 
@@ -275,8 +275,8 @@ Then, to run, either
 
 1. Commands that take positions as arguments will ignore/reject invalid inputs such as a) non-numbers, b) 0, c) empty strings (if you can somehow do that in the terminal), and d) bigger index than the todo/done list you're trying to access
 2. Spaces in the program are used to differentiate separate arguments, so multi-word tasks can instead be separated by a character such as -, e.g., multi-word-task-item
-3. For the repeating tasks, the maximum interval for the repeating time is 4294967295, e.g., 4294967295 days.
-4. Note that this program doesn't work on WSL
+3. For the repeating tasks, the maximum interval for the repeating time is u32 or 4294967295, e.g., 4294967295 days.
+4. Note that this program doesn't work in WSL
 
 ## Milestones
 
@@ -300,4 +300,5 @@ Potential features:
 - [ ] repeating: if possible, smarter system on rp-as, rp-ae commands where if a date/time argument isn't present, then it defaults to the current date/00:00. note that for both deadline and repeating, i can just default to recognizing today/zero/0/midnight keywords
 - [ ] sections within lists, e.g., (types of) homework, chores, etc.
 - [ ] if possible, a move to a more conventional cli-style with Clap
+- [ ] make program work in WSL
 - [ ] all: argument chaining on edit commands
