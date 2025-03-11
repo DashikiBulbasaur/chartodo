@@ -1552,9 +1552,9 @@ mod main_help {
 
         AFFECTS ALL LISTS: 
             help, h                                 show help
-            regular-help, r-h                       show regular tasks help
-            deadline-help, dl-h                     show deadline tasks help
-            repeating-help, rp-h                    show repeating tasks help
+            regular-help, r-h                       show help for regular tasks
+            deadline-help, dl-h                     show help for deadline tasks
+            repeating-help, rp-h                    show help for repeating tasks
             list, l                                 show the todo list
             clearall, ca                            clear everything (TODO, DEADLINE, REPEATING)
             clearall-regular, ca-r                  clear all regular todo and done tasks
@@ -1739,9 +1739,9 @@ mod main_help {
 
         AFFECTS ALL LISTS: 
             help, h                                 show help
-            regular-help, r-h                       show regular tasks help
-            deadline-help, dl-h                     show deadline tasks help
-            repeating-help, rp-h                    show repeating tasks help
+            regular-help, r-h                       show help for regular tasks
+            deadline-help, dl-h                     show help for deadline tasks
+            repeating-help, rp-h                    show help for repeating tasks
             list, l                                 show the todo list
             clearall, ca                            clear everything (TODO, DEADLINE, REPEATING)
             clearall-regular, ca-r                  clear all regular todo and done tasks
