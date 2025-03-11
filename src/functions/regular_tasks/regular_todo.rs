@@ -1,4 +1,5 @@
 use super::regular_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
 use std::io::Write;
 
@@ -52,6 +53,23 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
         return true;
     }
 
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..todo_to_done.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            todo_to_done.get(i).unwrap().to_string(),
+            regular_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| todo_to_done.push(number.to_string()));
+            // this is not good
+        }
+    }
+
     // filter for viable items
     // rev cuz i want the indices to be viable after swap removing
     for i in (0..todo_to_done.len()).rev() {
@@ -69,8 +87,8 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
         writeln!(
             writer,
             "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the regular \
-            todo list's length."
+            -- they were all either negative, zero, exceeded the regular \
+            todo list's length, or were invalid range positioning."
         )
         .expect("writeln failed");
 
@@ -136,6 +154,23 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
         return true;
     }
 
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..todo_to_remove.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            todo_to_remove.get(i).unwrap().to_string(),
+            regular_tasks.todo.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| todo_to_remove.push(number.to_string()));
+            // this is not good
+        }
+    }
+
     // filter for viable items
     for i in (0..todo_to_remove.len()).rev() {
         if todo_to_remove.get(i).unwrap().parse::<usize>().is_err()
@@ -151,9 +186,9 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     if todo_to_remove.is_empty() {
         writeln!(
             writer,
-            "ERROR: none of the positions you gave were valid \
-            -- they were all either negative, zero, or exceeded the regular todo list's \
-            length."
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, exceeded the regular \
+            todo list's length, or were invalid range positioning."
         )
         .expect("writeln failed");
 
@@ -644,7 +679,12 @@ mod regular_todo_unit_tests {
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // check that invalid arguments are in fact invalid
-        let arguments = vec![String::from("-1"), String::from("0"), String::from("2")];
+        let arguments = vec![
+            String::from("-1"),
+            String::from("0"),
+            String::from("2"),
+            String::from("2-1"),
+        ];
         let error_should_be_true = regular_tasks_change_todo_to_done(arguments);
 
         assert!(error_should_be_true);
@@ -749,6 +789,103 @@ mod regular_todo_unit_tests {
             String::from("5"),
             String::from("6"),
         ];
+        let error_should_be_true = regular_tasks_change_todo_to_done(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn regular_tasks_todo_to_done_should_do_doneall_range() {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "poopy",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "poopy2",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "poopy3",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "poopy4",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "poopy5",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "poopy6",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+            "#;
+
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // check that user should in fact do chartodo doneall
+        let arguments = vec![String::from("1-6")];
         let error_should_be_true = regular_tasks_change_todo_to_done(arguments);
 
         assert!(error_should_be_true);
@@ -969,6 +1106,131 @@ mod regular_todo_unit_tests {
     }
 
     #[test]
+    fn regular_tasks_todo_to_done_multiple_args_range_is_correct() {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this is the todo list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // perform actions. an invalid arg is included for testing
+        let arguments = vec![String::from("1-2"), String::from("4")];
+        let error_should_be_false = regular_tasks_change_todo_to_done(arguments);
+        let read_test_file = open_regular_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "this is the todo list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+
+        let regular_tasks: Tasks = serde_json::from_str(regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, regular_tasks);
+    }
+
+    #[test]
     fn regular_tasks_remove_todo_todo_is_empty() {
         // write fresh to regular tasks so content is known
         let fresh_regular_tasks = r#"
@@ -1045,7 +1307,12 @@ mod regular_todo_unit_tests {
         write_changes_to_new_regular_tasks(fresh_regular_tasks);
 
         // check that invalid arguments are in fact invalid
-        let arguments = vec![String::from("-1"), String::from("0"), String::from("2")];
+        let arguments = vec![
+            String::from("-1"),
+            String::from("0"),
+            String::from("2"),
+            String::from("2-1"),
+        ];
         let error_should_be_true = regular_tasks_remove_todo(arguments);
 
         assert!(error_should_be_true);
@@ -1153,6 +1420,106 @@ mod regular_todo_unit_tests {
             String::from("5"),
             String::from("6"),
         ];
+        let error_should_be_true = regular_tasks_remove_todo(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
+    fn regular_tasks_remove_todo_should_do_cleartodo_range() {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi2",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+
+                    {
+                        "task": "hi3",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                
+                    {
+                        "task": "hi4",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                
+                    {
+                        "task": "hi5",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi6",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+            "#;
+
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // check that user should do cleartodo
+        let arguments = vec![String::from("1-6")];
         let error_should_be_true = regular_tasks_remove_todo(arguments);
 
         assert!(error_should_be_true);
@@ -1306,6 +1673,110 @@ mod regular_todo_unit_tests {
                 "todo": [
                     {
                         "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let regular_tasks: Tasks = serde_json::from_str(regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, regular_tasks);
+    }
+
+    #[test]
+    fn regular_tasks_remove_todo_multiple_args_is_correct_range() {
+        // write fresh to regular tasks so content is known
+        let fresh_regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this is the todo list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hello",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "this is the done list",
+                        "date": null,
+                        "time": null,
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_regular_tasks: Tasks = serde_json::from_str(fresh_regular_tasks)
+            .context(
+                "during testing: the fresh data to put in the new regular_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_regular_tasks(fresh_regular_tasks);
+
+        // perform actions. an invalid arg + one is left in on purpose
+        let arguments = vec![String::from("2-3")];
+        let error_should_be_false = regular_tasks_remove_todo(arguments);
+        let read_test_file = open_regular_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let regular_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "this is the todo list",
                         "date": null,
                         "time": null,
                         "repeat_number": null,

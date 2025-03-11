@@ -217,8 +217,9 @@ mod deadline_done_rmdone {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the deadline done list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the deadline done list's \
+            length.",
         ));
 
         Ok(())
@@ -256,8 +257,9 @@ mod deadline_done_rmdone {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("dl-rmd").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the deadline done list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the deadline done list's \
+            length.",
         ));
 
         Ok(())
@@ -360,6 +362,95 @@ mod deadline_done_rmdone {
     }
 
     #[test]
+    fn rmdone_should_do_deadline_cleartodo_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-rmdone").arg("1-6").arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You might as well do deadline-cleardone since you want to \
+            remove all of the items.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn rmdone_abrev_should_do_deadline_cleartodo() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to deadline tasks so content is known
         let fresh_deadline_tasks = r#"
@@ -447,6 +538,95 @@ mod deadline_done_rmdone {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You might as well do deadline-cleardone since you want to \
+            remove all of the items.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn rmdone_abrev_should_do_deadline_cleartodo_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-rmd").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You might as well do deadline-cleardone since you want to \
             remove all of the items.",
@@ -639,6 +819,85 @@ mod deadline_done_rmdone {
     }
 
     #[test]
+    fn rmdone_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-2",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-3",
+                        "date": "2023-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-4",
+                        "date": "2022-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-5",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-rmdone").arg("3-5").arg("5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: deadline-task-5"))
+            .stdout(predicate::str::contains("2: deadline-task-4"));
+
+        Ok(())
+    }
+
+    #[test]
     fn rmdone_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to deadline tasks so content is known
         let fresh_deadline_tasks = r#"
@@ -713,6 +972,85 @@ mod deadline_done_rmdone {
             .success()
             .stdout(predicate::str::contains("1: deadline-task-4"))
             .stdout(predicate::str::contains("2: deadline-task-2"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn rmdone_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline-task",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-2",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-3",
+                        "date": "2023-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-4",
+                        "date": "2022-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-5",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-rmd").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: deadline-task-5"))
+            .stdout(predicate::str::contains("2: deadline-task-4"));
 
         Ok(())
     }
@@ -835,8 +1173,9 @@ mod deadline_done_notdone {
             .arg("2")
             .arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the deadline done list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the deadline done list's \
+            length.",
         ));
 
         Ok(())
@@ -874,8 +1213,9 @@ mod deadline_done_notdone {
         let mut cmd = Command::cargo_bin("chartodo")?;
         cmd.arg("dl-nd").arg("0").arg("a").arg("2").arg("");
         cmd.assert().success().stdout(predicate::str::contains(
-            "ERROR: None of the positions you provided were viable -- they were \
-            all either negative, zero, or exceeded the deadline done list's length.",
+            "ERROR: None of the positions you provided were viable \
+            -- they were all either negative, zero, or exceeded the deadline done list's \
+            length.",
         ));
 
         Ok(())
@@ -978,6 +1318,95 @@ mod deadline_done_notdone {
     }
 
     #[test]
+    fn notdone_should_do_deadline_notdoneall_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-notdone").arg("1-6").arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You might as well do deadline-notdoneall since you want to \
+            reverse all deadline done items.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
     fn notdone_abrev_should_do_deadline_notdoneall() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to deadline tasks so content is known
         let fresh_deadline_tasks = r#"
@@ -1065,6 +1494,96 @@ mod deadline_done_notdone {
             .arg("4")
             .arg("5")
             .arg("6");
+        cmd.assert().success().stdout(predicate::str::contains(
+            "WARNING: You might as well do deadline-notdoneall since you want to \
+            reverse all deadline done items.",
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn notdone_abrev_should_do_deadline_notdoneall_range() -> Result<(), Box<dyn std::error::Error>>
+    {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-nd").arg("1-6").arg("6");
         cmd.assert().success().stdout(predicate::str::contains(
             "WARNING: You might as well do deadline-notdoneall since you want to \
             reverse all deadline done items.",
@@ -1258,6 +1777,88 @@ mod deadline_done_notdone {
     }
 
     #[test]
+    fn notdone_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-2",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-3",
+                        "date": "2023-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-4",
+                        "date": "2022-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-5",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("deadline-notdone").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: deadline-task-3"))
+            .stdout(predicate::str::contains("2: deadline-task-2"))
+            .stdout(predicate::str::contains("3: deadline-task-1"))
+            .stdout(predicate::str::contains("1: deadline-task-5"))
+            .stdout(predicate::str::contains("2: deadline-task-4"));
+
+        Ok(())
+    }
+
+    #[test]
     fn notdone_abrev_multiple_is_correct() -> Result<(), Box<dyn std::error::Error>> {
         // write fresh to deadline tasks so content is known
         let fresh_deadline_tasks = r#"
@@ -1335,6 +1936,88 @@ mod deadline_done_notdone {
             .stdout(predicate::str::contains("1: deadline-task-5"))
             .stdout(predicate::str::contains("2: deadline-task-3"))
             .stdout(predicate::str::contains("3: deadline-task-1"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn notdone_abrev_multiple_is_correct_range() -> Result<(), Box<dyn std::error::Error>> {
+        // write fresh to deadline tasks so content is known
+        let fresh_deadline_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "deadline-task-1",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-2",
+                        "date": "2024-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-3",
+                        "date": "2023-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-4",
+                        "date": "2022-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "deadline-task-5",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_deadline_tasks: Tasks = serde_json::from_str(fresh_deadline_tasks)
+            .context(
+                "during testing: the fresh data to put in the new deadline_tasks \
+                file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_deadline_tasks(fresh_deadline_tasks);
+
+        // actions
+        let mut cmd = Command::cargo_bin("chartodo")?;
+        cmd.arg("dl-nd").arg("3-5");
+        cmd.assert()
+            .success()
+            .stdout(predicate::str::contains("1: deadline-task-3"))
+            .stdout(predicate::str::contains("2: deadline-task-2"))
+            .stdout(predicate::str::contains("3: deadline-task-1"))
+            .stdout(predicate::str::contains("1: deadline-task-5"))
+            .stdout(predicate::str::contains("2: deadline-task-4"));
 
         Ok(())
     }

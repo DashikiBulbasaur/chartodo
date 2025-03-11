@@ -1,4 +1,5 @@
 use super::repeating_helpers::*;
+use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use std::io::Write;
 
 pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
@@ -16,6 +17,23 @@ pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..not_done.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            not_done.get(i).unwrap().to_string(),
+            repeating_tasks.done.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| not_done.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items
@@ -103,6 +121,23 @@ pub fn repeating_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
 
         // error = true
         return true;
+    }
+
+    // for the record, i hate that this is a separate iteration
+    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
+    for i in (0..done_remove.len()).rev() {
+        let (error_or_not, bound1, bound2) = check_if_range_positioning(
+            done_remove.get(i).unwrap().to_string(),
+            repeating_tasks.done.len(),
+        );
+
+        if !error_or_not {
+            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
+            unwrapped_range
+                .iter()
+                .for_each(|number| done_remove.push(number.to_string()));
+            // this is not good
+        }
     }
 
     // filter for viable items
@@ -476,6 +511,91 @@ mod repeating_done_unit_tests {
     }
 
     #[test]
+    fn repeating_tasks_notdone_should_do_notdoneall_range() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // check that there are no valid args
+        let arguments = vec![String::from("1-6"), String::from("1")];
+        let error_should_be_true = repeating_tasks_not_done(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
     fn repeating_tasks_notdone_is_correct() {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -603,6 +723,130 @@ mod repeating_done_unit_tests {
             String::from("4"),
             String::from("1"),
         ];
+        let error_should_be_false = repeating_tasks_not_done(arguments);
+        let read_test_file = open_repeating_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "nyah",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "minutes",
+                        "repeat_done": false,
+                        "repeat_original_date": "2020-12-31",
+                        "repeat_original_time": "23:57"
+                    },
+                    {
+                        "task": "blue",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": true,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "yellow",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ]
+            }
+        "#;
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, repeating_tasks);
+    }
+
+    #[test]
+    fn repeating_tasks_notdone_multiple_args_is_correct_range() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "blue",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": true,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "nyah",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "minutes",
+                        "repeat_done": false,
+                        "repeat_original_date": "2020-12-31",
+                        "repeat_original_time": "23:57"
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    },
+                    {
+                        "task": "yellow",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ]
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // no valid args
+        let arguments = vec![String::from("1-2"), String::from("4"), String::from("1")];
         let error_should_be_false = repeating_tasks_not_done(arguments);
         let read_test_file = open_repeating_tasks_and_return_tasks_struct();
 
@@ -819,6 +1063,91 @@ mod repeating_done_unit_tests {
     }
 
     #[test]
+    fn repeating_tasks_rmdone_should_do_cleardone_range() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [],
+                "done": [
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2025-01-01",
+                        "time": "00:00",
+                        "repeat_number": null,
+                        "repeat_unit": null,
+                        "repeat_done": null,
+                        "repeat_original_date": null,
+                        "repeat_original_time": null
+                    }
+                ]
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // check that there are no valid args
+        let arguments = vec![String::from("1-6"), String::from("1")];
+        let error_should_be_true = repeating_tasks_rmdone(arguments);
+
+        assert!(error_should_be_true);
+    }
+
+    #[test]
     fn repeating_tasks_rmdone_is_correct() {
         // write fresh to repeating tasks so content is known
         let fresh_repeating_tasks = r#"
@@ -931,6 +1260,115 @@ mod repeating_done_unit_tests {
         // no valid args
         let arguments = vec![
             String::from("1"),
+            String::from("2"),
+            String::from("4"),
+            String::from("1"),
+        ];
+        let error_should_be_false = repeating_tasks_rmdone(arguments);
+        let read_test_file = open_repeating_tasks_and_return_tasks_struct();
+
+        // this should be the content of the file
+        let repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "blue",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": true,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "yellow",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ]
+            }
+        "#;
+        let repeating_tasks: Tasks = serde_json::from_str(repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+
+        assert!(!error_should_be_false);
+        assert_eq!(read_test_file, repeating_tasks);
+    }
+
+    #[test]
+    fn repeating_tasks_rmdone_multiple_args_is_correct_range() {
+        // write fresh to repeating tasks so content is known
+        let fresh_repeating_tasks = r#"
+            {
+                "todo": [
+                    {
+                        "task": "blue",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": true,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ],
+                "done": [
+                    {
+                        "task": "nyah",
+                        "date": "2021-01-01",
+                        "time": "00:00",
+                        "repeat_number": 3,
+                        "repeat_unit": "minutes",
+                        "repeat_done": false,
+                        "repeat_original_date": "2020-12-31",
+                        "repeat_original_time": "23:57"
+                    },
+                    {
+                        "task": "hi",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    },
+                    {
+                        "task": "yellow",
+                        "date": "2099-12-12",
+                        "time": "23:46",
+                        "repeat_number": 15,
+                        "repeat_unit": "weeks",
+                        "repeat_done": false,
+                        "repeat_original_date": "2098-09-12",
+                        "repeat_original_time": "23:46"
+                    }
+                ]
+            }
+        "#;
+        let fresh_repeating_tasks: Tasks = serde_json::from_str(fresh_repeating_tasks)
+            .context(
+                "during testing: the fresh data to put in the new \
+                repeating_tasks file wasn't correct. you should never be able to see this",
+            )
+            .expect("changing str to tasks struct failed");
+        write_changes_to_new_repeating_tasks(fresh_repeating_tasks);
+
+        // no valid args
+        let arguments = vec![
+            String::from("1-2"),
             String::from("2"),
             String::from("4"),
             String::from("1"),

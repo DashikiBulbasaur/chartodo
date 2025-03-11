@@ -1,10 +1,10 @@
 [package]
 name = "chartodo"
-version = "0.1.101"
+version = "0.1.102"
 edition = "2021"
 authors = ["DashikiBulbasaur <githubearl@gmail.com>"]
 license = "Apache-2.0"
-description = "A simple CLI todo list program with a host of features"
+description = "A CLI todo list program where you can create deadline tasks and repeating tasks"
 readme = "README.md"
 homepage = "https://github.com/DashikiBulbasaur/chartodo"
 repository = "https://github.com/DashikiBulbasaur/chartodo"
