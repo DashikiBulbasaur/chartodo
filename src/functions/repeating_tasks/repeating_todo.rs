@@ -84,9 +84,8 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
             writeln!(
                 writer,
                 "ERROR: You had an interval of 0 in argument set \
-                '{}'. You can't have an interval of 0, otherwise why are you even making a new \
-                repeating task?",
-                counter
+                '{counter}'. You can't have an interval of 0, otherwise why are you even making a new \
+                repeating task?"
             )
             .expect("writeln failed");
 
@@ -303,9 +302,8 @@ pub fn repeating_tasks_add_start_datetime(start: Vec<String>) -> bool {
             writeln!(
                 writer,
                 "ERROR: You provided an interval of 0 in argument \
-                set '{}'. You can't have an interval of 0, otherwise why are you even making a \
-                new repeating task?",
-                counter
+                set '{counter}'. You can't have an interval of 0, otherwise why are you even making a \
+                new repeating task?"
             )
             .expect("writeln failed");
 
@@ -559,9 +557,8 @@ pub fn repeating_tasks_add_end(add_end: Vec<String>) -> bool {
             writeln!(
                 writer,
                 "ERROR: You provided an interval of 0 in argument \
-                set {}. You can't have an interval of 0, otherwise why are you even making a new \
-                repeating task?",
-                counter
+                set {counter}. You can't have an interval of 0, otherwise why are you even making a new \
+                repeating task?"
             )
             .expect("writeln failed");
 

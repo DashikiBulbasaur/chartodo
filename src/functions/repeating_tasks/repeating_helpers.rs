@@ -61,8 +61,7 @@ pub fn repeating_tasks_create_dir_and_file_if_needed() {
             .with_context(|| {
                 format!(
                     "couldn't create repeating_tasks json file in the following dirs:
-                {}",
-                    CHARTODO_PATH
+                {CHARTODO_PATH}"
                 )
             })
             .expect("couldn't create new repeating_tasks.json file");
@@ -97,8 +96,7 @@ pub fn repeating_tasks_create_dir_and_file_if_needed() {
             .with_context(|| {
                 format!(
                     "failed to write fresh repeating tasks to new repeating_tasks json file in:
-            {}",
-                    CHARTODO_PATH
+            {CHARTODO_PATH}"
                 )
             })
             .expect("failed to write fresh repeating tasks to repeating_tasks json file");
@@ -111,8 +109,7 @@ pub fn open_repeating_tasks_and_return_tasks_struct() -> Tasks {
         .with_context(|| {
             format!(
                 "couldn't open repeating_tasks.json in the following directories:
-                {}",
-                CHARTODO_PATH
+                {CHARTODO_PATH}"
             )
         })
         .expect("couldn't open repeating_tasks.json file");
@@ -144,8 +141,7 @@ pub fn open_repeating_tasks_and_return_tasks_struct() -> Tasks {
                 .with_context(|| {
                     format!(
                         "couldn't open repeating_tasks.json in the following directories:
-                        {}",
-                        CHARTODO_PATH
+                        {CHARTODO_PATH}"
                     )
                 })
                 .expect("couldn't open repeating_tasks.json file");
@@ -162,8 +158,7 @@ pub fn open_repeating_tasks_and_return_tasks_struct() -> Tasks {
                     format!(
                         "failed to write fresh repeating tasks to new \
                         repeating_tasks json file in:
-                {}",
-                        CHARTODO_PATH
+                {CHARTODO_PATH}"
                     )
                 })
                 .expect("failed to write fresh repeating tasks to repeating_tasks json file");
@@ -195,8 +190,7 @@ pub fn write_changes_to_new_repeating_tasks(mut repeating_tasks: Tasks) {
         .with_context(|| {
             format!(
                 "couldn't create new repeating_tasks.json file in the following directories:
-{}",
-                CHARTODO_PATH
+{CHARTODO_PATH}"
             )
         })
         .expect("couldn't create new repeating_tasks.json");
@@ -205,8 +199,7 @@ pub fn write_changes_to_new_repeating_tasks(mut repeating_tasks: Tasks) {
         .with_context(|| {
             format!(
                 "failed to write changes to repeating_tasks.json in the following dirs:
-    {}",
-                CHARTODO_PATH
+    {CHARTODO_PATH}"
             )
         })
         .expect("failed to write changes to repeating_tasks.json");
@@ -314,8 +307,7 @@ mod repeating_helpers_unit_tests {
             .with_context(|| {
                 format!(
                     "couldn't open repeating_tasks.json in the following directories:
-                    {}",
-                    CHARTODO_PATH
+                    {CHARTODO_PATH}"
                 )
             })
             .expect("couldn't open repeating_tasks.json file");
@@ -331,8 +323,7 @@ mod repeating_helpers_unit_tests {
             .with_context(|| {
                 format!(
                     "failed to write fresh repeating tasks to new repeating_tasks json file in:
-            {}",
-                    CHARTODO_PATH
+            {CHARTODO_PATH}"
                 )
             })
             .expect("failed to write fresh repeating tasks to repeating_tasks json file");

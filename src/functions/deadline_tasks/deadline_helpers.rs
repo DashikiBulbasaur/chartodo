@@ -61,8 +61,7 @@ pub fn deadline_tasks_create_dir_and_file_if_needed() {
             .with_context(|| {
                 format!(
                     "couldn't create deadline_tasks json file in the following dirs:
-                {}",
-                    CHARTODO_PATH
+                {CHARTODO_PATH}"
                 )
             })
             .expect("couldn't create new deadline_tasks.json file");
@@ -97,8 +96,7 @@ pub fn deadline_tasks_create_dir_and_file_if_needed() {
             .with_context(|| {
                 format!(
                     "failed to write fresh deadline tasks to new deadline_tasks json file in:
-            {}",
-                    CHARTODO_PATH
+            {CHARTODO_PATH}"
                 )
             })
             .expect("failed to write fresh deadline tasks to deadline_tasks json file");
@@ -111,8 +109,7 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
         .with_context(|| {
             format!(
                 "couldn't open deadline_tasks.json in the following directories:
-                {}",
-                CHARTODO_PATH
+                {CHARTODO_PATH}"
             )
         })
         .expect("couldn't open deadline_tasks.json file");
@@ -144,8 +141,7 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
                 .with_context(|| {
                     format!(
                         "couldn't open deadline_tasks.json in the following directories:
-                        {}",
-                        CHARTODO_PATH
+                        {CHARTODO_PATH}"
                     )
                 })
                 .expect("couldn't open deadline_tasks.json file");
@@ -161,8 +157,7 @@ pub fn open_deadline_tasks_and_return_tasks_struct() -> Tasks {
                 .with_context(|| {
                     format!(
                         "failed to write fresh deadline tasks to new deadline_tasks json file in:
-                {}",
-                        CHARTODO_PATH
+                {CHARTODO_PATH}"
                     )
                 })
                 .expect("failed to write fresh deadline tasks to deadline_tasks json file");
@@ -194,8 +189,7 @@ pub fn write_changes_to_new_deadline_tasks(mut deadline_tasks: Tasks) {
         .with_context(|| {
             format!(
                 "couldn't create new deadline_tasks.json file in the following directories:
-{}",
-                CHARTODO_PATH
+{CHARTODO_PATH}"
             )
         })
         .expect("couldn't create new deadline_tasks.json");
@@ -204,8 +198,7 @@ pub fn write_changes_to_new_deadline_tasks(mut deadline_tasks: Tasks) {
         .with_context(|| {
             format!(
                 "failed to write changes to deadline_tasks.json in the following dirs:
-    {}",
-                CHARTODO_PATH
+    {CHARTODO_PATH}"
             )
         })
         .expect("failed to write changes to deadline_tasks.json");
@@ -313,8 +306,7 @@ mod deadline_helpers_unit_tests {
             .with_context(|| {
                 format!(
                     "couldn't open deadline_tasks.json in the following directories:
-                    {}",
-                    CHARTODO_PATH
+                    {CHARTODO_PATH}"
                 )
             })
             .expect("couldn't open deadline_tasks.json file");
@@ -330,8 +322,7 @@ mod deadline_helpers_unit_tests {
             .with_context(|| {
                 format!(
                     "failed to write fresh deadline tasks to new deadline_tasks json file in:
-            {}",
-                    CHARTODO_PATH
+            {CHARTODO_PATH}"
                 )
             })
             .expect("failed to write fresh deadline tasks to deadline_tasks json file");

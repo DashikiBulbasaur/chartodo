@@ -486,7 +486,7 @@ fn main() -> Result<()> {
                     .context("didn't provide arguments for repeating-start")?,
             );
             let writer = &mut std::io::stdout();
-            writeln!(writer, "{}", show_starts).expect("writeln failed");
+            writeln!(writer, "{show_starts}").expect("writeln failed");
             Ok(())
         }
         "repeating-resetall" | "rp-ra" | "repeating-doneresetall" | "rp-dra"
@@ -502,7 +502,7 @@ fn main() -> Result<()> {
         "repeating-startall" | "rp-sa" if args.item_identifier.is_none() => {
             let show_starts = repeating_tasks_showstartall();
             let writer = &mut std::io::stdout();
-            writeln!(writer, "{}", show_starts).expect("writeln failed");
+            writeln!(writer, "{show_starts}").expect("writeln failed");
             Ok(())
         }
         "repeating-editall" | "rp-ea" => {

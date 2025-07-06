@@ -119,6 +119,8 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
 
     // change todos to dones one by one. no idea if the parse slows down the process significantly
     // rev is done so that removing by position doesn't become invalid
+    // note that to_owned probably incurs the same resource cost as clone. no idea why I didn't catch this
+    // TODO: find a way to not do this as to_owned
     todo_to_done.iter().rev().for_each(|position| {
         regular_tasks
             .done
