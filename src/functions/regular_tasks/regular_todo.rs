@@ -3,6 +3,58 @@ use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range
 use crate::functions::json_file_structs::*;
 use std::io::Write;
 
+enum TodoOrDone {
+    Todo,
+    Done,
+}
+
+enum TaskType {
+    Regular,
+    Deadline,
+    Repeating,
+}
+
+fn validate_empty_tasks(tasks: &Tasks) -> &bool {
+    if tasks.todo.is_empty() {
+        &true
+    } else {
+        &false
+    }
+}
+
+fn validate_valid_args(args: &[String]) -> &bool {
+    match args.is_empty() {
+        true => {
+            print_valid_args_error_msg(TodoOrDone::Todo, TaskType::Regular);
+            &true
+        }
+        false => &false,
+    }
+}
+
+fn print_valid_args_error_msg(todo_or_done: TodoOrDone, task_type: TaskType) {
+    let writer = &mut std::io::stdout();
+    // note to self: this can be DRY'd with a helper fn
+    let list: &str = match todo_or_done {
+        TodoOrDone::Todo => "todo",
+        TodoOrDone::Done => "done",
+    };
+
+    let task: &str = match task_type {
+        TaskType::Regular => "regular",
+        TaskType::Deadline => "deadline",
+        TaskType::Repeating => "repeating",
+    };
+
+    writeln!(
+        writer,
+        "ERROR: None of the positions you provided were viable \
+        -- they were all either negative, zero, exceeded the {task} {list} \
+        list's length, or were invalid range positioning."
+    )
+    .expect("writeln failed");
+}
+
 pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
@@ -41,7 +93,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if regular_tasks.todo.is_empty() {
+    if *validate_empty_tasks(&regular_tasks) {
         writeln!(
             writer,
             "ERROR: The regular todo list is currently empty so you can't change \
@@ -83,15 +135,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     }
 
     // check if none of the args were valid
-    if todo_to_done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, exceeded the regular \
-            todo list's length, or were invalid range positioning."
-        )
-        .expect("writeln failed");
-
+    if *validate_valid_args(&todo_to_done) {
         // error = true
         return true;
     }
