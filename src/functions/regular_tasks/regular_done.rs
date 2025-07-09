@@ -1,5 +1,9 @@
 use super::regular_helpers::*;
-use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
+use crate::functions::validations::*;
+use crate::functions::{
+    general_helpers::{check_if_range_positioning, unwrap_range_positioning},
+    validations::validate_empty_task_list,
+};
 use std::io::Write;
 
 pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
@@ -11,14 +15,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if regular_tasks.done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular done list is currently empty, so you can't \
-            remove any items."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -52,15 +49,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     }
 
     // check if all args were invalid
-    if done_to_remove.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, exceeded the regular \
-            done list's length, or were invalid range positioning."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(&done_to_remove, TodoOrDone::Done, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -107,7 +96,7 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if regular_tasks.done.is_empty() {
+    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
         writeln!(
             writer,
             "ERROR: The regular done list is currently empty, so \
@@ -148,15 +137,7 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     }
 
     // check if all args were invalid
-    if done_to_todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, exceeded the regular \
-            done list's length, or were invalid range positioning."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(&done_to_todo, TodoOrDone::Done, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -200,20 +181,12 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
 pub fn regular_tasks_clear_done() -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if regular_tasks.done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular done list is currently empty, so you can't \
-            remove any items."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -231,20 +204,12 @@ pub fn regular_tasks_clear_done() -> bool {
 pub fn regular_tasks_reverse_all_dones() -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if regular_tasks.done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular done list is currently empty, so \
-            you can't reverse any items back to todo."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
         // error = true
         return true;
     }

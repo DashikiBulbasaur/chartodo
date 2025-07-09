@@ -1,59 +1,8 @@
 use super::regular_helpers::*;
 use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
+use crate::functions::validations::*;
 use std::io::Write;
-
-enum TodoOrDone {
-    Todo,
-    Done,
-}
-
-enum TaskType {
-    Regular,
-    Deadline,
-    Repeating,
-}
-
-fn validate_empty_tasks(tasks: &Tasks) -> &bool {
-    if tasks.todo.is_empty() {
-        &true
-    } else {
-        &false
-    }
-}
-
-fn validate_valid_args(args: &[String]) -> &bool {
-    match args.is_empty() {
-        true => {
-            print_valid_args_error_msg(TodoOrDone::Todo, TaskType::Regular);
-            &true
-        }
-        false => &false,
-    }
-}
-
-fn print_valid_args_error_msg(todo_or_done: TodoOrDone, task_type: TaskType) {
-    let writer = &mut std::io::stdout();
-    // note to self: this can be DRY'd with a helper fn
-    let list: &str = match todo_or_done {
-        TodoOrDone::Todo => "todo",
-        TodoOrDone::Done => "done",
-    };
-
-    let task: &str = match task_type {
-        TaskType::Regular => "regular",
-        TaskType::Deadline => "deadline",
-        TaskType::Repeating => "repeating",
-    };
-
-    writeln!(
-        writer,
-        "ERROR: None of the positions you provided were viable \
-        -- they were all either negative, zero, exceeded the {task} {list} \
-        list's length, or were invalid range positioning."
-    )
-    .expect("writeln failed");
-}
 
 pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
     // housekeeping
@@ -93,14 +42,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if *validate_empty_tasks(&regular_tasks) {
-        writeln!(
-            writer,
-            "ERROR: The regular todo list is currently empty so you can't change \
-            any todos to done."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -135,7 +77,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     }
 
     // check if none of the args were valid
-    if *validate_valid_args(&todo_to_done) {
+    if validate_valid_args(&todo_to_done, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -188,14 +130,7 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if regular_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular todo list is currently empty, so you can't \
-            remove any items. Try adding to it first before removing any."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -229,15 +164,7 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     }
 
     // check if all args were invalid
-    if todo_to_remove.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, exceeded the regular \
-            todo list's length, or were invalid range positioning."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(&todo_to_remove, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -278,20 +205,12 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
 pub fn regular_tasks_clear_todo() -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if regular_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular todo list is currently empty. Try adding items \
-            to it first before removing any."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -309,20 +228,12 @@ pub fn regular_tasks_clear_todo() -> bool {
 pub fn regular_tasks_change_all_todo_to_done() -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if regular_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular todo list is currently empty, so you can't \
-            change any todos to done."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -355,14 +266,7 @@ pub fn regular_tasks_edit_todo(position_and_new: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if regular_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The regular todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
