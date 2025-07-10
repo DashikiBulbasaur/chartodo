@@ -36,7 +36,6 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
 pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
@@ -91,14 +90,13 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     todo_to_done.dedup();
 
     // check if the user basically specified the entire list
-    if todo_to_done.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: you've specified marking the entire regular todo list as \
-            done. You should do chartodo doneall."
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        todo_to_done.len(),
+        regular_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+        PositionCommands::Done,
+    ) {
         // error = true
         return true;
     }
