@@ -4,18 +4,20 @@ use crate::functions::{
     general_helpers::{check_if_range_positioning, unwrap_range_positioning},
     validations::validate_empty_task_list,
 };
-use std::io::Write;
 
 pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -49,7 +51,11 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     }
 
     // check if all args were invalid
-    if validate_valid_args(&done_to_remove, TodoOrDone::Done, TaskType::Regular) {
+    if validate_valid_args(
+        done_to_remove.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -63,14 +69,13 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     done_to_remove.dedup();
 
     // check if user wants to remove all of the items
-    if done_to_remove.len() >= regular_tasks.done.len() && regular_tasks.done.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You've specified removing the entire regular \
-            done list. You should do chartodo cleardone."
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        done_to_remove.len(),
+        regular_tasks.done.len(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+        PositionCommands::RmDone,
+    ) {
         // error = true
         return true;
     }
@@ -90,20 +95,16 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
 pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
-        writeln!(
-            writer,
-            "ERROR: The regular done list is currently empty, so \
-            you can't reverse any items back to todo."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        regular_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -137,7 +138,7 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     }
 
     // check if all args were invalid
-    if validate_valid_args(&done_to_todo, TodoOrDone::Done, TaskType::Regular) {
+    if validate_valid_args(done_to_todo.is_empty(), TodoOrDone::Done, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -151,14 +152,13 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     done_to_todo.dedup();
 
     // check if user wants to remove all done items to todo
-    if done_to_todo.len() >= regular_tasks.done.len() && regular_tasks.done.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: you've specified reversing the entire regular done list \
-            back to todo. You should do chartodo notdoneall."
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        done_to_todo.len(),
+        regular_tasks.done.len(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+        PositionCommands::NotDone,
+    ) {
         // error = true
         return true;
     }
@@ -186,7 +186,11 @@ pub fn regular_tasks_clear_done() -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -209,7 +213,11 @@ pub fn regular_tasks_reverse_all_dones() -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if validate_empty_task_list(&regular_tasks.done, TodoOrDone::Done, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }

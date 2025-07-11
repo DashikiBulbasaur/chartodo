@@ -41,7 +41,11 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -76,7 +80,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     }
 
     // check if none of the args were valid
-    if validate_valid_args(&todo_to_done, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_valid_args(todo_to_done.is_empty(), TodoOrDone::Todo, TaskType::Regular) {
         // error = true
         return true;
     }
@@ -128,7 +132,11 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -162,7 +170,11 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     }
 
     // check if all args were invalid
-    if validate_valid_args(&todo_to_remove, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_valid_args(
+        todo_to_remove.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -208,7 +220,11 @@ pub fn regular_tasks_clear_todo() -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -231,7 +247,11 @@ pub fn regular_tasks_change_all_todo_to_done() -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }
@@ -264,7 +284,11 @@ pub fn regular_tasks_edit_todo(position_and_new: Vec<String>) -> bool {
     let mut regular_tasks = open_regular_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if validate_empty_task_list(&regular_tasks.todo, TodoOrDone::Todo, TaskType::Regular) {
+    if validate_empty_task_list(
+        regular_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Regular,
+    ) {
         // error = true
         return true;
     }

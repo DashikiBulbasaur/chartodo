@@ -1,6 +1,7 @@
 use super::repeating_helpers::*;
 use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
+use crate::functions::validations::*;
 use chrono::{Days, Duration, Local, Months, NaiveDate, NaiveDateTime, NaiveTime};
 use std::io::Write;
 
@@ -852,15 +853,13 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     reset.dedup();
 
     // check if the user basically specified the entire list
-    if reset.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You've specified the entire repeating \
-            todo list that's relatively long. You should do chartodo \
-            repeating-resetall/repeating-doneresetall"
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        reset.len(),
+        repeating_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+        PositionCommands::Reset,
+    ) {
         // error = true
         return true;
     }
@@ -1134,11 +1133,14 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     start.dedup();
 
     // check if user wants to show starts for all of the items
-    if start.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        return String::from(
-            "WARNING: You want to show the start times for an \
-            entire list that's relatively long. You should do repeating-startall.",
-        );
+    if validate_should_do_all_equivalent(
+        start.len(),
+        repeating_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+        PositionCommands::Start,
+    ) {
+        return String::from("No start values shown.");
     }
 
     let mut show_starts = String::from("");

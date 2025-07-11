@@ -1,6 +1,7 @@
 use super::deadline_helpers::*;
 use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
 use crate::functions::json_file_structs::*;
+use crate::functions::validations::*;
 use chrono::{Local, NaiveDate, NaiveTime};
 use std::io::Write;
 
@@ -301,19 +302,16 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
 pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if deadline_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The deadline todo list is currently empty. Try adding items to it first."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        deadline_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+    ) {
         // error = true
         return true;
     }
@@ -345,15 +343,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     }
 
     // check if none of the args were valid
-    if done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the deadline todo list's \
-            length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(done.is_empty(), TodoOrDone::Todo, TaskType::Deadline) {
         // error = true
         return true;
     }
@@ -364,14 +354,13 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     done.dedup();
 
     // check if the user basically specified the entire list
-    if done.len() >= deadline_tasks.todo.len() && deadline_tasks.todo.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You've specified the entire list. Might as well do \
-            chartodo deadline-doneall"
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        done.len(),
+        deadline_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+        PositionCommands::Done,
+    ) {
         // error = true
         return true;
     }
@@ -394,20 +383,16 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
 pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if deadline_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The deadline todo list is currently empty. Try adding items \
-            to it first."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        deadline_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+    ) {
         // error = true
         return true;
     }
@@ -441,15 +426,7 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     }
 
     // check if none of the args were valid
-    if rmtodo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the deadline \
-            todo list's length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(rmtodo.is_empty(), TodoOrDone::Todo, TaskType::Deadline) {
         // error = true
         return true;
     }
@@ -460,14 +437,13 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     rmtodo.dedup();
 
     // check if user wants to remove all of the items
-    if rmtodo.len() >= deadline_tasks.todo.len() && deadline_tasks.todo.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You might as well do deadline-cleartodo since you want to \
-            remove all of the items."
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        rmtodo.len(),
+        deadline_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+        PositionCommands::RmTodo,
+    ) {
         // error = true
         return true;
     }
@@ -487,20 +463,16 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 pub fn deadline_tasks_clear_todo() -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if deadline_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The deadline todo list is currently empty. Try \
-            adding items to it first before removing any."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        deadline_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+    ) {
         // error = true
         return true;
     }
@@ -518,20 +490,16 @@ pub fn deadline_tasks_clear_todo() -> bool {
 pub fn deadline_tasks_done_all() -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if deadline_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The deadline todo list is currently empty, so you can't \
-            change any todos to done."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        deadline_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+    ) {
         // error = true
         return true;
     }
@@ -560,14 +528,11 @@ pub fn deadline_tasks_edit_all(position_task_date_time: Vec<String>) -> bool {
     let mut deadline_tasks = open_deadline_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if deadline_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The deadline todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        deadline_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Deadline,
+    ) {
         // error = true
         return true;
     }

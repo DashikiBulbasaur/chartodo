@@ -1,4 +1,3 @@
-use crate::functions::json_file_structs::*;
 use std::io::Write;
 
 pub enum TodoOrDone {
@@ -19,7 +18,6 @@ pub enum PositionCommands {
     RmTodo,
     RmDone,
     Reset,
-    DoneReset,
     Start,
 }
 
@@ -45,7 +43,6 @@ fn return_all_command_equivalent(positional: PositionCommands) -> (String, Strin
         PositionCommands::RmTodo => String::from("rmtodo"),
         PositionCommands::RmDone => String::from("rmdone"),
         PositionCommands::Reset => String::from("reset"),
-        PositionCommands::DoneReset => String::from("donereset"),
         PositionCommands::Start => String::from("start"),
     };
 
@@ -55,7 +52,6 @@ fn return_all_command_equivalent(positional: PositionCommands) -> (String, Strin
         PositionCommands::RmTodo => String::from("cleartodo"),
         PositionCommands::RmDone => String::from("cleardone"),
         PositionCommands::Reset => String::from("resetall"),
-        PositionCommands::DoneReset => String::from("doneresetall"),
         PositionCommands::Start => String::from("startall"),
     };
 
@@ -63,19 +59,19 @@ fn return_all_command_equivalent(positional: PositionCommands) -> (String, Strin
 }
 
 pub fn validate_empty_task_list(
-    task_list: &[Task],
+    empty_list: bool,
     todo_or_done: TodoOrDone,
     task_type: TaskType,
 ) -> bool {
     match &todo_or_done {
-        TodoOrDone::Todo => match task_list.is_empty() {
+        TodoOrDone::Todo => match empty_list {
             true => {
                 print_empty_task_list_error(todo_or_done, task_type);
                 true
             }
             false => false,
         },
-        TodoOrDone::Done => match task_list.is_empty() {
+        TodoOrDone::Done => match empty_list {
             true => {
                 print_empty_task_list_error(todo_or_done, task_type);
                 true
@@ -96,16 +92,20 @@ fn print_empty_task_list_error(todo_or_done: TodoOrDone, task_type: TaskType) {
     .expect("writeln failed");
 }
 
-pub fn validate_valid_args(args: &[String], todo_or_done: TodoOrDone, task_type: TaskType) -> bool {
+pub fn validate_valid_args(
+    no_valid_args: bool,
+    todo_or_done: TodoOrDone,
+    task_type: TaskType,
+) -> bool {
     match &todo_or_done {
-        TodoOrDone::Todo => match args.is_empty() {
+        TodoOrDone::Todo => match no_valid_args {
             true => {
                 print_valid_args_error(todo_or_done, task_type);
                 true
             }
             false => false,
         },
-        TodoOrDone::Done => match args.is_empty() {
+        TodoOrDone::Done => match no_valid_args {
             true => {
                 print_valid_args_error(todo_or_done, task_type);
                 true
