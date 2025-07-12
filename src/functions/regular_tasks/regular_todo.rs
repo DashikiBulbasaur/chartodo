@@ -1,5 +1,5 @@
 use super::regular_helpers::*;
-use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
+use crate::functions::filtering::*;
 use crate::functions::json_file_structs::*;
 use crate::functions::validations::*;
 use std::io::Write;
@@ -33,7 +33,7 @@ pub fn regular_tasks_add_todo(add_todo: Vec<String>) {
     write_changes_to_new_regular_tasks(regular_tasks);
 }
 
-pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool {
+pub fn regular_tasks_change_todo_to_done(todo_to_done: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
 
@@ -50,34 +50,11 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..todo_to_done.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            todo_to_done.get(i).unwrap().to_string(),
-            regular_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| todo_to_done.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let todo_to_done = ranged_positioning_filter(todo_to_done, regular_tasks.todo.len());
 
     // filter for viable items
-    // rev cuz i want the indices to be viable after swap removing
-    for i in (0..todo_to_done.len()).rev() {
-        if todo_to_done.get(i).unwrap().parse::<usize>().is_err()
-            || todo_to_done.get(i).unwrap().is_empty() // this will never trigger smh
-            || todo_to_done.get(i).unwrap().parse::<usize>().unwrap() == 0
-            || todo_to_done.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.todo.len()
-        {
-            todo_to_done.swap_remove(i);
-        }
-    }
+    let todo_to_done = positioning_filter(todo_to_done, regular_tasks.todo.len());
 
     // check if none of the args were valid
     if validate_valid_args(todo_to_done.is_empty(), TodoOrDone::Todo, TaskType::Regular) {
@@ -85,13 +62,8 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
         return true;
     }
 
-    // sort and dedup. Vec<usize> is needed for sorting
-    let mut todo_to_done: Vec<usize> = todo_to_done
-        .iter()
-        .map(|x| x.parse::<usize>().unwrap())
-        .collect();
-    todo_to_done.sort();
-    todo_to_done.dedup();
+    // sort and dedup.
+    let todo_to_done = sort_and_dedup(todo_to_done);
 
     // check if the user basically specified the entire list
     if validate_should_do_all_equivalent(
@@ -123,7 +95,7 @@ pub fn regular_tasks_change_todo_to_done(mut todo_to_done: Vec<String>) -> bool 
     false
 }
 
-pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
+pub fn regular_tasks_remove_todo(todo_to_remove: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
     let writer = &mut std::io::stdout();
@@ -141,33 +113,11 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..todo_to_remove.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            todo_to_remove.get(i).unwrap().to_string(),
-            regular_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| todo_to_remove.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let todo_to_remove = ranged_positioning_filter(todo_to_remove, regular_tasks.todo.len());
 
     // filter for viable items
-    for i in (0..todo_to_remove.len()).rev() {
-        if todo_to_remove.get(i).unwrap().parse::<usize>().is_err()
-            || todo_to_remove.get(i).unwrap().is_empty() // this will never trigger smh
-            || todo_to_remove.get(i).unwrap().parse::<usize>().unwrap() == 0
-            || todo_to_remove.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.todo.len()
-        {
-            todo_to_remove.swap_remove(i);
-        }
-    }
+    let todo_to_remove = positioning_filter(todo_to_remove, regular_tasks.todo.len());
 
     // check if all args were invalid
     if validate_valid_args(
@@ -180,12 +130,7 @@ pub fn regular_tasks_remove_todo(mut todo_to_remove: Vec<String>) -> bool {
     }
 
     // sort and dedup
-    let mut todo_to_remove: Vec<usize> = todo_to_remove
-        .iter()
-        .map(|x| x.parse::<usize>().unwrap())
-        .collect();
-    todo_to_remove.sort();
-    todo_to_remove.dedup();
+    let todo_to_remove = sort_and_dedup(todo_to_remove);
 
     // check if user wants to remove all of the items
     if todo_to_remove.len() >= regular_tasks.todo.len() && regular_tasks.todo.len() > 5 {
