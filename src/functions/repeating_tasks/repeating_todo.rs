@@ -685,19 +685,16 @@ fn subract_from_given_ending_datetime(
 pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -731,15 +728,7 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     }
 
     // no valid arguments
-    if done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the repeating todo list's \
-            length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(done.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
         // error = true
         return true;
     }
@@ -750,14 +739,13 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     done.dedup();
 
     // check if the user basically specified the entire list
-    if done.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You've specified the entire repeating todo list that's \
-            relatively long. You should do chartodo repeating-doneall"
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        done.len(),
+        repeating_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+        PositionCommands::Done,
+    ) {
         // error = true
         return true;
     }
@@ -789,19 +777,16 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
 pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -835,15 +820,7 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     }
 
     // no valid args
-    if reset.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the repeating todo list's \
-            length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(reset.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
         // error = true
         return true;
     }
@@ -917,19 +894,16 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
 pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -963,15 +937,7 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     }
 
     // no valid args
-    if rmtodo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the repeating todo list's \
-            length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(rmtodo.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
         // error = true
         return true;
     }
@@ -982,14 +948,13 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     rmtodo.dedup();
 
     // check if user wants to remove all of the items
-    if rmtodo.len() >= repeating_tasks.todo.len() && repeating_tasks.todo.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You've specified the entire repeating todo list, one \
-            that's relatively long. You should do repeating-cleartodo"
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        rmtodo.len(),
+        repeating_tasks.todo.len(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+        PositionCommands::RmTodo,
+    ) {
         // error = true
         return true;
     }
@@ -1009,19 +974,16 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
 pub fn repeating_tasks_doneall() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so you can't change any todos to done."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = treu
         return true;
     }
@@ -1048,20 +1010,16 @@ pub fn repeating_tasks_doneall() -> bool {
 pub fn repeating_tasks_clear_todo() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty. Try \
-            adding items to it first before removing any."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -1084,10 +1042,12 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     let repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        return String::from(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
-        );
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
+        return String::from("No start values shown.");
     }
 
     // for the record, i hate that this is a separate iteration
@@ -1119,12 +1079,8 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     }
 
     // no valid args
-    if start.is_empty() {
-        return String::from(
-            "ERROR: None of the positions you provided were \
-            viable -- they were all either negative, zero, or exceeded the repeating todo \
-            list's length.",
-        );
+    if validate_valid_args(start.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
+        return String::from("No start values shown.");
     }
 
     // sort and dedup
@@ -1173,19 +1129,16 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
 pub fn repeating_tasks_resetall() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -1220,10 +1173,12 @@ pub fn repeating_tasks_showstartall() -> String {
     let repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        return String::from(
-            "ERROR: The repeating todo list is currently empty. Try adding items to it first.",
-        );
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
+        return String::from("No start values shown.");
     }
 
     let mut show_starts = String::from("");
@@ -1250,14 +1205,11 @@ pub fn repeating_tasks_edit_all(edit_all: Vec<String>) -> bool {
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -1481,14 +1433,11 @@ pub fn repeating_tasks_edit_task(edit_task: Vec<String>) -> bool {
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -1575,14 +1524,11 @@ pub fn repeating_tasks_edit_interval(edit_interval: Vec<String>) -> bool {
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -1742,14 +1688,11 @@ pub fn repeating_tasks_edit_time_unit(edit_unit: Vec<String>) -> bool {
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -1895,13 +1838,11 @@ pub fn repeating_tasks_edit_interval_unit(edit_interval_unit: Vec<String>) -> bo
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -2096,14 +2037,11 @@ pub fn repeating_tasks_edit_start(edit_start: Vec<String>) -> bool {
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -2251,14 +2189,11 @@ pub fn repeating_tasks_edit_end(edit_end: Vec<String>) -> bool {
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if todo list is empty
-    if repeating_tasks.todo.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: The repeating todo list is currently empty, so there are no \
-            todos that can be edited."
-        )
-        .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.todo.is_empty(),
+        TodoOrDone::Todo,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }

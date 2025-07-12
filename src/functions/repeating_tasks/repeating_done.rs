@@ -1,20 +1,20 @@
 use super::repeating_helpers::*;
 use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
-use std::io::Write;
+use crate::functions::validations::*;
 
 pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if repeating_tasks.done.is_empty() {
-        writeln!(writer, "ERROR: The repeating done list is currently empty.")
-            .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -48,15 +48,7 @@ pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
     }
 
     // no valid args
-    if not_done.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the repeating done list's \
-            length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(not_done.is_empty(), TodoOrDone::Done, TaskType::Repeating) {
         // error = true
         return true;
     }
@@ -70,14 +62,13 @@ pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
     not_done.dedup();
 
     // check if user wants to move all done items to todo
-    if not_done.len() >= repeating_tasks.done.len() && repeating_tasks.done.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You specified an entire done list that's \
-            relatively long. You should do repeating-notdoneall."
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        not_done.len(),
+        repeating_tasks.done.len(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+        PositionCommands::NotDone,
+    ) {
         // error = true
         return true;
     }
@@ -109,16 +100,16 @@ pub fn repeating_tasks_not_done(mut not_done: Vec<String>) -> bool {
 pub fn repeating_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if repeating_tasks.done.is_empty() {
-        writeln!(writer, "ERROR: The repeating done list is currently empty.")
-            .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -152,15 +143,11 @@ pub fn repeating_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     }
 
     // no valid args
-    if done_remove.is_empty() {
-        writeln!(
-            writer,
-            "ERROR: None of the positions you provided were viable \
-            -- they were all either negative, zero, or exceeded the repeating done list's \
-            length."
-        )
-        .expect("writeln failed");
-
+    if validate_valid_args(
+        done_remove.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -174,14 +161,13 @@ pub fn repeating_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
     done_remove.dedup();
 
     // check if user wants to remove all of the items
-    if done_remove.len() >= repeating_tasks.done.len() && repeating_tasks.done.len() > 5 {
-        writeln!(
-            writer,
-            "WARNING: You want to remove all of the finished tasks in a \
-            relatively long repeating done list. You should do repeating-cleardone."
-        )
-        .expect("writeln failed");
-
+    if validate_should_do_all_equivalent(
+        done_remove.len(),
+        repeating_tasks.done.len(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+        PositionCommands::RmDone,
+    ) {
         // error = true
         return true;
     }
@@ -201,16 +187,16 @@ pub fn repeating_tasks_rmdone(mut done_remove: Vec<String>) -> bool {
 pub fn repeating_tasks_not_done_all() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if repeating_tasks.done.is_empty() {
-        writeln!(writer, "ERROR: The repeating done list is currently empty.")
-            .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
@@ -237,16 +223,16 @@ pub fn repeating_tasks_not_done_all() -> bool {
 pub fn repeating_tasks_clear_done() -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
-    let writer = &mut std::io::stdout();
 
     // open file and parse
     let mut repeating_tasks = open_repeating_tasks_and_return_tasks_struct();
 
     // check if the done list is empty
-    if repeating_tasks.done.is_empty() {
-        writeln!(writer, "ERROR: The repeating done list is currently empty.")
-            .expect("writeln failed");
-
+    if validate_empty_task_list(
+        repeating_tasks.done.is_empty(),
+        TodoOrDone::Done,
+        TaskType::Repeating,
+    ) {
         // error = true
         return true;
     }
