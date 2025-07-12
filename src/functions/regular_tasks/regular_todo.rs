@@ -1,7 +1,5 @@
 use super::regular_helpers::*;
-use crate::functions::filtering::*;
-use crate::functions::json_file_structs::*;
-use crate::functions::validations::*;
+use crate::functions::{filtering::*, json_file_structs::*, validations::*};
 use std::io::Write;
 
 pub fn regular_tasks_add_todo(add_todo: Vec<String>) {

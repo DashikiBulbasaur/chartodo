@@ -1,7 +1,5 @@
 use super::repeating_helpers::*;
-use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
-use crate::functions::json_file_structs::*;
-use crate::functions::validations::*;
+use crate::functions::{filtering::*, json_file_structs::*, validations::*};
 use chrono::{Days, Duration, Local, Months, NaiveDate, NaiveDateTime, NaiveTime};
 use std::io::Write;
 
@@ -682,7 +680,7 @@ fn subract_from_given_ending_datetime(
     (date, time, repeat_original_date, repeat_original_time)
 }
 
-pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
+pub fn repeating_tasks_done(done: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
 
@@ -699,33 +697,11 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..done.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            done.get(i).unwrap().to_string(),
-            repeating_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| done.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let done = ranged_positioning_filter(done, repeating_tasks.todo.len());
 
     // filter for viable positions
-    for i in (0..done.len()).rev() {
-        if done.get(i).unwrap().parse::<usize>().is_err()
-        || done.get(i).unwrap().is_empty() // this will never trigger smh
-        || done.get(i).unwrap().parse::<usize>().unwrap() == 0
-        || done.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
-        {
-            done.swap_remove(i);
-        }
-    }
+    let done = positioning_filter(done, repeating_tasks.todo.len());
 
     // no valid arguments
     if validate_valid_args(done.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
@@ -734,9 +710,7 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     }
 
     // sort and dedup
-    let mut done: Vec<usize> = done.iter().map(|x| x.parse::<usize>().unwrap()).collect();
-    done.sort();
-    done.dedup();
+    let done = sort_and_dedup(done);
 
     // check if the user basically specified the entire list
     if validate_should_do_all_equivalent(
@@ -774,7 +748,7 @@ pub fn repeating_tasks_done(mut done: Vec<String>) -> bool {
     false
 }
 
-pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) -> bool {
+pub fn repeating_tasks_reset_original_datetime_to_now(reset: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
 
@@ -791,33 +765,11 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..reset.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            reset.get(i).unwrap().to_string(),
-            repeating_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| reset.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let reset = ranged_positioning_filter(reset, repeating_tasks.todo.len());
 
     // filter for viable positions
-    for i in (0..reset.len()).rev() {
-        if reset.get(i).unwrap().parse::<usize>().is_err()
-        || reset.get(i).unwrap().is_empty() // this will never trigger smh
-        || reset.get(i).unwrap().parse::<usize>().unwrap() == 0
-        || reset.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
-        {
-            reset.swap_remove(i);
-        }
-    }
+    let reset = positioning_filter(reset, repeating_tasks.todo.len());
 
     // no valid args
     if validate_valid_args(reset.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
@@ -826,8 +778,7 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     }
 
     // sort and dedup
-    reset.sort();
-    reset.dedup();
+    let reset = sort_and_dedup(reset);
 
     // check if the user basically specified the entire list
     if validate_should_do_all_equivalent(
@@ -847,13 +798,13 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
         let (date, time, repeat_original_date, repeat_original_time) = add_to_local_now(
             repeating_tasks
                 .todo
-                .get(position.parse::<usize>().unwrap() - 1)
+                .get(position - 1)
                 .unwrap()
                 .repeat_number
                 .unwrap(),
             repeating_tasks
                 .todo
-                .get(position.parse::<usize>().unwrap() - 1)
+                .get(position - 1)
                 .unwrap()
                 .repeat_unit
                 .as_ref()
@@ -864,24 +815,16 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
         // set the new datetimes
         repeating_tasks
             .todo
-            .get_mut(position.parse::<usize>().unwrap() - 1)
+            .get_mut(position - 1)
             .unwrap()
             .repeat_original_date = Some(repeat_original_date);
         repeating_tasks
             .todo
-            .get_mut(position.parse::<usize>().unwrap() - 1)
+            .get_mut(position - 1)
             .unwrap()
             .repeat_original_time = Some(repeat_original_time);
-        repeating_tasks
-            .todo
-            .get_mut(position.parse::<usize>().unwrap() - 1)
-            .unwrap()
-            .date = Some(date);
-        repeating_tasks
-            .todo
-            .get_mut(position.parse::<usize>().unwrap() - 1)
-            .unwrap()
-            .time = Some(time);
+        repeating_tasks.todo.get_mut(position - 1).unwrap().date = Some(date);
+        repeating_tasks.todo.get_mut(position - 1).unwrap().time = Some(time);
     });
 
     // write changes to file
@@ -891,7 +834,7 @@ pub fn repeating_tasks_reset_original_datetime_to_now(mut reset: Vec<String>) ->
     false
 }
 
-pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
+pub fn repeating_tasks_rmtodo(rmtodo: Vec<String>) -> bool {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
 
@@ -908,33 +851,11 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..rmtodo.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            rmtodo.get(i).unwrap().to_string(),
-            repeating_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| rmtodo.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let rmtodo = ranged_positioning_filter(rmtodo, repeating_tasks.todo.len());
 
     // filter for viable positions
-    for i in (0..rmtodo.len()).rev() {
-        if rmtodo.get(i).unwrap().parse::<usize>().is_err()
-        || rmtodo.get(i).unwrap().is_empty() // this will never trigger smh
-        || rmtodo.get(i).unwrap().parse::<usize>().unwrap() == 0
-        || rmtodo.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
-        {
-            rmtodo.swap_remove(i);
-        }
-    }
+    let rmtodo = positioning_filter(rmtodo, repeating_tasks.todo.len());
 
     // no valid args
     if validate_valid_args(rmtodo.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
@@ -943,9 +864,7 @@ pub fn repeating_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
     }
 
     // sort and dedup
-    let mut rmtodo: Vec<usize> = rmtodo.iter().map(|x| x.parse::<usize>().unwrap()).collect();
-    rmtodo.sort();
-    rmtodo.dedup();
+    let rmtodo = sort_and_dedup(rmtodo);
 
     // check if user wants to remove all of the items
     if validate_should_do_all_equivalent(
@@ -1034,7 +953,7 @@ pub fn repeating_tasks_clear_todo() -> bool {
     false
 }
 
-pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
+pub fn repeating_tasks_show_start(start: Vec<String>) -> String {
     // housekeeping
     repeating_tasks_create_dir_and_file_if_needed();
 
@@ -1050,33 +969,11 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
         return String::from("No start values shown.");
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..start.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            start.get(i).unwrap().to_string(),
-            repeating_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| start.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let start = ranged_positioning_filter(start, repeating_tasks.todo.len());
 
     // filter for viable positions
-    for i in (0..start.len()).rev() {
-        if start.get(i).unwrap().parse::<usize>().is_err()
-        || start.get(i).unwrap().is_empty() // this will never trigger smh
-        || start.get(i).unwrap().parse::<usize>().unwrap() == 0
-        || start.get(i).unwrap().parse::<usize>().unwrap() > repeating_tasks.todo.len()
-        {
-            start.swap_remove(i);
-        }
-    }
+    let start = positioning_filter(start, repeating_tasks.todo.len());
 
     // no valid args
     if validate_valid_args(start.is_empty(), TodoOrDone::Todo, TaskType::Repeating) {
@@ -1084,9 +981,7 @@ pub fn repeating_tasks_show_start(mut start: Vec<String>) -> String {
     }
 
     // sort and dedup
-    let mut start: Vec<usize> = start.iter().map(|x| x.parse::<usize>().unwrap()).collect();
-    start.sort();
-    start.dedup();
+    let start = sort_and_dedup(start);
 
     // check if user wants to show starts for all of the items
     if validate_should_do_all_equivalent(

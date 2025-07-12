@@ -1,7 +1,5 @@
 use super::deadline_helpers::*;
-use crate::functions::general_helpers::{check_if_range_positioning, unwrap_range_positioning};
-use crate::functions::json_file_structs::*;
-use crate::functions::validations::*;
+use crate::functions::{filtering::*, json_file_structs::*, validations::*};
 use chrono::{Local, NaiveDate, NaiveTime};
 use std::io::Write;
 
@@ -299,7 +297,7 @@ pub fn deadline_tasks_add_no_date(add_no_date: Vec<String>) -> bool {
     false
 }
 
-pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
+pub fn deadline_tasks_done(done: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
 
@@ -316,31 +314,11 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..done.len()).rev() {
-        let (error_or_not, bound1, bound2) =
-            check_if_range_positioning(done.get(i).unwrap().to_string(), deadline_tasks.todo.len());
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| done.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let done = ranged_positioning_filter(done, deadline_tasks.todo.len());
 
     // filter for viable positions
-    for i in (0..done.len()).rev() {
-        if done.get(i).unwrap().parse::<usize>().is_err()
-            || done.get(i).unwrap().is_empty() // will never trigger
-            || done.get(i).unwrap().parse::<usize>().unwrap() == 0
-            || done.get(i).unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len()
-        {
-            done.swap_remove(i);
-        }
-    }
+    let done = positioning_filter(done, deadline_tasks.todo.len());
 
     // check if none of the args were valid
     if validate_valid_args(done.is_empty(), TodoOrDone::Todo, TaskType::Deadline) {
@@ -349,9 +327,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     }
 
     // sort and dedup
-    let mut done: Vec<usize> = done.iter().map(|x| x.parse::<usize>().unwrap()).collect();
-    done.sort();
-    done.dedup();
+    let done = sort_and_dedup(done);
 
     // check if the user basically specified the entire list
     if validate_should_do_all_equivalent(
@@ -380,7 +356,7 @@ pub fn deadline_tasks_done(mut done: Vec<String>) -> bool {
     false
 }
 
-pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
+pub fn deadline_tasks_rmtodo(rmtodo: Vec<String>) -> bool {
     // housekeeping
     deadline_tasks_create_dir_and_file_if_needed();
 
@@ -397,33 +373,11 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..rmtodo.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            rmtodo.get(i).unwrap().to_string(),
-            deadline_tasks.todo.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| rmtodo.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let rmtodo = ranged_positioning_filter(rmtodo, deadline_tasks.todo.len());
 
     // filter for viable positions
-    for i in (0..rmtodo.len()).rev() {
-        if rmtodo.get(i).unwrap().parse::<usize>().is_err()
-            || rmtodo.get(i).unwrap().is_empty() // will never trigger
-            || rmtodo.get(i).unwrap().parse::<usize>().unwrap() == 0
-            || rmtodo.get(i).unwrap().parse::<usize>().unwrap() > deadline_tasks.todo.len()
-        {
-            rmtodo.swap_remove(i);
-        }
-    }
+    let rmtodo = positioning_filter(rmtodo, deadline_tasks.todo.len());
 
     // check if none of the args were valid
     if validate_valid_args(rmtodo.is_empty(), TodoOrDone::Todo, TaskType::Deadline) {
@@ -431,10 +385,8 @@ pub fn deadline_tasks_rmtodo(mut rmtodo: Vec<String>) -> bool {
         return true;
     }
 
-    // reverse sort
-    let mut rmtodo: Vec<usize> = rmtodo.iter().map(|x| x.parse::<usize>().unwrap()).collect();
-    rmtodo.sort();
-    rmtodo.dedup();
+    // sort and dedup
+    let rmtodo = sort_and_dedup(rmtodo);
 
     // check if user wants to remove all of the items
     if validate_should_do_all_equivalent(

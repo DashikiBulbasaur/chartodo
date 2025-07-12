@@ -1,11 +1,7 @@
 use super::regular_helpers::*;
-use crate::functions::validations::*;
-use crate::functions::{
-    general_helpers::{check_if_range_positioning, unwrap_range_positioning},
-    validations::validate_empty_task_list,
-};
+use crate::functions::{filtering::*, validations::*};
 
-pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
+pub fn regular_tasks_remove_done(done_to_remove: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
 
@@ -22,33 +18,11 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..done_to_remove.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            done_to_remove.get(i).unwrap().to_string(),
-            regular_tasks.done.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| done_to_remove.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let done_to_remove = ranged_positioning_filter(done_to_remove, regular_tasks.done.len());
 
     // filter for viable items
-    for i in (0..done_to_remove.len()).rev() {
-        if done_to_remove.get(i).unwrap().parse::<usize>().is_err()
-            || done_to_remove.get(i).unwrap().is_empty() // this will never trigger smh
-            || done_to_remove.get(i).unwrap().parse::<usize>().unwrap() == 0
-            || done_to_remove.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.done.len()
-        {
-            done_to_remove.swap_remove(i);
-        }
-    }
+    let done_to_remove = positioning_filter(done_to_remove, regular_tasks.done.len());
 
     // check if all args were invalid
     if validate_valid_args(
@@ -61,12 +35,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     }
 
     // sort and dedup
-    let mut done_to_remove: Vec<usize> = done_to_remove
-        .iter()
-        .map(|x| x.parse::<usize>().unwrap())
-        .collect();
-    done_to_remove.sort();
-    done_to_remove.dedup();
+    let done_to_remove = sort_and_dedup(done_to_remove);
 
     // check if user wants to remove all of the items
     if validate_should_do_all_equivalent(
@@ -92,7 +61,7 @@ pub fn regular_tasks_remove_done(mut done_to_remove: Vec<String>) -> bool {
     false
 }
 
-pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
+pub fn regular_tasks_not_done(done_to_todo: Vec<String>) -> bool {
     // housekeeping
     regular_tasks_create_dir_and_file_if_needed();
 
@@ -109,33 +78,11 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
         return true;
     }
 
-    // for the record, i hate that this is a separate iteration
-    // go thru list and check if an item is ranged. if yes, unwrap it and push to original list
-    for i in (0..done_to_todo.len()).rev() {
-        let (error_or_not, bound1, bound2) = check_if_range_positioning(
-            done_to_todo.get(i).unwrap().to_string(),
-            regular_tasks.done.len(),
-        );
-
-        if !error_or_not {
-            let unwrapped_range = unwrap_range_positioning(bound1, bound2);
-            unwrapped_range
-                .iter()
-                .for_each(|number| done_to_todo.push(number.to_string()));
-            // this is not good
-        }
-    }
+    // filter for ranged positioning, if any
+    let done_to_todo = ranged_positioning_filter(done_to_todo, regular_tasks.done.len());
 
     // filter for viable items
-    for i in (0..done_to_todo.len()).rev() {
-        if done_to_todo.get(i).unwrap().parse::<usize>().is_err()
-            || done_to_todo.get(i).unwrap().is_empty() // this will never trigger smh
-            || done_to_todo.get(i).unwrap().parse::<usize>().unwrap() == 0
-            || done_to_todo.get(i).unwrap().parse::<usize>().unwrap() > regular_tasks.done.len()
-        {
-            done_to_todo.swap_remove(i);
-        }
-    }
+    let done_to_todo = positioning_filter(done_to_todo, regular_tasks.done.len());
 
     // check if all args were invalid
     if validate_valid_args(done_to_todo.is_empty(), TodoOrDone::Done, TaskType::Regular) {
@@ -144,12 +91,7 @@ pub fn regular_tasks_not_done(mut done_to_todo: Vec<String>) -> bool {
     }
 
     // sort and dedup
-    let mut done_to_todo: Vec<usize> = done_to_todo
-        .iter()
-        .map(|x| x.parse::<usize>().unwrap())
-        .collect();
-    done_to_todo.sort();
-    done_to_todo.dedup();
+    let done_to_todo = sort_and_dedup(done_to_todo);
 
     // check if user wants to remove all done items to todo
     if validate_should_do_all_equivalent(
