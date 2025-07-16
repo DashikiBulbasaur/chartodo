@@ -99,6 +99,7 @@ pub fn repeating_tasks_add(add: Vec<String>) -> bool {
             time: None,
             repeat_number: None,
             repeat_unit: None,
+            // TODO: I remember that I don't need this repeat_done field in the Task struct
             repeat_done: Some(false),
             repeat_original_date: None,
             repeat_original_time: None,
